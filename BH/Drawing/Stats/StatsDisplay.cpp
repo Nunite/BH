@@ -340,8 +340,8 @@ void StatsDisplay::OnDraw()
 			None,
 			6,
 			Gold,
-			"Name:ÿc0 %s",
-			isMerc ? "ÿc;Mercenary" : unit->pPlayerData->szName);
+			"玩家:\377c0 %s",
+			isMerc ? "\377c;雇佣兵" : unit->pPlayerData->szName);
 
 		auto player_level = D2COMMON_GetUnitStat(unit, STAT_LEVEL, 0);
 		Texthook::Draw(pRect.right - 5,
@@ -349,7 +349,7 @@ void StatsDisplay::OnDraw()
 			Right,
 			6,
 			Gold,
-			L"Level:ÿc0 %d",
+			L"等级:ÿc0 %d",
 			static_cast<int>(player_level));
 
 		auto map_id = **Var_D2CLIENT_MapId();
@@ -632,7 +632,7 @@ void StatsDisplay::OnDraw()
 			None,
 			6,
 			Gold,
-			"FCR:ÿc0 %s",
+			"FCR:\377c0 %s",
 			bp_fcr_string);
 
 
@@ -659,7 +659,7 @@ void StatsDisplay::OnDraw()
 			None,
 			6,
 			Gold,
-			"FHR:ÿc0 %s",
+			"FHR:\377c0 %s",
 			bp_string);
 
 
@@ -839,7 +839,7 @@ void StatsDisplay::OnDraw()
 						None,
 						6,
 						Gold,
-						"%s[%d]:ÿc0 %d",
+						"%s[%d]:\377c0 %d",
 						customStats[i]->name.c_str(),
 						secondary,
 						stat);
@@ -851,7 +851,7 @@ void StatsDisplay::OnDraw()
 						None,
 						6,
 						Gold,
-						"%s:ÿc0 %d",
+						"%s:\377c0 %d",
 						customStats[i]->name.c_str(),
 						stat);
 				}
@@ -945,9 +945,9 @@ void StatsDisplay::GetBreakpointString(UnitAny* unit,
 	{
 		if (bp >= bps[i] && bp < bps[i + 1])
 		{
-			bpString += "ÿc8";
+			bpString += "\377c8";
 			bpString += std::to_string(bps[i]);
-			bpString += "ÿc0 / ";
+			bpString += "\377c0 / ";
 		}
 		else { bpString += std::to_string(bps[i]) + " / "; }
 	}

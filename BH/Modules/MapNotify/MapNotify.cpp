@@ -84,7 +84,19 @@ void MapNotify::OnDraw() {
 										itemName.replace(start_pos, 1, " - ");
 										start_pos += 3;
 									}
+									
+									//by zyl
+									for (int i = 0; i < 100; i++) {  //by zyl 这里解决名字里面有颜色的代码
+										int pos = itemName.find("ÿ");
+										if (pos >= 0) {
+											itemName = itemName.replace(pos, 1, "\377");
+										}
+										else {
+											break;
+										}
+									}
 									PrintText(ItemColorFromQuality(unit->pItemData->dwQuality), "%s", itemName.c_str());
+
 								}
 							}
 							unit->dwFlags |= UNITFLAG_REVEALED;

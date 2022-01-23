@@ -3,7 +3,8 @@
 #define BH_VERSION "PD2 0.1"
 #define SETTINGS_TEXT "Settings"
 
-#define CODE_PAGE 1252 // windows-1252	ANSI Latin 1; Western European (Windows)
+//#define CODE_PAGE 1252 // windows-1252	ANSI Latin 1; Western European (Windows)
+#define CODE_PAGE 936 // windows-1252	ANSI Latin 1; Western European (Windows)
 
 enum TextColor {
 	Disabled = -1,

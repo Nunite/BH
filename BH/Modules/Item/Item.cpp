@@ -298,6 +298,16 @@ void __fastcall Item::ItemNamePatch(wchar_t* name, UnitAny* item)
 {
 	char* szName = UnicodeToAnsi(name);
 	string itemName = szName;
+	for (int i = 0; i < 100; i++) {  //by zyl 这里解决名字里面有颜色的代码
+		int pos = itemName.find("ÿ");
+		if (pos >= 0) {
+			itemName = itemName.replace(pos, 1, "\377");
+		}
+		else {
+			break;
+		}
+	}
+
 	char* code = D2COMMON_GetItemText(item->dwTxtFileNo)->szCode;
 
 	if (Toggles["Advanced Item Display"].state) {
@@ -314,23 +324,39 @@ void __fastcall Item::ItemNamePatch(wchar_t* name, UnitAny* item)
 	}
 
 	// Some common color codes for text strings (see TextColor enum):
-	// ÿc; (purple)
-	// ÿc0 (white)
-	// ÿc1 (red)
-	// ÿc2 (green)
-	// ÿc3 (blue)
-	// ÿc4 (gold)
-	// ÿc5 (gray)
-	// ÿc6 (black)
-	// ÿc7 (tan)
-	// ÿc8 (orange)
-	// ÿc9 (yellow)
+	// \377c; (purple)
+	// \377c0 (white)
+	// \377c1 (red)
+	// \377c2 (green)
+	// \377c3 (blue)
+	// \377c4 (gold)
+	// \377c5 (gray)
+	// \377c6 (black)
+	// \377c7 (tan)
+	// \377c8 (orange)
+	// \377c9 (yellow)
+
+
 
 	/* Test code to display item codes */
-	//string test3 = test_code;
+	//string test3 = code;
 	//itemName += " {" + test3 + "}";
 
 	MultiByteToWideChar(CODE_PAGE, MB_PRECOMPOSED, itemName.c_str(), itemName.length(), name, itemName.length());
+	//by zyl
+	for (DWORD i = 0; i < wcslen(name); i++)
+	{
+		if ((name[i] >= 0xFF || name[i] == 0x79) && name[i + 1] == L'c')
+		{
+			//if (name[i + 2] >= L'0' && name[i + 2] <= L':')
+			//{
+			name[i] = L'\377';
+			//}
+		};		
+	}
+	
+	
+
 	name[itemName.length()] = 0;  // null-terminate the string since MultiByteToWideChar doesn't
 	delete[] szName;
 }
@@ -343,12 +369,12 @@ void Item::OrigGetItemName(UnitAny* item, string& itemName, char* code)
 		// We will also strip ilvls from these items
 		if (code[0] == 't' && code[1] == 's' && code[2] == 'c')  // town portal scroll
 		{
-			itemName = "ÿc2**ÿc0TP";
+			itemName = "\377c2**\377c0TP";
 			displayItemLevel = false;
 		}
 		else if (code[0] == 'i' && code[1] == 's' && code[2] == 'c')  // identify scroll
 		{
-			itemName = "ÿc2**ÿc0ID";
+			itemName = "\377c2**\377c0ID";
 			displayItemLevel = false;
 		}
 		else if (code[0] == 'v' && code[1] == 'p' && code[2] == 's')  // stamina potion
@@ -400,27 +426,27 @@ void Item::OrigGetItemName(UnitAny* item, string& itemName, char* code)
 		{
 			if (code[2] == '1')
 			{
-				itemName = "ÿc1**ÿc0Min Heal";
+				itemName = "\377c1**\377c0Min Heal";
 				displayItemLevel = false;
 			}
 			else if (code[2] == '2')
 			{
-				itemName = "ÿc1**ÿc0Lt Heal";
+				itemName = "\377c1**\377c0Lt Heal";
 				displayItemLevel = false;
 			}
 			else if (code[2] == '3')
 			{
-				itemName = "ÿc1**ÿc0Heal";
+				itemName = "\377c1**\377c0Heal";
 				displayItemLevel = false;
 			}
 			else if (code[2] == '4')
 			{
-				itemName = "ÿc1**ÿc0Gt Heal";
+				itemName = "\377c1**\377c0Gt Heal";
 				displayItemLevel = false;
 			}
 			else if (code[2] == '5')
 			{
-				itemName = "ÿc1**ÿc0Sup Heal";
+				itemName = "\377c1**\377c0Sup Heal";
 				displayItemLevel = false;
 			}
 		}
@@ -428,27 +454,27 @@ void Item::OrigGetItemName(UnitAny* item, string& itemName, char* code)
 		{
 			if (code[2] == '1')
 			{
-				itemName = "ÿc3**ÿc0Min Mana";
+				itemName = "\377c3**\377c0Min Mana";
 				displayItemLevel = false;
 			}
 			else if (code[2] == '2')
 			{
-				itemName = "ÿc3**ÿc0Lt Mana";
+				itemName = "\377c3**\377c0Lt Mana";
 				displayItemLevel = false;
 			}
 			else if (code[2] == '3')
 			{
-				itemName = "ÿc3**ÿc0Mana";
+				itemName = "\377c3**\377c0Mana";
 				displayItemLevel = false;
 			}
 			else if (code[2] == '4')
 			{
-				itemName = "ÿc3**ÿc0Gt Mana";
+				itemName = "\377c3**\377c0Gt Mana";
 				displayItemLevel = false;
 			}
 			else if (code[2] == '5')
 			{
-				itemName = "ÿc3**ÿc0Sup Mana";
+				itemName = "\377c3**\377c0Sup Mana";
 				displayItemLevel = false;
 			}
 		}
@@ -456,12 +482,12 @@ void Item::OrigGetItemName(UnitAny* item, string& itemName, char* code)
 		{
 			if (code[2] == 's')
 			{
-				itemName = "ÿc;**ÿc0Rejuv";
+				itemName = "\377c;**\377c0Rejuv";
 				displayItemLevel = false;
 			}
 			else if (code[2] == 'l')
 			{
-				itemName = "ÿc;**ÿc0Full";
+				itemName = "\377c;**\377c0FULL";
 				displayItemLevel = false;
 			}
 		}
@@ -557,13 +583,13 @@ void Item::OrigGetItemName(UnitAny* item, string& itemName, char* code)
 		//if( (code[0] == 'g' && code[1] == 'l'					) ||
 		//	(code[0] == 's' && code[1] == 'k' && code[2] == 'l' ) )
 		//{
-		//	itemName = "ÿc:" + itemName;
+		//	itemName = "\377c:" + itemName;
 		//}
 		///*Perfect Gems*/
 		//if( (code[0] == 'g' && code[1] == 'p'                   ) ||
 		//	(code[0] == 's' && code[1] == 'k' && code[2] == 'p' ) )
 		//{
-		//	itemName = "ÿc<" + itemName;
+		//	itemName = "\377c<" + itemName;
 		//}
 		/*Ethereal*/
 		if (item->pItemData->dwFlags & 0x400000)
@@ -572,7 +598,7 @@ void Item::OrigGetItemName(UnitAny* item, string& itemName, char* code)
 			if ((code[0] == 'u') ||
 				(code[0] == 'p' && code[1] == 'a' && code[2] >= 'b'))
 			{
-				itemName = "ÿc;" + itemName;
+				itemName = "\377c;" + itemName;
 			}
 		}
 		/*Runes*/
@@ -580,33 +606,33 @@ void Item::OrigGetItemName(UnitAny* item, string& itemName, char* code)
 		{
 			if (code[1] == '0')
 			{
-				itemName = "ÿc0" + itemName;
+				itemName = "\377c0" + itemName;
 			}
 			else if (code[1] == '1')
 			{
 				if (code[2] <= '6')
 				{
-					itemName = "ÿc4" + itemName;
+					itemName = "\377c4" + itemName;
 				}
 				else
 				{
-					itemName = "ÿc8" + itemName;
+					itemName = "\377c8" + itemName;
 				}
 			}
 			else if (code[1] == '2')
 			{
 				if (code[2] <= '2')
 				{
-					itemName = "ÿc8" + itemName;
+					itemName = "\377c8" + itemName;
 				}
 				else
 				{
-					itemName = "ÿc1" + itemName;
+					itemName = "\377c1" + itemName;
 				}
 			}
 			else if (code[1] == '3')
 			{
-				itemName = "ÿc1" + itemName;
+				itemName = "\377c1" + itemName;
 			}
 		}
 	}
@@ -640,7 +666,17 @@ void __stdcall Item::OnProperties(wchar_t* wTxt)
 			if (desc != "") {
 					static wchar_t wDesc[MAXDESCRIPTION];
 					auto chars_written = MultiByteToWideChar(CODE_PAGE, MB_PRECOMPOSED, desc.c_str(), -1, wDesc, MAXDESCRIPTION);
-
+					// by zyl
+					for (DWORD i = 0; i < wcslen(wDesc); i++)
+					{
+						if ((wDesc[i] >= 0xFF || wDesc[i] == 0x79) && wDesc[i + 1] == L'c')
+						{
+							//if (name[i + 2] >= L'0' && name[i + 2] <= L':')
+							//{
+							wDesc[i] = L'\377';
+							//}
+						};
+					}
 					int aLen = wcslen(wTxt);
 					swprintf_s(wTxt + aLen, MAXLEN - aLen, 
 							L"%s%s\n",

@@ -146,7 +146,7 @@ void BH::Initialize()
 	new Party();
 	new ItemMover();
 	new StashExport();
-	new MapNotify();
+	new MapNotify();   //这个就是MapHack修改而来
 	new ChatColor();
 
 	BnetBools = ((Bnet*)moduleManager->Get("bnet"))->GetBools();
