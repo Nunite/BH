@@ -522,6 +522,7 @@ struct MonsterData {
 	struct
 	{
 		BYTE fUnk : 1;
+		BYTE fSuperUniq : 1;
 		BYTE fNormal : 1;
 		BYTE fChamp : 1;
 		BYTE fBoss : 1;

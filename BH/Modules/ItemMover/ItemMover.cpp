@@ -25,6 +25,8 @@ int CUBE_LEFT = 197;
 int CUBE_TOP = 199;
 int CELL_SIZE = 29;
 
+std::string POTIONS[] = { "hp", "mp", "rv" };
+
 DWORD idBookId;
 DWORD unidItemId;
 
@@ -498,27 +500,32 @@ void ItemMover::OnRightClick(bool up, int x, int y, bool* block) {
 }
 
 void ItemMover::LoadConfig() {
-	//BH::config->ReadKey("Use TP Tome", "VK_NUMPADADD", TpKey);
-	//BH::config->ReadKey("Use Healing Potion", "VK_NUMPADMULTIPLY", HealKey);
-	//BH::config->ReadKey("Use Mana Potion", "VK_NUMPADSUBTRACT", ManaKey);
+	BH::config->ReadKey("Use TP Tome", "VK_N", TpKey);
+	BH::config->ReadKey("Use TP Tome Back", "VK_BACK", TpBackKey);
+	BH::config->ReadKey("Use Healing Potion", "VK_D", HealKey);
+	BH::config->ReadKey("Use Mana Potion", "VK_F", ManaKey);
+	BH::config->ReadKey("Use Rejuv Potion", "VK_G", JuvKey);
 
-	//BH::config->ReadInt("Low TP Warning", tp_warn_quantity);
+	BH::config->ReadInt("Low TP Warning", tp_warn_quantity);
 }
 
 void ItemMover::OnLoad() {
 	LoadConfig();
+	
 	Drawing::Texthook* colored_text;
 
 	settingsTab = new Drawing::UITab("Interaction", BH::settingsUI);
 
 	unsigned int x = 8;
 	unsigned int y = 7;
-	/*new Drawing::Texthook(settingsTab, x, y, "Keys (esc to clear)");
-	new Drawing::Keyhook(settingsTab, x, (y += 15), &TpKey ,  "Quick Town Portal:     ");
-	new Drawing::Keyhook(settingsTab, x, (y += 15), &HealKey, "Use Healing Potion:    ");
-	new Drawing::Keyhook(settingsTab, x, (y += 15), &ManaKey, "Use Mana Potion:       ");*/
+	new Drawing::Texthook(settingsTab, x, y, "Keys (esc to clear)");
+	new Drawing::Keyhook(settingsTab, x, (y += 15), &TpKey, "快速开门:       ");
+	new Drawing::Keyhook(settingsTab, x, (y += 15), &TpBackKey, "快速回城:       ");
+	new Drawing::Keyhook(settingsTab, x, (y += 15), &HealKey, "使用红药:       ");
+	new Drawing::Keyhook(settingsTab, x, (y += 15), &ManaKey, "使用蓝药:       ");
+	new Drawing::Keyhook(settingsTab, x, (y += 15), &JuvKey, "使用紫药:       ");
 
-	//y += 7;
+	y += 15;
 
 	new Drawing::Texthook(settingsTab, x, (y), "QoL features");
 	colored_text = new Drawing::Texthook(settingsTab, x, (y += 15),
@@ -540,21 +547,23 @@ void ItemMover::OnLoad() {
 
 }
 
+
 void ItemMover::OnKey(bool up, BYTE key, LPARAM lParam, bool* block) {
 	UnitAny* unit = D2CLIENT_GetPlayerUnit();
 	if (!unit)
 		return;
 
-	/*if (!up && (key == HealKey || key == ManaKey)) {
-		char firstChar = key == HealKey ? 'h' : 'm';
+	if (!up && (key == HealKey || key == ManaKey || key == JuvKey)) {
+		int idx = key == JuvKey ? 2 : key == ManaKey ? 1 : 0;
+		std::string startChars = POTIONS[idx];
 		char minPotion = 127;
 		DWORD minItemId = 0;
 		bool isBelt = false;
-		for (UnitAny *pItem = unit->pInventory->pFirstItem; pItem; pItem = pItem->pItemData->pNextInvItem) {
+		for (UnitAny* pItem = unit->pInventory->pFirstItem; pItem; pItem = pItem->pItemData->pNextInvItem) {
 			if (pItem->pItemData->ItemLocation == STORAGE_INVENTORY ||
 				pItem->pItemData->ItemLocation == STORAGE_NULL && pItem->pItemData->NodePage == NODEPAGE_BELTSLOTS) {
 				char* code = D2COMMON_GetItemText(pItem->dwTxtFileNo)->szCode;
-				if (code[0] == firstChar && code[1] == 'p' && code[2] < minPotion) {
+				if (code[0] == startChars[0] && code[1] == startChars[1] && code[2] < minPotion) {
 					minPotion = code[2];
 					minItemId = pItem->dwUnitId;
 					isBelt = pItem->pItemData->NodePage == NODEPAGE_BELTSLOTS;
@@ -570,12 +579,12 @@ void ItemMover::OnKey(bool up, BYTE key, LPARAM lParam, bool* block) {
 			//}
 		}
 		if (minItemId > 0) {
-			if (isBelt){
+			if (isBelt) {
 				BYTE PacketData[13] = { 0x26, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0 };
 				*reinterpret_cast<int*>(PacketData + 1) = minItemId;
 				D2NET_SendPacket(13, 0, PacketData);
 			}
-			else{
+			else {
 				//PrintText(1, "Sending packet %d, %d, %d", minItemId, unit->pPath->xPos, unit->pPath->yPos);
 				BYTE PacketData[13] = { 0x20, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0 };
 				*reinterpret_cast<int*>(PacketData + 1) = minItemId;
@@ -585,14 +594,18 @@ void ItemMover::OnKey(bool up, BYTE key, LPARAM lParam, bool* block) {
 			}
 			*block = true;
 		}
-	}*/
-	/*if (!up && (key == TpKey)) {
+	}
+	if (!up && (key == TpKey || key == TpBackKey)) {
+		AutoBackTown = false;
+		if (key == TpBackKey) {
+			AutoBackTown = true;
+		}
 		DWORD tpId = 0;
 		int tp_quantity = 0;
-		for (UnitAny *pItem = unit->pInventory->pFirstItem; pItem; pItem = pItem->pItemData->pNextInvItem) {
+		for (UnitAny* pItem = unit->pInventory->pFirstItem; pItem; pItem = pItem->pItemData->pNextInvItem) {
 			if (pItem->pItemData->ItemLocation == STORAGE_INVENTORY) {
 				char* code = D2COMMON_GetItemText(pItem->dwTxtFileNo)->szCode;
-				if (code[0] == 't' && code[1] == 'b' && code[2] =='k') {
+				if (code[0] == 't' && code[1] == 'b' && code[2] == 'k') {
 					tp_quantity = D2COMMON_GetUnitStat(pItem, STAT_AMMOQUANTITY, 0);
 					if (tp_quantity > 0) {
 						tpId = pItem->dwUnitId;
@@ -612,7 +625,7 @@ void ItemMover::OnKey(bool up, BYTE key, LPARAM lParam, bool* block) {
 			D2NET_SendPacket(13, 0, PacketData);
 			*block = true;
 		}
-	}*/
+	}
 }
 
 void ItemMover::OnGamePacketRecv(BYTE* packet, bool* block) {
@@ -742,11 +755,36 @@ void ItemMover::OnGamePacketRecv(BYTE* packet, bool* block) {
 		}
 		break;
 	}
+	case 0x60:  //by zyl 自动回城
+	{
+		if (!AutoBackTown) return;   //不自动回城就直接返回
+		if (packet[1] == 0x00) { //00限定只能走通向城里的传送门
+			BYTE castMove[9] = { 0x13 };
+			*(DWORD*)&castMove[1] = 2;
+			*(DWORD*)&castMove[5] = *(DWORD*)&packet[3]; // portal ID
+			D2NET_SendPacket(sizeof(castMove), 0, castMove);
+		}
+	}
 	default:
 		break;
 	}
 	return;
 }
+
+//void AutoBackToTown(BYTE* aPacket)
+//{
+//	//PrintText(Blue, "%s", "RecvCommand...");
+//	if (aPacket[0] == 0x60 && aPacket[1] == 0x00) //00限定只能走通向城里的传送门
+//	{
+//		PrintText(Blue, "%s", "RecvCommand...");
+//		BYTE castMove[9] = { 0x13 };
+//		*(DWORD*)&castMove[1] = 2;
+//		*(DWORD*)&castMove[5] = *(DWORD*)&aPacket[3]; // portal ID
+//		D2NET_SendPacket(sizeof(castMove), 0, castMove);
+//
+//
+//	}
+//}
 
 void ItemMover::OnGameExit() {
 	ActivePacket.itemId = 0;
@@ -1201,3 +1239,6 @@ bool ProcessStat(unsigned int stat, BitReader& reader, ItemProperty& itemProp) {
 	}
 	}
 }
+
+
+

@@ -856,7 +856,8 @@ struct Action
     int    pxColor;
     int    lineColor;
     int    notifyColor;
-
+    bool noTracking;
+    unsigned int pingLevel;
     Action() :
         colorOnMap(UNDEFINED_COLOR),
         borderColor(UNDEFINED_COLOR),
@@ -864,7 +865,9 @@ struct Action
         pxColor(UNDEFINED_COLOR),
         lineColor(UNDEFINED_COLOR),
         notifyColor(UNDEFINED_COLOR),
+        pingLevel(0),
         stopProcessing(true),
+        noTracking(false),
         name(""),
         description("")
     {

@@ -190,6 +190,10 @@ void UI::SetDragged(bool state) {
     SetDragged(state, false);
 }
 
+void UI::SetVisible(bool newState) {
+	visible = newState;
+}
+
 void UI::SetMinimized(bool newState) { 
 	if (newState == minimized) 
 		return; 

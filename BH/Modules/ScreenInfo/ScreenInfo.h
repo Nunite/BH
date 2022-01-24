@@ -63,6 +63,7 @@ class ScreenInfo : public Module {
 		void OnDraw();
 		void OnAutomapDraw();
 		void OnGamePacketRecv(BYTE* packet, bool *block);
+
 };
 
 StateCode GetStateCode(unsigned int nKey);

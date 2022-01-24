@@ -38,13 +38,16 @@ struct ItemPacketData {
 class ItemMover : public Module {
 private:
 	bool FirstInit;
+	bool AutoBackTown;  //自动回城的开关
 	UnitAny** InventoryItems;
 	UnitAny** StashItems;
 	UnitAny** CubeItems;
 	int tp_warn_quantity;
 	unsigned int TpKey;
+	unsigned int TpBackKey;
 	unsigned int HealKey;
 	unsigned int ManaKey;
+	unsigned int JuvKey;
 	ItemPacketData ActivePacket;
 	CRITICAL_SECTION crit;
 	Drawing::UITab* settingsTab;

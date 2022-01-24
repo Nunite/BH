@@ -17,7 +17,8 @@
 	{"PRES", STAT_POISONRESIST},	\
 	{"MINDMG", STAT_MINIMUMDAMAGE},	\
 	{"MAXDMG", STAT_MAXIMUMDAMAGE},
-#define MAX_NAME_SIZE 56
+//#define MAX_NAME_SIZE 56
+#define MAX_NAME_SIZE 100
 // For ignoring size
 std::vector<std::string> colorreps =
 {
@@ -531,7 +532,7 @@ string ItemNameLookupCache::make_cached_T(UnitItemInfo* uInfo,
 		if ((*it)->Evaluate(uInfo, NULL))
 		{
 			//by zyl TRUE => FALSE  名字长度不做限制
-			SubstituteNameVariables(uInfo, new_name, (*it)->action.name, FALSE);
+			SubstituteNameVariables(uInfo, new_name, (*it)->action.name, TRUE);
 			if ((*it)->action.stopProcessing) { break; }
 		}
 	}
