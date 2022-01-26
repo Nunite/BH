@@ -505,6 +505,7 @@ void MapNotify::OnAutomapDraw() {
 				// Draw monster on automap
 				if (unit->dwType == UNIT_MONSTER && IsValidMonster(unit) && Toggles["Show Monsters"].state) {
 					int lineColor = -1;
+					
 					int color = monsterColors["Normal"];
 					if (unit->pMonsterData->fBoss)
 						color = monsterColors["Boss"];
@@ -590,10 +591,10 @@ void MapNotify::OnAutomapDraw() {
 						POINT automapLoc;
 						Drawing::Hook::ScreenToAutomap(&automapLoc, xPos, yPos);
 						if (immunityText.length() > 0)
-							Drawing::Texthook::Draw(automapLoc.x+8, automapLoc.y - 8, Drawing::Center, 6, White, immunityText);
+							Drawing::Texthook::Draw(automapLoc.x+9, automapLoc.y - 8, Drawing::Center, 6, White, immunityText);
 						//Drawing::Texthook::Draw(automapLoc.x, automapLoc.y - 8, Drawing::Center, 6, White, immunityText);
 						if (enchantText.length() > 0)
-							Drawing::Texthook::Draw(automapLoc.x+8, automapLoc.y - 14, Drawing::Center, 6, White, enchantText);
+							Drawing::Texthook::Draw(automapLoc.x+9, automapLoc.y - 14, Drawing::Center, 6, White, enchantText);
 						//Drawing::Texthook::Draw(automapLoc.x, automapLoc.y - 14, Drawing::Center, 6, White, enchantText);
 						Drawing::Crosshook::Draw(automapLoc.x, automapLoc.y, color);
 						if (lineColor != -1) {

@@ -502,23 +502,23 @@ void ItemMover::OnRightClick(bool up, int x, int y, bool* block) {
 void ItemMover::LoadConfig() {
 	BH::config->ReadKey("Use TP Tome", "VK_N", TpKey);
 	BH::config->ReadKey("Use TP Tome Back", "VK_BACK", TpBackKey);
-	BH::config->ReadKey("Use Healing Potion", "VK_D", HealKey);
-	BH::config->ReadKey("Use Mana Potion", "VK_F", ManaKey);
-	BH::config->ReadKey("Use Rejuv Potion", "VK_G", JuvKey);
+	BH::config->ReadKey("Use Healing Potion", "VK_1", HealKey);
+	BH::config->ReadKey("Use Mana Potion", "VK_2", ManaKey);
+	BH::config->ReadKey("Use Rejuv Potion", "VK_3", JuvKey);
 
 	BH::config->ReadInt("Low TP Warning", tp_warn_quantity);
 }
 
 void ItemMover::OnLoad() {
 	LoadConfig();
-	
+	AutoBackTown = false;
 	Drawing::Texthook* colored_text;
 
-	settingsTab = new Drawing::UITab("Interaction", BH::settingsUI);
+	settingsTab = new Drawing::UITab("快捷说明", BH::settingsUI);
 
 	unsigned int x = 8;
 	unsigned int y = 7;
-	new Drawing::Texthook(settingsTab, x, y, "Keys (esc to clear)");
+	new Drawing::Texthook(settingsTab, x, y, "鼠标点击可自定义快捷键 (按esc清除快捷键)");
 	new Drawing::Keyhook(settingsTab, x, (y += 15), &TpKey, "快速开门:       ");
 	new Drawing::Keyhook(settingsTab, x, (y += 15), &TpBackKey, "快速回城:       ");
 	new Drawing::Keyhook(settingsTab, x, (y += 15), &HealKey, "使用红药:       ");
@@ -527,18 +527,18 @@ void ItemMover::OnLoad() {
 
 	y += 15;
 
-	new Drawing::Texthook(settingsTab, x, (y), "QoL features");
+	new Drawing::Texthook(settingsTab, x, (y), "物品快速移动说明");
 	colored_text = new Drawing::Texthook(settingsTab, x, (y += 15),
-		"Shift-leftclick IDs an item if an ID tome is in inventory");
+		"Shift+左键 如果鉴定书在背包，就可以快速鉴定物品");
 	colored_text->SetColor(Gold);
 	colored_text = new Drawing::Texthook(settingsTab, x, (y += 15),
-		"Shift-rightclick moves between stash/open cube and inventory");
+		"Shift+右键 在背包和打开的箱子（或打开的盒子）之间移动");
 	colored_text->SetColor(Gold);
 	colored_text = new Drawing::Texthook(settingsTab, x, (y += 15),
-		"Ctrl-rightclick moves item to ground");
+		"Ctrl+右键 把物品扔地上");
 	colored_text->SetColor(Gold);
 	colored_text = new Drawing::Texthook(settingsTab, x, (y += 15),
-		"Ctrl-shift-rightclick moves item into closed cube");
+		"Ctrl+shift+右键 移动物品到关闭着的盒子");
 	colored_text->SetColor(Gold);
 
 	colored_text = new Drawing::Texthook(settingsTab, x, (y += 15),
@@ -763,6 +763,7 @@ void ItemMover::OnGamePacketRecv(BYTE* packet, bool* block) {
 			*(DWORD*)&castMove[1] = 2;
 			*(DWORD*)&castMove[5] = *(DWORD*)&packet[3]; // portal ID
 			D2NET_SendPacket(sizeof(castMove), 0, castMove);
+			AutoBackTown = false;
 		}
 	}
 	default:
