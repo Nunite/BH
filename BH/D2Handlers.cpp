@@ -5,6 +5,7 @@
 #include <iterator>
 
 void GameDraw() {
+	if (D2CLIENT_GetUIState(UI_CHAT_CONSOLE)) return;
 	__raise BH::moduleManager->OnDraw();
 	Drawing::UI::Draw();
 	Drawing::StatsDisplay::Draw();
@@ -12,15 +13,18 @@ void GameDraw() {
 }
 
 void GameAutomapDraw() {
+	if (D2CLIENT_GetUIState(UI_CHAT_CONSOLE)) return;
 	__raise BH::moduleManager->OnAutomapDraw();
 }
 
 void OOGDraw() {
+	if (D2CLIENT_GetUIState(UI_CHAT_CONSOLE)) return;
 	Drawing::Hook::Draw(Drawing::OutOfGame);
 	__raise BH::moduleManager->OnOOGDraw();
 }
 
 void GameLoop() {
+	if (D2CLIENT_GetUIState(UI_CHAT_CONSOLE)) return;
 	__raise BH::moduleManager->OnLoop();
 }
 
@@ -29,14 +33,18 @@ DWORD WINAPI GameThread(VOID* lpvoid) {
 	while (true) {
 		if ((*p_D2WIN_FirstControl) && inGame) {
 			inGame = false;
-			__raise BH::moduleManager->OnGameExit();
-			BH::config->Write();
-			BH::oogDraw->Install();
+			if (!D2CLIENT_GetUIState(UI_CHAT_CONSOLE)) {
+				__raise BH::moduleManager->OnGameExit();
+				BH::config->Write();
+				BH::oogDraw->Install();
+			}
 		}
 		else if (D2CLIENT_GetPlayerUnit() && !inGame) {
 			inGame = true;
-			__raise BH::moduleManager->OnGameJoin();
-			BH::oogDraw->Remove();
+			if (!D2CLIENT_GetUIState(UI_CHAT_CONSOLE)) {
+				__raise BH::moduleManager->OnGameJoin();
+				BH::oogDraw->Remove();
+			}
 		}
 		Sleep(10);
 	}

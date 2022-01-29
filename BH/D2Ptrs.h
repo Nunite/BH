@@ -250,6 +250,11 @@ VARPTR(D2CLIENT, NoPickUp, DWORD, 0x11C2F0, 0x11D574) // unused but I want to ad
 
 VARPTR(D2CLIENT, ChatMsg, wchar_t*, 0x11EC80, 0x11D650)
 
+VARPTR(D2CLIENT, ChatTextLength, int, 0x11C028, 0x11CAA4)  //by zyl from HM
+//D2VARPTR2(D2CLIENT, 0x6FBCC028, 0x6FBCCAA4, ChatTextLength, int)
+VARPTR(D2CLIENT, LastChatMsg, wchar_t, 0x11EC80, 0x11D650)  //by zyl from HM
+VARPTR(BNCLIENT, BnChatMessage, LPDWORD, 0x1F64C, 0x1F618)  //by zyl from HM
+//D2VARPTR2(BNCLIENT, 0x6FF3F64C, 0x6FF3F618, BnChatMessage, LPDWORD)
 VARPTR(D2CLIENT, HoverItem, UnitAny*, 0x11BC38);
 
 VARPTR(D2CLIENT, MapId, DWORD, 0x11C310)
@@ -508,12 +513,33 @@ FUNCPTR(D2WIN, SetControlText, void* __fastcall, (Control* box, wchar_t* txt), -
 FUNCPTR(D2WIN, GetTextWidthFileNo, DWORD __fastcall, (wchar_t* wStr, DWORD* dwWidth, DWORD* dwFileNo), -10177, -10179)
 
 FUNCPTR(D2WIN, CreateEditBox, Control* __fastcall, (DWORD dwPosX, DWORD dwPosY, DWORD _1, DWORD _2, DWORD _3, DWORD _4, DWORD _5, BOOL(__stdcall* pCallback)(wchar_t* wText), DWORD _6, DWORD _7, ControlPreferences* pPreferences), 0x161B0, 0x11A10)//1.13c
+FUNCPTR(D2WIN, CreateEditBoxHM, D2EditBox* __fastcall, (DWORD dwPosX, DWORD dwPosY, DWORD dwSizeX, DWORD dwSizeY, DWORD dwOffsetX, DWORD dwOffsetY, CellFile* pCellFile, DWORD dwReturnHandler, DWORD arg9, DWORD dwIsCloaked, void* buf), 0x161B0, 0x11A10)//1.13c
+//D2FUNCPTR2(D2WIN, 0x6F8F61B0, 0x11A10 + DLLBASE_D2WIN, CreateEditBox, D2EditBox* __fastcall, (DWORD dwPosX, DWORD dwPosY, DWORD dwSizeX, DWORD dwSizeY, DWORD dwOffsetX, DWORD dwOffsetY, CellFile* pCellFile, DWORD dwReturnHandler, DWORD arg9, DWORD dwIsCloaked, void* buf))
+
 FUNCPTR(D2WIN, DestroyEditBox, VOID __fastcall, (Control* pControl), 0x159E0, 0xF320)//1.13c
+FUNCPTR(D2WIN, DestroyEditBoxHM, DWORD __fastcall, (D2EditBox* box), 0x159E0, 0xF320)//1.13c by zyl
+//D2FUNCPTR2(D2WIN, 0x6F8F59E0, 0xF320 + DLLBASE_D2WIN, DestroyEditBox, DWORD __fastcall, (D2EditBox* box))
 FUNCPTR(D2WIN, DestroyControl, VOID __stdcall, (Control* pControl), 0x18490, 0xE5F0)//1.13c
 FUNCPTR(D2WIN, SetEditBoxCallback, VOID __fastcall, (Control* pControl, BOOL(__stdcall* FunCallBack)(Control* pControl, DWORD dwInputType, char* pChar)), 0x13970, 0xF1D0)//1.13c
 FUNCPTR(D2WIN, SetEditBoxProc, void __fastcall, (Control* box, BOOL(__stdcall* FunCallBack)(Control*, DWORD, DWORD)), 0x13970, 0xF1D0)//Updated 1.13c
+FUNCPTR(D2WIN, SetEditBoxProcHM, void __fastcall, (D2EditBox* box, BOOL(__stdcall* FunCallBack)(D2EditBox*, DWORD, char*)), 0x13970, 0xF1D0)//Updated 1.13c
+//D2FUNCPTR2(D2WIN, 0x6F8F3970, 0xF1D0 + DLLBASE_D2WIN, SetEditBoxProc, void __fastcall, (D2EditBox* box, BOOL(__stdcall* FunCallBack)(D2EditBox*, DWORD, char*)))
+
+
 FUNCPTR(D2WIN, SelectEditBoxText, void __fastcall, (Control* box), 0x13720, 0xEF80) //Updated 1.13c
 FUNCPTR(D2WIN, InitMPQ, DWORD __stdcall, (char* dll, const char* mpqfile, char* mpqname, int v4, int v5), 0x7E60, 0x7E50)
+
+FUNCPTR(D2WIN, SetEditBoxText, void* __fastcall, (Control* box, wchar_t* wcszTxt), 0x14DF0, 0x14DF0) //by zyl,1.13d还不知道
+FUNCPTR(D2WIN, SetEditBoxTextHM, void* __fastcall, (D2EditBox* box, wchar_t* wcszTxt), 0x14DF0, 0x14DF0) //by zyl,1.13d还不知道
+//D2FUNCPTR2(D2WIN, 0x6F8F4DF0, 0x6F8F0680, SetEditBoxText, void* __fastcall, (D2EditBox* box, wchar_t* wcszTxt))
+FUNCPTR(D2WIN, GetEditBoxText, wchar_t* __fastcall, (Control* box), 0x136A0, 0x136A0) //by zyl,1.13d还不知道
+FUNCPTR(D2WIN, GetEditBoxTextHM, wchar_t* __fastcall, (D2EditBox* box), 0x136A0, 0x136A0) //by zyl,1.13d还不知道
+//D2FUNCPTR2(D2WIN,  0x6F8F36A0, 0x6F8EEF00,  GetEditBoxText,         wchar_t* __fastcall, (D2EditBox* box))
+FUNCPTR(D2WIN, SetTextFont, DWORD __fastcall, (DWORD dwFont), 0x12FE0, 0x12FE0) //by zyl,1.13d还不知道
+// D2FUNCPTR2(D2WIN,  0x6F8F2FE0, 0x6F8F3B70,   SetTextFont,            DWORD __fastcall, (DWORD dwFont))
+FUNCPTR(D2WIN, AddEditBoxChar, DWORD __fastcall, (D2EditBox* box, BYTE keycode), 0x15450, 0x15450) //by zyl,1.13d还不知道
+//D2FUNCPTR2(D2WIN, 0x6F8F5450, 0x6F8F0CE0, AddEditBoxChar, DWORD __fastcall, (D2EditBox* box, BYTE keycode))
+
 
 ////////////////////////////////////////////////////////////////////////////////////////////////
 // D2Win Globals
@@ -521,7 +547,8 @@ FUNCPTR(D2WIN, InitMPQ, DWORD __stdcall, (char* dll, const char* mpqfile, char* 
 
 VARPTR(D2WIN, FirstControl, Control*, 0x214A0, 0x8DB34)
 VARPTR(D2WIN, FocusedControl, Control*, 0x214B0, 0x8DB44) // unused, but we ought to use it
-
+VARPTR(D2WIN, FocusedControlHM, D2EditBox*, 0x214B0, 0x8DB44) // unused, but we ought to use it
+//D2VARPTR2(D2WIN, 0x6F9014B0, 0x8DB44 + DLLBASE_D2WIN, FocusedControl, D2EditBox*)
 ////////////////////////////////////////////////////////////////////////////////////////////////
 // D2Game Functions
 ////////////////////////////////////////////////////////////////////////////////////////////////

@@ -389,6 +389,7 @@ BYTE nChestLockedColour = 0x09;
 Act* lastAct = NULL;
 
 void MapNotify::OnDraw() {
+	//if (D2CLIENT_GetUIState(UI_CHAT_CONSOLE)) return;
 	UnitAny* player = D2CLIENT_GetPlayerUnit();
 
 	if (!player || !player->pAct || player->pPath->pRoom1->pRoom2->pLevel->dwLevelNo == 0)
@@ -479,6 +480,7 @@ void MapNotify::OnDraw() {
 }
 
 void MapNotify::OnAutomapDraw() {
+	//if (D2CLIENT_GetUIState(UI_CHAT_CONSOLE)) return;
 	UnitAny* player = D2CLIENT_GetPlayerUnit();
 
 	if (!player || !player->pAct || player->pPath->pRoom1->pRoom2->pLevel->dwLevelNo == 0)
@@ -590,11 +592,11 @@ void MapNotify::OnAutomapDraw() {
 					automapBuffer.push([immunityText, enchantText, color, xPos, yPos, lineColor, MyPos]()->void {
 						POINT automapLoc;
 						Drawing::Hook::ScreenToAutomap(&automapLoc, xPos, yPos);
-						if (immunityText.length() > 0)
-							Drawing::Texthook::Draw(automapLoc.x+9, automapLoc.y - 8, Drawing::Center, 6, White, immunityText);
+						if (immunityText.length() > 0)   //immunityText.length()/4是offset，i前面还有3个字节用来显示颜色
+							Drawing::Texthook::Draw(automapLoc.x+(9*immunityText.length()/4)+((immunityText.length() / 4-1)*2.5), automapLoc.y - 8, Drawing::Center, 6, White, immunityText);
 						//Drawing::Texthook::Draw(automapLoc.x, automapLoc.y - 8, Drawing::Center, 6, White, immunityText);
 						if (enchantText.length() > 0)
-							Drawing::Texthook::Draw(automapLoc.x+9, automapLoc.y - 14, Drawing::Center, 6, White, enchantText);
+							Drawing::Texthook::Draw(automapLoc.x+ (9 * enchantText.length() / 4) + ((enchantText.length() / 4 - 1) * 2), automapLoc.y - 20, Drawing::Center, 6, White, enchantText);
 						//Drawing::Texthook::Draw(automapLoc.x, automapLoc.y - 14, Drawing::Center, 6, White, enchantText);
 						Drawing::Crosshook::Draw(automapLoc.x, automapLoc.y, color);
 						if (lineColor != -1) {
@@ -718,10 +720,12 @@ void MapNotify::OnAutomapDraw() {
 }
 
 void MapNotify::OnGameJoin() {
-	ResetRevealed();
-	automapLevels.clear();
-	*p_D2CLIENT_AutomapOn = Toggles["Show Automap On Join"].state;
-
+	//这里先注释掉，貌似跟中文打字有冲突，如果放开，打字的时候地图就消失了，并且无法再次打开
+	if (!D2CLIENT_GetUIState(UI_CHAT_CONSOLE)) {  //这句是我补的，貌似没用
+		ResetRevealed();
+		automapLevels.clear();
+		//*p_D2CLIENT_AutomapOn = Toggles["Show Automap On Join"].state;   //这句是消失的主要一句，但是上面这2句也有冲突，会访问冲突
+	}
 }
 
 void Squelch(DWORD Id, BYTE button) {
@@ -1057,9 +1061,9 @@ int HoverObjectPatch(UnitAny* pUnit, DWORD tY, DWORD unk1, DWORD unk2, DWORD tX,
 	POINT p = Texthook::GetTextSize(wTxt, 1);
 	int center = tX + (p.x / 2);
 	int y = tY - p.y;
-	Texthook::Draw(center, y - 12, Center, 6, White, L"\377c7%d \377c8%d \377c1%d \377c9%d \377c3%d \377c2%d", dwResistances[0], dwResistances[1], dwResistances[2], dwResistances[3], dwResistances[4], dwResistances[5]);
-	Texthook::Draw(center, y, Center, 6, White, L"\377c%d%s", HoverMonsterColor(pUnit), wTxt);
-	Texthook::Draw(center, y + 8, Center, 6, White, L"%.0f%%", (hp / maxhp) * 100.0);
+	Texthook::Draw(center, y - 16, Center, 13, White, L"\377c7%d \377c8%d \377c1%d \377c9%d \377c3%d \377c2%d", dwResistances[0], dwResistances[1], dwResistances[2], dwResistances[3], dwResistances[4], dwResistances[5]);
+	Texthook::Draw(center, y+2, Center, 6, White, L"\377c%d%s(%.0f%%)", HoverMonsterColor(pUnit), wTxt , (hp / maxhp) * 100.0);
+	//Texthook::Draw(center, y + 12, Center, 6, White, L"%.0f%%", (hp / maxhp) * 100.0);
 	return 1;
 }
 

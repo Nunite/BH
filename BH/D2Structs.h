@@ -187,6 +187,32 @@ struct Control {
 	Control* pChildControl;			//0x90
 };
 
+struct D2EditBox {
+	DWORD	dwType;				//+00
+	CellFile* pCellFile;		//+04
+	DWORD   dwFlag;				//+08
+	DWORD	dwPosX;				//+0C   
+	DWORD	dwPosY;				//+10
+	DWORD	dwSizeX;			//+14
+	DWORD	dwSizeY;			//+18
+	void(__fastcall* fnCallBack)(D2EditBox*); // +1C
+	DWORD _3[7];				//+20
+	D2EditBox* pNext;			//+3C
+	DWORD   _4;					//+40
+	DWORD   dwOffsetY;			//+44
+	union {
+		DWORD   dwMaxLength;		//+48
+		DWORD	dwScrollEntries;	//+48
+	};
+	DWORD   dwScrollPosition;	//+4C ?
+	DWORD	_5;					//+50
+	DWORD	dwSelectStart;		//+54
+	DWORD	dwSelectEnd;		//+58
+	wchar_t wszText[256];		//+5C
+	DWORD	dwCursorPos;		//+25C
+	DWORD	dwIsCloaked;		//+260
+};
+
 #pragma pack(push)
 #pragma pack(1)
 
