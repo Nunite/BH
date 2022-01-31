@@ -28,6 +28,8 @@ map<string, bool>* BH::GamefilterBools;
 
 Patch* patches[] = {
 	new Patch(Call, D2CLIENT, { 0x44230, 0x45280 }, (int)GameLoop_Interception, 7),
+	new Patch(Call, D2CLIENT, { 0x45153, 0x461A3 }, (int)GameEnd_Interception, 5),
+	//{PatchCALL,   DLLOFFSET2(D2CLIENT, 0x6FAF5153, 0x6FAF61A3),    (DWORD)GameEndPatch_ASM,                5 ,   &fDefault},
 
 	new Patch(Jump, D2CLIENT, { 0xC3DB4, 0x1D7B4 }, (int)GameDraw_Interception, 6),
 	new Patch(Jump, D2CLIENT, { 0x626C9, 0x73469 }, (int)GameAutomapDraw_Interception, 5),

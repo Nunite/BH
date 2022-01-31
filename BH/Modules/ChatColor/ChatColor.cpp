@@ -6,11 +6,10 @@
 
 
 using namespace Drawing;  //这个是Hook的namespace
-
-static BOOL fDisabled = FALSE;
-#pragma   comment(lib,"imm32.lib")   
-
+ 
 D2EditBox* ChatColor::pD2WinEditBox;
+DWORD ChatColor::dwPlayerId=0;
+StatMonitor ChatColor::sMonitorStr[200] = {L'\0'};
 //尝试做中文输入的补丁
 Patch* InputLine1 = new Patch(Call, D2CLIENT, { 0x70C6C, 0xB254C }, (DWORD)InputLinePatch1_ASM, 5);
 //{PatchCALL, DLLOFFSET2(D2CLIENT, 0x6FB20C6C, 0x6FB6254C), (DWORD)InputLinePatch1_ASM, 5, & fDefault},
@@ -24,9 +23,22 @@ Patch* UnicodeSupport3 = new Patch(Call, D2WIN, { 0x183A0, 0xE850 }, (DWORD)Chan
 //{PatchCALL, DLLOFFSET2(D2WIN, 0x6F8F83A0, 0x6F8EE850), (DWORD)ChannelEnterCharPatch, 5, & fLocalizationSupport}, //注意InputLinePatch1_ASM必须结合这个，不然会引起部分堆栈错误(虽然不影响使用)
 Patch* UnicodeSupport4 = new Patch(Call, BNCLIENT, { 0xFF5C, 0x1513C }, (DWORD)MultiByteFixPatch_ASM, 6);
 //{ PatchCALL,   DLLOFFSET2(BNCLIENT,0x6FF2FF5C, 0x6FF3513C),     (DWORD)MultiByteFixPatch_ASM,            6 ,   &fLocalizationSupport }, // for /w *acc msg text
+//尝试做光环状态，以后再分开来吧。先都写在ChatColor.cpp里面
+Patch* Monitor1 = new Patch(Call, D2CLIENT, { 0xADEB1, 0xB254C }, (DWORD)RecvCommand_A7_Patch_ASM, 9);
+//{PatchCALL, DLLOFFSET2(D2CLIENT, 0x6FB5DEB1, 0x6FB34391), (DWORD)RecvCommand_A7_Patch_ASM, 9, & fDefault},//设置状态1
+Patch* Monitor2 = new Patch(Call, D2CLIENT, { 0xADD74, 0xB254C }, (DWORD)RecvCommand_A8_Patch_ASM, 9);
+//{ PatchCALL,   DLLOFFSET2(D2CLIENT , 0x6FB5DD74, 0x6FB34254),   (DWORD)RecvCommand_A8_Patch_ASM,        9 ,   &fDefault },//设置状态2
+Patch* Monitor3 = new Patch(Call, D2CLIENT, { 0xADD31, 0xB254C }, (DWORD)RecvCommand_A9_Patch_ASM, 9);
+//{ PatchCALL,   DLLOFFSET2(D2CLIENT , 0x6FB5DD31, 0x6FB34211),   (DWORD)RecvCommand_A9_Patch_ASM,        9 ,   &fDefault },//结束状态
+//显血显蓝
+Patch* showLifeMana1 = new Patch(Call, D2CLIENT, { 0x276B5, 0xB254C }, (DWORD)ShowLifePatch_ASM, 5);
+//{PatchCALL, DLLOFFSET2(D2CLIENT, 0x6FAD76B5, 0x6FB1D765), (DWORD)ShowLifePatch_ASM, 5, & fDefault},
+Patch* showLifeMana2 = new Patch(Call, D2CLIENT, { 0x27767, 0xB254C }, (DWORD)ShowManaPatch_ASM, 5);
+//{ PatchCALL,   DLLOFFSET2(D2CLIENT, 0x6FAD7767, 0x6FB1D817),    (DWORD)ShowManaPatch_ASM,           5 ,   &fDefault },
+
 
 void ChatColor::Init() {
-	
+	inGameOnce = false;
 }
 
 void Print(DWORD color, char* format, ...) {
@@ -81,7 +93,49 @@ void ChatColor::OnLoad() {
 	UnicodeSupport2->Install();
 	UnicodeSupport3->Install();
 	UnicodeSupport4->Install();
+	Monitor1->Install();
+	Monitor2->Install();
+	Monitor3->Install();
+	showLifeMana1->Install();
+	showLifeMana2->Install();
 	LoadConfig();
+	//状态写在这里吧
+	DWORD statNo[] = {   //状态id
+		1,2,9,11,19,21,28,55,58,60,
+		62,95,61,10,16,20,26,30,31,32,
+		38,51,88,94,101,117,120,128,129,130,
+		131,132,133,134,135,136,137,139,140,144,
+		145,153,157,158,159,177,8,14,33,34,
+		37,40,41,42,45,48,49,148,149,151,
+		161,162
+	};
+	DWORD color[] = {
+		1,1,1,1,1,1,1,1,1,1,
+		1,1,1,3,3,3,3,3,3,3,
+		3,3,3,3,3,3,3,3,3,3,
+		3,3,3,3,3,3,3,3,3,3,
+		3,3,3,3,3,3,3,3,3,3,
+		3,3,3,3,3,3,3,3,3,3,
+		3,3
+	};
+	LPCSTR desc[] = {
+		"冻结","中毒","伤害加深","冰减速","虚弱","眩晕","审判光环","攻击反噬","生命偷取","衰老",
+		"撕裂伤口","狂战士","降低抵抗","冰封装甲","火焰强化","寒冰装甲","大叫","能量盾","毒牙","战斗体制",
+		"雷云风暴","战斗指挥","碎冰甲","狂乱","神圣之盾","撞锤","野性狂暴","装甲神殿","战斗神殿","闪电神殿",
+		"火焰神殿","冰冷神殿","毒素神殿","技能神殿","法力神殿","耐力神殿","经验神殿","狼人形态","熊人形态","暴风",
+		"毁天灭地","魔影斗篷","速度爆发","刀刃之盾","能量消解","变身娃娃","救助","白骨装甲","力量光环","祈祷",
+		"反抗光环","祝福瞄准","活力","专注光环","淨化","冥思","狂热光环","狼獾之心","橡木智者","飓风装甲",
+		"橡木智者","狼獾之心"
+	};
+	for (DWORD n = 0; n < 62; n++) {
+		ChatColor::sMonitorStr[n].dwStatNo = statNo[n];
+		ChatColor::sMonitorStr[n].dwColor = color[n];
+		//ChatColor::sMonitorStr[0].fCountDown = TRUE;  //倒计时,这个暂时不行，持续时间的参数还不知道哪里
+		MyMultiByteToWideChar(CP_ACP, 0, desc[n], -1, sMonitorStr[n].wszDesc[0], 30);
+	}
+	//永久显示血蓝,自定义
+	*p_D2CLIENT_ShowLifeStr = TRUE;
+	*p_D2CLIENT_ShowManaStr = TRUE;
 }
 
 void ChatColor::OnUnload()
@@ -92,6 +146,11 @@ void ChatColor::OnUnload()
 	UnicodeSupport2->Remove();
 	UnicodeSupport3->Remove();
 	UnicodeSupport4->Remove();
+	Monitor1->Remove();
+	Monitor2->Remove();
+	Monitor3->Remove();
+	showLifeMana1->Remove();
+	showLifeMana2->Remove();
 }
 
 void ChatColor::LoadConfig() {
@@ -127,28 +186,28 @@ void ChatColor::OnChatPacketRecv(BYTE* packet, bool* block) {
 	}
 }
 
-
-void ToggleIMEInput(BOOL fEnable) {
-
-	static HIMC hIMC = NULL;
-	if (fEnable) {
-		if (fDisabled) {
-			ImmAssociateContext(D2GFX_GetHwnd(), hIMC);
-			fDisabled = FALSE;
-		}
-	}
-	else {
-		if (fDisabled == FALSE) {
-			hIMC = ImmAssociateContext(D2GFX_GetHwnd(), NULL);
-			fDisabled = TRUE;
-		}
-	}
-
+void ChatColor::OnDraw()
+{
+	DrawMonitorInfo();
 }
+
 
 void ChatColor::OnLoop()
 {
 	CheckD2WinEditBox();
+	if (inGameOnce == false) {
+		inGameOnce = true;
+		//*p_D2CLIENT_AutomapOn = TRUE;  //自动开启地图
+		D2CLIENT_ShowMap();  //自动开启地图,这个才是真正的自动开启地图
+		(*p_D2CLIENT_AutomapPos).x += 32;  //地图中心点偏移...
+		//(*p_D2CLIENT_AutomapPos).y += 0;
+		dwPlayerId = D2CLIENT_GetPlayerUnit()->dwUnitId;
+	}
+}
+
+void ChatColor::OnEnd() 
+{
+	inGameOnce = false;
 }
 
 void CheckD2WinEditBox()
@@ -514,5 +573,233 @@ void __declspec(naked) MultiByteFixPatch_ASM()
 		push ebp;
 		call MultiByteFix;
 		ret;
+	}
+}
+
+
+//以下是状态监视器
+
+void DrawMonitorInfo() {
+
+	//if (tStateMonitorToggle.isOn == 0) return;  //默认开启
+	wchar_t wszTemp[512];
+	memset(wszTemp, 0, sizeof(wszTemp));
+
+	int xpos = Hook::GetScreenWidth() - 10;
+	int ypos = Hook::GetScreenHeight() - 130;
+
+	DWORD dwTimer = GetTickCount();
+	DWORD dwOldFone = D2WIN_SetTextFont(8);
+	for (int i = 0; i < 200; i++) {
+
+		if ((int)(ChatColor::sMonitorStr[i].dwStatNo) <= 0)break;
+
+		if (ChatColor::sMonitorStr[i].fEnable) {
+
+			DWORD secs = (dwTimer - ChatColor::sMonitorStr[i].dwTimer) / 1000;
+			if (ChatColor::sMonitorStr[i].fCountDown) {
+				secs = ChatColor::sMonitorStr[i].dwTimer - secs;  //倒计时
+			}
+			//wsprintfW(wszTemp, L"%s: %.2d:%.2d:%.2d", ChatColor::sMonitorStr[i].wszDesc[0], secs / 3600, (secs / 60) % 60, secs % 60);
+			wsprintfW(wszTemp, L"%s: %.2d:%.2d", ChatColor::sMonitorStr[i].wszDesc[0], (secs / 60) % 60, secs % 60);
+			DWORD width, fileNo;
+			D2WIN_GetTextWidthFileNo(wszTemp, &width, &fileNo);  //这个是BH的取字体宽的方法,跟HM有点不一样
+			D2WIN_DrawText(wszTemp, xpos - width, ypos, ChatColor::sMonitorStr[i].dwColor, 0);
+			ypos = ypos - 15;
+
+		}
+
+	}
+	D2WIN_SetTextFont(dwOldFone);
+
+}
+
+void ResetMonitor() {
+
+	for (int i = 0; i < 200; i++) {
+
+		if ((int)(ChatColor::sMonitorStr[i].dwStatNo) <= 0)break;
+		ChatColor::sMonitorStr[i].fEnable = 0;
+
+	}
+
+}
+
+void __stdcall SetState(DWORD dwStateNo, BOOL fSet) {
+
+	//if (tStateMonitorToggle.isOn == 0) return;
+	for (int i = 0; i < 200; i++) {
+		if ((int)(ChatColor::sMonitorStr[i].dwStatNo) <= 0)break;
+		if (ChatColor::sMonitorStr[i].dwStatNo == dwStateNo) {
+			ChatColor::sMonitorStr[i].fEnable = fSet;
+			ChatColor::sMonitorStr[i].dwTimer = GetTickCount();
+			break;
+		}
+	}
+
+}
+
+void __declspec(naked) RecvCommand_A7_Patch_ASM()
+{
+	__asm {
+
+		mov esi, ecx
+		movzx edx, byte ptr[esi + 1]
+		mov ecx, dword ptr[esi + 2]
+
+		cmp edx, 0
+		jne  org
+		cmp ecx, [ChatColor::dwPlayerId]
+		jne org
+		movzx eax, byte ptr[esi + 06]
+
+		push ecx
+		push edx
+		push esi
+
+		push 1
+		push eax
+		call SetState
+
+		pop esi
+		pop edx
+		pop ecx
+		org :
+		ret
+
+	}
+
+}
+
+void __declspec(naked) RecvCommand_A8_Patch_ASM()
+{
+	__asm {
+
+		mov esi, ecx
+		movzx edx, byte ptr[esi + 1]
+		mov ecx, dword ptr[esi + 2]
+
+		cmp edx, 0
+		jne  org
+		cmp ecx, [ChatColor::dwPlayerId]
+		jne org
+		movzx eax, byte ptr[esi + 07]
+
+		push ecx
+		push edx
+		push esi
+
+		push 1
+		push eax
+		call SetState
+
+		pop esi
+		pop edx
+		pop ecx
+		org :
+		ret
+
+	}
+
+}
+
+
+
+void __declspec(naked) RecvCommand_A9_Patch_ASM()
+{
+	__asm {
+
+		mov esi, ecx
+		movzx edx, byte ptr[esi + 1]
+		mov ecx, dword ptr[esi + 2]
+
+		cmp edx, 0
+		jne  org
+		cmp ecx, [ChatColor::dwPlayerId]
+		jne org
+		movzx eax, byte ptr[esi + 06]
+
+		push ecx
+		push edx
+		push esi
+
+		push 0
+		push eax
+		call SetState
+
+		pop esi
+		pop edx
+		pop ecx
+		org :
+		ret
+
+	}
+
+}
+
+wchar_t* __cdecl wsprintfW2(wchar_t* dest, char* fmt, ...)
+{
+	va_list va;
+	va_start(va, fmt);
+	int len = wvsprintf((char*)dest, fmt, va);
+	for (int i = len; i >= 0; i--) {
+		dest[i] = ((char*)dest)[i];
+	}
+	return dest;
+}
+
+void DrawDefaultFontText(wchar_t* wStr, int xpos, int ypos, DWORD dwColor, int div, DWORD dwAlign)
+{
+	D2WIN_DrawText(wStr, xpos - (D2WIN_GetTextPixelLen(wStr) >> div), ypos, dwColor, dwAlign);//dwAlign:多行时对齐有用 1居中 0 靠左
+}
+
+char* szOrbPattern = "%d/%d (%d%%)";
+DWORD __stdcall ShowLifeWithMyPattern(DWORD callBack, int min, int max) {
+
+	wchar_t wszTemp[64];
+	int iPercent = 100 * min / max;
+	wsprintfW2(wszTemp, szOrbPattern, min, max, iPercent);
+	DrawDefaultFontText(wszTemp, 75, Hook::GetScreenHeight() - 95, 0);
+	return callBack;
+
+}
+
+DWORD __stdcall ShowManaWithMyPattern(DWORD callBack, int min, int max) {
+
+	wchar_t wszTemp[64];
+	int iPercent = 100 * min / max;
+	wsprintfW2(wszTemp, szOrbPattern, min, max, iPercent);
+	DrawDefaultFontText(wszTemp, Hook::GetScreenWidth() - 65, Hook::GetScreenHeight() - 95, 0);
+	return callBack;
+
+}
+BYTE showOrbs = 2;  //显示自己的格式 
+void __declspec(naked) ShowLifePatch_ASM()
+{
+	__asm {
+		cmp [showOrbs], 2
+		je showme
+		mov ecx, 0x00001045
+		ret
+		showme :
+		call ShowLifeWithMyPattern
+			push eax
+			add dword ptr[esp], 0x4E
+			ret
+	}
+}
+
+void __declspec(naked) ShowManaPatch_ASM()
+{
+	__asm {
+		cmp [showOrbs], 2
+		je showme
+		mov ecx, 0x00001046
+		ret
+		showme :
+		call ShowManaWithMyPattern
+			push eax
+			add dword ptr[esp], 0x5B
+			ret
 	}
 }

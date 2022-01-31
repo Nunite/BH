@@ -1,8 +1,29 @@
 ﻿#include "D2Ptrs.h"
 #include "BH.h"
 #include "D2Stubs.h"
+#include "imm.h"
 
 #include <iterator>
+#pragma   comment(lib,"imm32.lib")  
+
+static BOOL fDisabled = FALSE;
+void ToggleIMEInput(BOOL fEnable) {
+
+	static HIMC hIMC = NULL;
+	if (fEnable) {
+		if (fDisabled) {
+			ImmAssociateContext(D2GFX_GetHwnd(), hIMC);
+			fDisabled = FALSE;
+		}
+	}
+	else {
+		if (fDisabled == FALSE) {
+			hIMC = ImmAssociateContext(D2GFX_GetHwnd(), NULL);
+			fDisabled = TRUE;
+		}
+	}
+
+}
 
 void GameDraw() {
 	if (D2CLIENT_GetUIState(UI_CHAT_CONSOLE)) return;
@@ -24,8 +45,14 @@ void OOGDraw() {
 }
 
 void GameLoop() {
+	ToggleIMEInput(D2CLIENT_GetUIState(UI_CHAT_CONSOLE));
 	if (D2CLIENT_GetUIState(UI_CHAT_CONSOLE)) return;
 	__raise BH::moduleManager->OnLoop();
+}
+
+void GameEnd() {
+	ToggleIMEInput(1);
+	__raise BH::moduleManager->OnEnd();
 }
 
 DWORD WINAPI GameThread(VOID* lpvoid) {

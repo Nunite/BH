@@ -44,6 +44,8 @@ class ScreenInfo : public Module {
 		int startLevel;
 
 		void ScreenInfo::drawExperienceInfo();
+		DWORD CalSrollOfTownportal();
+		DWORD CalSrollOfIdentify();
 	public:
 		static map<std::string, Toggle> Toggles;
 

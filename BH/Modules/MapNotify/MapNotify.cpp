@@ -584,12 +584,30 @@ void MapNotify::OnAutomapDraw() {
 					if (unit->pMonsterData->fSuperUniq &&
 						automapSuperUniqueColors.find(unit->pMonsterData->wUniqueNo) != automapSuperUniqueColors.end()) {
 						color = automapSuperUniqueColors[unit->pMonsterData->wUniqueNo];
+						
 					}
+
+					string superUniqName;
+					MonsterDataHM* mdhm = (MonsterDataHM*)unit->pMonsterData;  //转成HM的结构才是正常的
+					if (mdhm->pMonsterTxt->fBoss == 1 && mdhm->wUniqueNo == 0) {
+						wchar_t* name = mdhm->wszMonName;
+						superUniqName = UnicodeToAnsi(name);
+						for (int i = 0; i < 100; i++) {  //by zyl 这里解决名字里面有颜色的代码
+							int pos = superUniqName.find("ÿ");
+							if (pos >= 0) {
+								superUniqName = superUniqName.replace(pos, 1, "\377");
+							}
+							else {
+								break;
+							}
+						}
+					}
+
 
 					xPos = unit->pPath->xPos;
 					yPos = unit->pPath->yPos;
 					
-					automapBuffer.push([immunityText, enchantText, color, xPos, yPos, lineColor, MyPos]()->void {
+					automapBuffer.push([superUniqName,immunityText, enchantText, color, xPos, yPos, lineColor, MyPos]()->void {
 						POINT automapLoc;
 						Drawing::Hook::ScreenToAutomap(&automapLoc, xPos, yPos);
 						if (immunityText.length() > 0)   //immunityText.length()/4是offset，i前面还有3个字节用来显示颜色
@@ -598,6 +616,9 @@ void MapNotify::OnAutomapDraw() {
 						if (enchantText.length() > 0)
 							Drawing::Texthook::Draw(automapLoc.x+ (9 * enchantText.length() / 4) + ((enchantText.length() / 4 - 1) * 2), automapLoc.y - 20, Drawing::Center, 6, White, enchantText);
 						//Drawing::Texthook::Draw(automapLoc.x, automapLoc.y - 14, Drawing::Center, 6, White, enchantText);
+						if (superUniqName.length() > 0) {
+							Drawing::Texthook::Draw(automapLoc.x, automapLoc.y-12, Drawing::Center, 6, Red, superUniqName);
+						}
 						Drawing::Crosshook::Draw(automapLoc.x, automapLoc.y, color);
 						if (lineColor != -1) {
 							Drawing::Linehook::Draw(MyPos.x, MyPos.y, automapLoc.x, automapLoc.y, lineColor);
@@ -721,7 +742,7 @@ void MapNotify::OnAutomapDraw() {
 
 void MapNotify::OnGameJoin() {
 	//这里先注释掉，貌似跟中文打字有冲突，如果放开，打字的时候地图就消失了，并且无法再次打开
-	if (!D2CLIENT_GetUIState(UI_CHAT_CONSOLE)) {  //这句是我补的，貌似没用
+	if (!D2CLIENT_GetUIState(UI_CHAT_CONSOLE)) {  //这句是我补的，不加这句，打字会有点卡
 		ResetRevealed();
 		automapLevels.clear();
 		//*p_D2CLIENT_AutomapOn = Toggles["Show Automap On Join"].state;   //这句是消失的主要一句，但是上面这2句也有冲突，会访问冲突
@@ -835,8 +856,12 @@ void MapNotify::OnGamePacketRecv(BYTE* packet, bool* block) {
 
 void MapNotify::RevealGame() {
 	// Check if we have already revealed the game.
-	if (revealedGame)
+	if (revealedGame) {
+		//这里处理PD2新的地图全开(先不用，手动开)
+		//UnitAny* unit = D2CLIENT_GetPlayerUnit();
+		//RevealLevel(unit->pPath->pRoom1->pRoom2->pLevel);
 		return;
+	}
 
 	// Iterate every act and reveal it.
 	for (int act = 1; act <= ((*p_D2CLIENT_ExpCharFlag) ? 5 : 4); act++) {
@@ -852,8 +877,12 @@ void MapNotify::RevealAct(int act) {
 		return;
 
 	// Check if the act is already revealed
-	if (revealedAct[act])
+	if (revealedAct[act]) {
+		//这里处理PD2新的地图全开
+		//UnitAny* unit = D2CLIENT_GetPlayerUnit();
+		//RevealLevel(unit->pPath->pRoom1->pRoom2->pLevel);
 		return;
+	}
 
 	UnitAny* player = D2CLIENT_GetPlayerUnit();
 	if (!player || !player->pAct)
@@ -1042,6 +1071,31 @@ int HoverObjectPatch(UnitAny* pUnit, DWORD tY, DWORD unk1, DWORD unk2, DWORD tX,
 {
 	if (!pUnit || pUnit->dwType != UNIT_MONSTER || pUnit->pMonsterData->pMonStatsTxt->bAlign != MONSTAT_ALIGN_ENEMY)
 		return 0;
+	//怪物等级by zyl from HM
+	int lvl = 0;
+	MonsterDataHM* monsterData = (MonsterDataHM*)pUnit->pMonsterData;
+	MonsterTxt* pMonTxt = monsterData->pMonsterTxt;
+	if (pMonTxt->fBoss == 0 && D2CLIENT_GetDifficulty() && 1) {
+		LevelTxt* pLvlTxt = D2COMMON_GetLevelTxt(pUnit->pPath->pRoom1->pRoom2->pLevel->dwLevelNo);
+		WORD  wAreaLevel = pLvlTxt->nMonLv[1][D2CLIENT_GetDifficulty()];   //EXPANSION: 1资料片 0 非资料片
+		lvl = wAreaLevel;
+	}
+	else {
+		lvl = D2COMMON_GetUnitStat(pUnit, STAT_LEVEL, 0);
+	}
+
+	if (pMonTxt->fBoss == 1 && monsterData->wUniqueNo == 0 && !(pMonTxt->hcIdx >= 546 && pMonTxt->hcIdx <= 550)) {
+		//Putrid Defiler 不受场景等级影响但受+2 +3影响 
+		//超级金怪受+3规则影响
+	}
+	else {
+		if (monsterData->fChamp) {
+			lvl += 2;
+		}
+		else if (monsterData->fBoss || monsterData->fMinion) {
+			lvl += 3;
+		}
+	}
 	DWORD dwImmunities[] = {
 		STAT_DMGREDUCTIONPCT,
 		STAT_MAGICDMGREDUCTIONPCT,
@@ -1062,7 +1116,7 @@ int HoverObjectPatch(UnitAny* pUnit, DWORD tY, DWORD unk1, DWORD unk2, DWORD tX,
 	int center = tX + (p.x / 2);
 	int y = tY - p.y;
 	Texthook::Draw(center, y - 16, Center, 13, White, L"\377c7%d \377c8%d \377c1%d \377c9%d \377c3%d \377c2%d", dwResistances[0], dwResistances[1], dwResistances[2], dwResistances[3], dwResistances[4], dwResistances[5]);
-	Texthook::Draw(center, y+2, Center, 6, White, L"\377c%d%s(%.0f%%)", HoverMonsterColor(pUnit), wTxt , (hp / maxhp) * 100.0);
+	Texthook::Draw(center, y+2, Center, 6, White, L"\377c%d(L%d)%s(%.0f%%)", HoverMonsterColor(pUnit),lvl, wTxt , (hp / maxhp) * 100.0);
 	//Texthook::Draw(center, y + 12, Center, 6, White, L"%.0f%%", (hp / maxhp) * 100.0);
 	return 1;
 }

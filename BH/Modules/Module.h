@@ -29,6 +29,7 @@ class Module {
 		virtual void MpqLoaded() {};
 
 		virtual void OnLoop() {};
+		virtual void OnEnd() {};
 
 		// Game Events
 		virtual void OnGameJoin() {}

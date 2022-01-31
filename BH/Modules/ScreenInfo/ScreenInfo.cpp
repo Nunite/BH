@@ -255,11 +255,46 @@ void ScreenInfo::drawExperienceInfo(){
 	Texthook::Draw((*p_D2CLIENT_ScreenSizeX / 2) - 100, *p_D2CLIENT_ScreenSizeY - 60, Center, 6, White, "%s", sExp);
 }
 
+//回城卷数量
+DWORD ScreenInfo::CalSrollOfTownportal() {
+	UnitAny* pUnit = D2CLIENT_GetPlayerUnit();
+	SkillInfoHM* skillInfo = (SkillInfoHM*)pUnit->pInfo;
+	if (skillInfo) {
+		SkillHM* pSkill = skillInfo->pFirstSkill;
+
+		while (pSkill) {
+			if (pSkill->pSkillInfo->wSkillId == 220) {
+				return pSkill->dwQuality;
+			}
+			pSkill = pSkill->pNextSkill;
+		}
+	}
+	return 0;
+}
+//鉴定卷数量
+DWORD ScreenInfo::CalSrollOfIdentify() {
+	UnitAny* pUnit = D2CLIENT_GetPlayerUnit();
+	SkillInfoHM* skillInfo = (SkillInfoHM*)pUnit->pInfo;
+	if (skillInfo) {
+		SkillHM* pSkill = skillInfo->pFirstSkill;
+
+		while (pSkill) {
+			if (pSkill->pSkillInfo->wSkillId == 218) {
+				return pSkill->dwQuality;
+			}
+			pSkill = pSkill->pNextSkill;
+		}
+	}
+	return 0;
+}
+
+DWORD dTPsCheck = -1; //当前已经打印过的数量,不能一直打印
+DWORD dIDsCheck = -1;
 void ScreenInfo::OnAutomapDraw() {
 	GameStructInfo* pInfo = (*p_D2CLIENT_GameInfo);
 	BnetData* pData = (*p_D2LAUNCH_BnData);
 	UnitAny* pUnit = D2CLIENT_GetPlayerUnit();
-	char* szDiff[3] = {"Normal", "Nightmare", "Hell"};
+	char* szDiff[3] = {"普通", "恶梦", "地狱"};
 	if (!pInfo || !pData || !pUnit)
 		return;
 	int y = 6+(BH::cGuardLoaded?16:0);
@@ -273,18 +308,40 @@ void ScreenInfo::OnAutomapDraw() {
 	CHAR szTime[128] = "";
 	struct tm time;
 	localtime_s(&time, &tTime);
-	strftime(szTime, sizeof(szTime), "%I:%M:%S %p", &time);
+	strftime(szTime, sizeof(szTime), "%H:%M:%S", &time);
 
 	// The call to GetLevelName somehow invalidates pUnit. This is only observable in O2 builds. The game
 	// will crash when you attempt to open the map (which calls OnAutomapDraw function). We need to get the player unit
 	// again after calling this function. It may be a good idea in general not to store the return value of
 	// GetPlayerUnit.
 	char *level = UnicodeToAnsi(D2CLIENT_GetLevelName(pUnit->pPath->pRoom1->pRoom2->pLevel->dwLevelNo));
+
+	LevelTxt* pLvlTxt = D2COMMON_GetLevelTxt(pUnit->pPath->pRoom1->pRoom2->pLevel->dwLevelNo);
+	WORD  wAreaLevel = pLvlTxt->nMonLv[1][D2CLIENT_GetDifficulty()];   //EXPANSION: 1资料片 0 非资料片
+	string cAreaLevel = to_string(wAreaLevel);
+
 	pUnit = D2CLIENT_GetPlayerUnit();
 	if (!pUnit) return;
 
 	CHAR szPing[10] = "";
 	sprintf_s(szPing, sizeof(szPing), "%d", *p_D2CLIENT_Ping);
+	
+	DWORD dTPs = CalSrollOfTownportal();
+	DWORD dIDs = CalSrollOfIdentify();
+	string tpcount = to_string(dTPs);
+	string idcount = to_string(dIDs);
+	if (dTPs <= 5 && dTPs!=dTPsCheck) {
+		CHAR temp[255] = "";
+		sprintf_s(temp, sizeof(temp), "回城卷轴只剩下%d个了!", dTPs);
+		PrintText(Red, temp);
+		dTPsCheck = dTPs;
+	}
+	if (dIDs <= 5 && dIDs != dIDsCheck) {
+		CHAR temp[255] = "";
+		sprintf_s(temp, sizeof(temp), "鉴定卷轴只剩下%d个了!", dIDs);
+		PrintText(Red, temp);
+		dIDsCheck = dIDs;
+	}
 
 	AutomapReplace automap[] = {
 		{"GAMENAME", pData->szGameName},
@@ -294,6 +351,9 @@ void ScreenInfo::OnAutomapDraw() {
 		{"ACCOUNTNAME", pData->szAccountName},
 		{"CHARNAME", pUnit->pPlayerData->szName},
 		{"LEVEL", level},
+		{"AREALEVEL", cAreaLevel},
+		{"TPCOUNT", tpcount},
+		{"IDCOUNT", idcount},
 		{"PING", szPing},
 		{"GAMETIME", gameTime},
 		{"REALTIME", szTime}

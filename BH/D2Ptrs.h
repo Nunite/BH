@@ -166,6 +166,9 @@ FUNCPTR(D2CLIENT, GetLevelName_I, wchar_t* __fastcall, (DWORD levelId), 0xBE240,
 FUNCPTR(D2GFX, DrawAutomapCell, void __stdcall, (CellContext* context, DWORD xpos, DWORD ypos, RECT* cliprect, DWORD bright), -10079, -10060)
 ASMPTR(D2CLIENT, OverrideShrinePatch_ORIG, 0x1155B8, 0x101B08)//Updated 1.13c
 
+FUNCPTR(D2CLIENT, ShowMap, void __fastcall, (), 0x3B8B0, 0x3B8B0) // by zyl from HM 1.13D先不管
+//D2FUNCPTR2(D2CLIENT, 0x6FAEB8B0, 0x6FAED660, ShowMap, void __fastcall, ())
+
 ////////////////////////////////////////////////////////////////////////////////////////////////
 // D2Client Globals
 ////////////////////////////////////////////////////////////////////////////////////////////////
@@ -182,6 +185,8 @@ VARPTR(D2CLIENT, MouseY, DWORD, 0x11B824, 0x11C94C)
 VARPTR(D2CLIENT, MouseOffsetY, int, 0x11995C, 0x106840)
 VARPTR(D2CLIENT, MouseOffsetX, int, 0x119960, 0x106844)
 
+VARPTR(D2CLIENT, AutomapPos, POINT, 0x11C1E8, 0x11C1E8)  //1.13d的先不管了
+//D2VARPTR2(D2CLIENT, 0x6FBCC1E8, 0x6FBCCF4C, AutomapPos, D2_POINT)
 VARPTR(D2CLIENT, AutomapOn, DWORD, 0xFADA8, 0x11C8B8)
 VARPTR(D2CLIENT, AutomapMode, int, 0xF16B0, 0xF34F8)
 VARPTR(D2CLIENT, Offset, POINT, 0x11C1F8, 0x11CF5C)
@@ -249,6 +254,11 @@ VARPTR(D2CLIENT, AlwaysRun, DWORD, 0x11C3EC, 0x11D234)
 VARPTR(D2CLIENT, NoPickUp, DWORD, 0x11C2F0, 0x11D574) // unused but I want to add it
 
 VARPTR(D2CLIENT, ChatMsg, wchar_t*, 0x11EC80, 0x11D650)
+
+VARPTR(D2CLIENT, ShowLifeStr, BOOL, 0x11C4B0, 0x11D650)
+//D2VARPTR2(D2CLIENT, 0x6FBCC4B0, 0x6FBCD008, ShowLifeStr, BOOL)
+VARPTR(D2CLIENT, ShowManaStr, BOOL, 0x11C4B4, 0x11D650)
+//D2VARPTR2(D2CLIENT, 0x6FBCC4B4, 0x6FBCD00C, ShowManaStr, BOOL)
 
 VARPTR(D2CLIENT, ChatTextLength, int, 0x11C028, 0x11CAA4)  //by zyl from HM
 //D2VARPTR2(D2CLIENT, 0x6FBCC028, 0x6FBCCAA4, ChatTextLength, int)
@@ -337,6 +347,8 @@ FUNCPTR(D2COMMON, GetItemText, ItemsTxt* __stdcall, (DWORD dwItemNo), -10695, -1
 
 FUNCPTR(D2COMMON, GetLayer, AutomapLayer2* __fastcall, (DWORD dwLevelNo), -10749, -10087)
 FUNCPTR(D2COMMON, GetLevel, Level* __fastcall, (ActMisc* pMisc, DWORD dwLevelNo), -10207, -10287)
+FUNCPTR(D2COMMON, GetLevelTxt, LevelTxt* __stdcall, (DWORD levelno), 0x6CCC0, 0x6CCC0)  //by zyl from HM 1.13d先不管
+//D2FUNCPTR2(D2COMMON, 0x6FDBCCC0, 0x6FD80CA0, GetLevelTxt, LevelTxt* __stdcall, (DWORD levelno))
 
 FUNCPTR(D2COMMON, GetStatList, StatList* __stdcall, (UnitAny* pUnit, DWORD dwUnk, DWORD dwMaxEntries), -10930, -10449)
 FUNCPTR(D2COMMON, CopyStatList, DWORD __stdcall, (StatList* pStatList, Stat* pStatArray, DWORD dwMaxEntries), -10658, -10195)
@@ -505,6 +517,9 @@ FUNCPTR(D2WIN, DrawCellFile, void __fastcall, (CellFile* pCellFile, int xPos, in
 ////////////////////////////////////////////////////////////////////////////////////////////////
 
 FUNCPTR(D2WIN, DrawText, void __fastcall, (const wchar_t* wStr, int xPos, int yPos, DWORD dwColor, DWORD dwUnk), -10150, -10076)
+FUNCPTR(D2WIN, GetTextPixelLen, DWORD __fastcall, (wchar_t* wStr), 0x12B20, -10047)
+//D2FUNCPTR2(D2WIN, 0x6F8F2B20, 0x6F8F36B0, GetTextPixelLen, DWORD __fastcall, (wchar_t* wStr))//这个函数不能分辨颜色代码，只能用于无色字符串
+
 
 FUNCPTR(D2WIN, GetTextSize, DWORD __fastcall, (wchar_t* wStr, DWORD* dwWidth, DWORD* dwFileNo), -10177, -10179)
 FUNCPTR(D2WIN, SetTextSize, DWORD __fastcall, (DWORD dwSize), -10184, -10047)

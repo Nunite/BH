@@ -7,9 +7,12 @@
 class ChatColor : public Module {
 private:
 	bool inGame;
+	bool inGameOnce;  //要自己写一个是否进入游戏的选项
 	std::map<string, unsigned int> whisperColors;
 public:
+	static DWORD dwPlayerId;  //当前角色
 	static D2EditBox* pD2WinEditBox;
+	static StatMonitor sMonitorStr[200];
 	ChatColor() : Module("Chat Color") {};
 
 	void Init();
@@ -19,14 +22,26 @@ public:
 	void LoadConfig();
 	void OnGameJoin();
 	void OnGameExit();
+	void OnDraw();
 	void OnChatPacketRecv(BYTE* packet, bool *block);
 
 	void OnLoop();
+	void OnEnd();
 };
 
 #define		KEY_CODE_COPY			0x03
 #define		KEY_CODE_PASTE			0x16
 #define		KEY_CODE_CUT			0x18
+
+void DrawMonitorInfo();
+int MyMultiByteToWideChar(
+	UINT CodePage,         // code page
+	DWORD dwFlags,         // character-type options
+	LPCSTR lpMultiByteStr, // string to map
+	int cbMultiByte,       // number of bytes in string
+	LPWSTR lpWideCharStr,  // wide-character buffer
+	int cchWideChar        // size of buffer
+);
 
 void ToggleIMEInput(BOOL fEnable);
 
@@ -39,3 +54,11 @@ LPWSTR __fastcall D2Lang_Win2UnicodePatch(LPWSTR lpUnicodeStr, LPCSTR lpWinStr, 
 
 DWORD __fastcall ChannelEnterCharPatch(D2EditBox* hWnd, BYTE bKeyCode);
 void MultiByteFixPatch_ASM();
+
+void RecvCommand_A7_Patch_ASM();
+void RecvCommand_A8_Patch_ASM();
+void RecvCommand_A9_Patch_ASM();
+
+void DrawDefaultFontText(wchar_t* wStr, int xpos, int ypos, DWORD dwColor, int div = 1, DWORD dwAlign = 0);
+void ShowLifePatch_ASM();
+void ShowManaPatch_ASM();
