@@ -250,9 +250,10 @@ void ScreenInfo::drawExperienceInfo(){
 		expPerSecond /= 1E3;
 		unit = "K";
 	}
-	sprintf_s(sExp, "%00.2f%% (%s%00.2f%%) [%s%.2f%s/s]", pExp, expGainPct >= 0 ? "+" : "", expGainPct, expPerSecond >= 0 ? "+" : "", expPerSecond, unit);
 
-	Texthook::Draw((*p_D2CLIENT_ScreenSizeX / 2) - 100, *p_D2CLIENT_ScreenSizeY - 60, Center, 6, White, "%s", sExp);
+	sprintf_s(sExp, "等级：%00d，经验：%00.2f%% (%s%00.2f%%) [%s%.2f%s/s]", cLevel, pExp, expGainPct >= 0 ? "+" : "", expGainPct, expPerSecond >= 0 ? "+" : "", expPerSecond, unit);
+
+	Texthook::Draw((*p_D2CLIENT_ScreenSizeX / 2) - 200, *p_D2CLIENT_ScreenSizeY - 60, Center, 6, White, "%s", sExp);
 }
 
 //回城卷数量
@@ -371,7 +372,16 @@ void ScreenInfo::OnAutomapDraw() {
 				key.replace(key.find("%" + automap[n].key + "%"), automap[n].key.length() + 2, automap[n].value);
 		}
 		if (key.length() > 0) {
-			Texthook::Draw(*p_D2CLIENT_ScreenSizeX - 10, y, Right,0,Gold,"%s", key.c_str());
+			if (key.find("回城") != string::npos) {
+				Texthook::Draw(*p_D2CLIENT_ScreenSizeX - 10, y, Right, 0, Blue, "%s", key.c_str());
+			}
+			else if (key.find("鉴定") != string::npos) {
+				Texthook::Draw(*p_D2CLIENT_ScreenSizeX - 10, y, Right, 0, Red, "%s", key.c_str());
+			}
+			else {
+				Texthook::Draw(*p_D2CLIENT_ScreenSizeX - 10, y, Right, 0, Gold, "%s", key.c_str());
+			}
+			
 			y += 16;
 		}
 	}

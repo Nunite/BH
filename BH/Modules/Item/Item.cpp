@@ -151,7 +151,7 @@ void Item::DrawSettings() {
 	new Keyhook(settingsTab, keyhook_x, y + 2, &Toggles["Show Sockets"].toggle, "");
 	y += 15;
 
-	new Checkhook(settingsTab, 4, y, &Toggles["Show iLvl"].state, "Show iLvl");
+	new Checkhook(settingsTab, 4, y, &Toggles["Show iLvl"].state, "显示物品等级");
 	new Keyhook(settingsTab, keyhook_x, y + 2, &Toggles["Show iLvl"].toggle, "");
 	y += 15;
 
@@ -347,18 +347,36 @@ void __fastcall Item::ItemNamePatch(wchar_t* name, UnitAny* item)
 	//by zyl
 	for (DWORD i = 0; i < wcslen(name); i++)
 	{
-		if ((name[i] >= 0xFF || name[i] == 0x79) && name[i + 1] == L'c')
+		//if ((name[i] >= 0xFF || name[i] == 0x79) && name[i + 1] == L'c')
+		//{
+		//	//if (name[i + 2] >= L'0' && name[i + 2] <= L':')
+		//	//{63733
+		//	name[i] = L'\377';
+		//	//}
+		//};	
+		if ((name[i] ==63733) && name[i + 1] == L'c')
 		{
 			//if (name[i + 2] >= L'0' && name[i + 2] <= L':')
-			//{
+			//{63733
 			name[i] = L'\377';
 			//}
-		};		
+		};
 	}
 	
 	
-
+	//这里名字可能会超长，所以loot.filter里面有一些中文太长的物品还是要控制和过滤一下,这里暂时不作处理吧
 	name[itemName.length()] = 0;  // null-terminate the string since MultiByteToWideChar doesn't
+	//item->pItemData->ItemLocation
+	// 32=0x20 可能是指在地上？
+	// 152=0x98 也可能是指在地上？
+	// BYTE	nLocation;	BH里面是node_page		//+69 实际位置, 0 ground, 1 cube/stash/inv,2 belt,3 body
+	if (item->pItemData->NodePage == 0
+		&& itemName.length() > 124) {   //测试出来，长度不能超过124
+		name[121] = '.';
+		name[122] = '.';
+		name[123] = '.';
+		name[124] = 0;
+	}
 	delete[] szName;
 }
 
@@ -741,7 +759,7 @@ void __stdcall Item::OnProperties(wchar_t* wTxt)
 		if (ilvl != alvl && (quality == ITEM_QUALITY_MAGIC || quality == ITEM_QUALITY_RARE || quality == ITEM_QUALITY_CRAFT)) {
 			int aLen = wcslen(wTxt);
 			swprintf_s(wTxt + aLen, MAXLEN - aLen,
-				L"%sAffix Level: %d\n",
+				L"%s词缀等级: %d\n",
 				GetColorCode(TextColor::White).c_str(),
 				GetAffixLevel((BYTE)pItem->pItemData->dwItemLevel, (BYTE)uInfo.attrs->qualityLevel, uInfo.attrs->magicLevel));
 		}
@@ -752,7 +770,7 @@ void __stdcall Item::OnProperties(wchar_t* wTxt)
 	{
 		int aLen = wcslen(wTxt);
 		swprintf_s(wTxt + aLen, MAXLEN - aLen,
-			L"%sItem Level: %d\n",
+			L"%s物品等级: %d\n",
 			GetColorCode(TextColor::White).c_str(),
 			pItem->pItemData->dwItemLevel);
 	}

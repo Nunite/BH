@@ -3,6 +3,7 @@
 #include "../Module.h"
 #include "../../Config.h"
 #include "../../Common.h"
+#include "../../Task.h"
 
 class ChatColor : public Module {
 private:
@@ -10,6 +11,7 @@ private:
 	bool inGameOnce;  //要自己写一个是否进入游戏的选项
 	std::map<string, unsigned int> whisperColors;
 public:
+	static std::map<std::string, Toggle> Toggles;
 	static DWORD dwPlayerId;  //当前角色
 	static D2EditBox* pD2WinEditBox;
 	static StatMonitor sMonitorStr[200];
@@ -28,6 +30,8 @@ public:
 	void OnLoop();
 	void OnEnd();
 };
+
+static double mercLastHP=100;  //佣兵上1次的血量百分比
 
 #define		KEY_CODE_COPY			0x03
 #define		KEY_CODE_PASTE			0x16
@@ -62,3 +66,7 @@ void RecvCommand_A9_Patch_ASM();
 void DrawDefaultFontText(wchar_t* wStr, int xpos, int ypos, DWORD dwColor, int div = 1, DWORD dwAlign = 0);
 void ShowLifePatch_ASM();
 void ShowManaPatch_ASM();
+
+void DrawPetHeadPath_ASM();
+void DrawPartyHeadPath_ASM();
+

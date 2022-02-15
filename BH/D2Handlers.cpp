@@ -26,7 +26,7 @@ void ToggleIMEInput(BOOL fEnable) {
 }
 
 void GameDraw() {
-	if (D2CLIENT_GetUIState(UI_CHAT_CONSOLE)) return;
+	//if (D2CLIENT_GetUIState(UI_CHAT_CONSOLE)) return;
 	__raise BH::moduleManager->OnDraw();
 	Drawing::UI::Draw();
 	Drawing::StatsDisplay::Draw();
@@ -34,19 +34,19 @@ void GameDraw() {
 }
 
 void GameAutomapDraw() {
-	if (D2CLIENT_GetUIState(UI_CHAT_CONSOLE)) return;
+	//if (D2CLIENT_GetUIState(UI_CHAT_CONSOLE)) return;
 	__raise BH::moduleManager->OnAutomapDraw();
 }
 
 void OOGDraw() {
-	if (D2CLIENT_GetUIState(UI_CHAT_CONSOLE)) return;
+	//if (D2CLIENT_GetUIState(UI_CHAT_CONSOLE)) return;
 	Drawing::Hook::Draw(Drawing::OutOfGame);
 	__raise BH::moduleManager->OnOOGDraw();
 }
 
 void GameLoop() {
 	ToggleIMEInput(D2CLIENT_GetUIState(UI_CHAT_CONSOLE));
-	if (D2CLIENT_GetUIState(UI_CHAT_CONSOLE)) return;
+	//if (D2CLIENT_GetUIState(UI_CHAT_CONSOLE)) return;
 	__raise BH::moduleManager->OnLoop();
 }
 
@@ -58,6 +58,10 @@ void GameEnd() {
 DWORD WINAPI GameThread(VOID* lpvoid) {
 	bool inGame = false;
 	while (true) {
+		if (D2CLIENT_GetUIState(UI_CHAT_CONSOLE)) {
+			Sleep(10);
+			continue;
+		}
 		if ((*p_D2WIN_FirstControl) && inGame) {
 			inGame = false;
 			if (!D2CLIENT_GetUIState(UI_CHAT_CONSOLE)) {
@@ -145,18 +149,24 @@ LONG WINAPI GameWindowEvent(HWND hWnd, UINT uMsg, WPARAM wParam, LPARAM lParam) 
 }
 
 BOOL ChatPacketRecv(DWORD dwSize, BYTE* pPacket) {
+	//这里加个打字过滤试试看
+	//if (D2CLIENT_GetUIState(UI_CHAT_CONSOLE)) return true;
 	bool blockPacket = false;
 	__raise BH::moduleManager->OnChatPacketRecv(pPacket, &blockPacket);
 	return !blockPacket;
 }
 
 BOOL __fastcall RealmPacketRecv(BYTE* pPacket) {
+	//这里加个打字过滤试试看
+	//if (D2CLIENT_GetUIState(UI_CHAT_CONSOLE)) return true;
 	bool blockPacket = false;
 	__raise BH::moduleManager->OnRealmPacketRecv(pPacket, &blockPacket);
 	return !blockPacket;
 }
 
 DWORD __fastcall GamePacketRecv(BYTE* pPacket, DWORD dwSize) {
+	//这里加个打字过滤试试看
+	//if (D2CLIENT_GetUIState(UI_CHAT_CONSOLE)) return true;
 	switch (pPacket[0])
 	{
 	case 0xAE: if (!BH::cGuardLoaded) return false; break;

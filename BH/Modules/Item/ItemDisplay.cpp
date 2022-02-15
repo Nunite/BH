@@ -532,7 +532,7 @@ string ItemNameLookupCache::make_cached_T(UnitItemInfo* uInfo,
 		if ((*it)->Evaluate(uInfo, NULL))
 		{
 			//by zyl TRUE => FALSE  名字长度不做限制
-			SubstituteNameVariables(uInfo, new_name, (*it)->action.name, TRUE);
+			SubstituteNameVariables(uInfo, new_name, (*it)->action.name, FALSE);
 			if ((*it)->action.stopProcessing) { break; }
 		}
 	}
@@ -666,10 +666,18 @@ void SubstituteNameVariables(UnitItemInfo* uInfo,
 	{
 		while (name.find("%" + replacements[n].key + "%") != string::npos)
 		{
-			if (bLimit && replacements[n].key == "NL") { name.replace(name.find("%" + replacements[n].key + "%"), replacements[n].key.length() + 2, ""); }
-			else { name.replace(name.find("%" + replacements[n].key + "%"), replacements[n].key.length() + 2, replacements[n].value); }
+			if (bLimit && replacements[n].key == "NL") { 
+				name.replace(name.find("%" + replacements[n].key + "%"), replacements[n].key.length() + 2, ""); 
+			}
+			//else if (name.length()>110) {
+			//	break;
+			//}
+			else { 
+				name.replace(name.find("%" + replacements[n].key + "%"), replacements[n].key.length() + 2, replacements[n].value); 
+			}
 		}
 	}
+
 	//int pos = name.find("?");
 	//name = name + "zyl:" + to_string(pos)+":";
 	//for (int i = 0; i < 10; i++) {  //by zyl 这里解决名字里面有颜色的代码

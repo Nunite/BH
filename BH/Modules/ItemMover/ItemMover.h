@@ -7,6 +7,7 @@
 #include "../../BitReader.h"
 #include "../Item/ItemDisplay.h"
 #include "../../MPQInit.h"
+#include "../../Task.h"
 
 extern int INVENTORY_WIDTH;
 extern int INVENTORY_HEIGHT;
@@ -48,9 +49,11 @@ private:
 	unsigned int HealKey;
 	unsigned int ManaKey;
 	unsigned int JuvKey;
+	unsigned int BeltKey;  //腰带开关
 	ItemPacketData ActivePacket;
 	CRITICAL_SECTION crit;
 	Drawing::UITab* settingsTab;
+	map<std::string, Toggle> Toggles;
 public:
 	ItemMover() : Module("Item Mover"),
 		ActivePacket(),
@@ -87,6 +90,7 @@ public:
 	void PickUpItem();
 	void PutItemInContainer();
 	void PutItemOnGround();
+	void AutoToBelt();  //自动填充腰带
 
 	void LoadConfig();
 
