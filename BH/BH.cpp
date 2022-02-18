@@ -147,7 +147,7 @@ void BH::Initialize()
 	new Item();
 	new Party();
 	new ItemMover();
-	new StashExport();
+	//new StashExport();   //这个先不要吧
 	new MapNotify();   //这个就是MapHack修改而来
 	new ChatColor();
 

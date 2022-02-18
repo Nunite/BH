@@ -139,15 +139,15 @@ void Item::LoadConfig() {
 }
 
 void Item::DrawSettings() {
-	settingsTab = new UITab("Item", BH::settingsUI);
+	settingsTab = new UITab("物品显示", BH::settingsUI);
 	int y = 10;
 	int keyhook_x = 230;
 
-	new Checkhook(settingsTab, 4, y, &Toggles["Show Ethereal"].state, "Show Ethereal");
+	new Checkhook(settingsTab, 4, y, &Toggles["Show Ethereal"].state, "显示ETH(无形)");
 	new Keyhook(settingsTab, keyhook_x, y + 2, &Toggles["Show Ethereal"].toggle, "");
 	y += 15;
 
-	new Checkhook(settingsTab, 4, y, &Toggles["Show Sockets"].state, "Show Sockets");
+	new Checkhook(settingsTab, 4, y, &Toggles["Show Sockets"].state, "显示孔数");
 	new Keyhook(settingsTab, keyhook_x, y + 2, &Toggles["Show Sockets"].toggle, "");
 	y += 15;
 
@@ -155,55 +155,55 @@ void Item::DrawSettings() {
 	new Keyhook(settingsTab, keyhook_x, y + 2, &Toggles["Show iLvl"].toggle, "");
 	y += 15;
 
-	new Checkhook(settingsTab, 4, y, &Toggles["Show Rune Numbers"].state, "Show Rune #");
+	new Checkhook(settingsTab, 4, y, &Toggles["Show Rune Numbers"].state, "显示符文编号#");
 	new Keyhook(settingsTab, keyhook_x, y + 2, &Toggles["Show Rune Numbers"].toggle, "");
 	y += 15;
 
-	new Checkhook(settingsTab, 4, y, &Toggles["Alt Item Style"].state, "Alt Style");
+	new Checkhook(settingsTab, 4, y, &Toggles["Alt Item Style"].state, "Alt物品样式");
 	new Keyhook(settingsTab, keyhook_x, y + 2, &Toggles["Alt Item Style"].toggle, "");
 	y += 15;
 
-	new Checkhook(settingsTab, 4, y, &Toggles["Color Mod"].state, "Color Mod");
+	new Checkhook(settingsTab, 4, y, &Toggles["Color Mod"].state, "多彩模式");
 	new Keyhook(settingsTab, keyhook_x, y + 2, &Toggles["Color Mod"].toggle, "");
 	y += 15;
 
-	new Checkhook(settingsTab, 4, y, &Toggles["Shorten Item Names"].state, "Shorten Names");
+	new Checkhook(settingsTab, 4, y, &Toggles["Shorten Item Names"].state, "物品短名称");
 	new Keyhook(settingsTab, keyhook_x, y + 2, &Toggles["Shorten Item Names"].toggle, "");
 	y += 15;
 
-	new Checkhook(settingsTab, 4, y, &Toggles["Always Show Items"].state, "Always Show Items");
+	new Checkhook(settingsTab, 4, y, &Toggles["Always Show Items"].state, "物品永久显示");
 	new Keyhook(settingsTab, keyhook_x, y + 2, &Toggles["Always Show Items"].toggle, "");
 	y += 15;
 
-	new Checkhook(settingsTab, 4, y, &Toggles["Always Show Item Stat Ranges"].state, "Always Show Item Stat Ranges");
+	new Checkhook(settingsTab, 4, y, &Toggles["Always Show Item Stat Ranges"].state, "显示物品变量");
 	new Keyhook(settingsTab, keyhook_x, y + 2, &Toggles["Always Show Item Stat Ranges"].toggle, "");
 	y += 15;
 
-	new Checkhook(settingsTab, 4, y, &Toggles["Advanced Item Display"].state, "Advanced Item Display");
+	new Checkhook(settingsTab, 4, y, &Toggles["Advanced Item Display"].state, "物品高级显示(Filter)");
 	new Keyhook(settingsTab, keyhook_x, y + 2, &Toggles["Advanced Item Display"].toggle, "");
 	y += 15;
 
-	new Checkhook(settingsTab, 4, y, &Toggles["Item Drop Notifications"].state, "Item Drop Notifications");
+	new Checkhook(settingsTab, 4, y, &Toggles["Item Drop Notifications"].state, "物品掉落提示(Filter)");
 	new Keyhook(settingsTab, keyhook_x, y + 2, &Toggles["Item Drop Notifications"].toggle, "");
 	y += 15;
 
-	new Checkhook(settingsTab, 4, y, &Toggles["Item Close Notifications"].state, "Item Close Notifications");
+	new Checkhook(settingsTab, 4, y, &Toggles["Item Close Notifications"].state, "物品接近提示(Filter)");
 	new Keyhook(settingsTab, keyhook_x, y + 2, &Toggles["Item Close Notifications"].toggle, "");
 	y += 15;
 
-	new Checkhook(settingsTab, 4, y, &Toggles["Item Detailed Notifications"].state, "Item Detailed Notifications");
+	new Checkhook(settingsTab, 4, y, &Toggles["Item Detailed Notifications"].state, "物品明细提示(Filter)");
 	new Keyhook(settingsTab, keyhook_x, y + 2, &Toggles["Item Detailed Notifications"].toggle, "");
 	y += 15;
 
-	new Checkhook(settingsTab, 4, y, &Toggles["Verbose Notifications"].state, "Verbose Notifications");
+	new Checkhook(settingsTab, 4, y, &Toggles["Verbose Notifications"].state, "提示更加丰富(Filter)");
 	new Keyhook(settingsTab, keyhook_x, y + 2, &Toggles["Verbose Notifications"].toggle, "");
 	y += 15;
 
-	new Keyhook(settingsTab, 4, y + 2, &showPlayer, "Show Player's Gear:        ");
+	new Keyhook(settingsTab, 4, y + 2, &showPlayer, "显示其它玩家鸡儿:                             ");
 	y += 15;
-	new Keyhook(settingsTab, 4, y + 2, &resyncKey, "Resync:                           ");
+	new Keyhook(settingsTab, 4, y + 2, &resyncKey, "同步(卡角色的时候按一下试试):         ");
 	y += 15;
-	new Keyhook(settingsTab, 4, y + 2, &advStatMenuKey, "Advanced Stat Display:   ");
+	new Keyhook(settingsTab, 4, y + 2, &advStatMenuKey, "玩家/雇佣兵高级属性:                        ");
 }
 
 void Item::OnUnload() {
@@ -308,7 +308,7 @@ void __fastcall Item::ItemNamePatch(wchar_t* name, UnitAny* item)
 			break;
 		}
 	}
-
+	
 	char* code = D2COMMON_GetItemText(item->dwTxtFileNo)->szCode;
 
 	if (Toggles["Advanced Item Display"].state) {
@@ -323,7 +323,7 @@ void __fastcall Item::ItemNamePatch(wchar_t* name, UnitAny* item)
 	else {
 		OrigGetItemName(item, itemName, code);
 	}
-
+	
 	// Some common color codes for text strings (see TextColor enum):
 	// \377c; (purple)
 	// \377c0 (white)
@@ -363,20 +363,22 @@ void __fastcall Item::ItemNamePatch(wchar_t* name, UnitAny* item)
 		};
 	}
 	
-	
 	//这里名字可能会超长，所以loot.filter里面有一些中文太长的物品还是要控制和过滤一下,这里暂时不作处理吧
-	name[itemName.length()] = 0;  // null-terminate the string since MultiByteToWideChar doesn't
+	//name[itemName.length()] = 0;  // null-terminate the string since MultiByteToWideChar doesn't，这句会引起异常，不知道为什么...先不要吧，反正下面已经有限制了。
+
 	//item->pItemData->ItemLocation
 	// 32=0x20 可能是指在地上？
 	// 152=0x98 也可能是指在地上？
 	// BYTE	nLocation;	BH里面是node_page		//+69 实际位置, 0 ground, 1 cube/stash/inv,2 belt,3 body
+	int nameMaxLng = 124;
 	if (item->pItemData->NodePage == 0
-		&& itemName.length() > 124) {   //测试出来，长度不能超过124
-		name[121] = '.';
-		name[122] = '.';
-		name[123] = '.';
-		name[124] = 0;
+		&& itemName.length() > nameMaxLng) {   //测试出来，长度不能超过124
+		name[nameMaxLng-3] = '.';
+		name[nameMaxLng-2] = '.';
+		name[nameMaxLng-1] = '.';
+		name[nameMaxLng] = 0;
 	}
+	//name = L"测试一下";
 	delete[] szName;
 }
 
