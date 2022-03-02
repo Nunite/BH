@@ -1,3 +1,14 @@
+#个人修改BH（汉化）
+仅用于个人创建的PD2的私服或其它D2私服
+主要修改内容如下：
+1、添加自动开图功能
+2、汉化所有的BH界面
+3、汉化filter文件（filter文件编码需要改成ANSI）
+4、添加修复部分新功能（主要来源于开源的D2hackmap）
+#图片预览
+
+
+
 # Project Diablo 2 BH
 
 ## Setting up Debug and Build output Folders
