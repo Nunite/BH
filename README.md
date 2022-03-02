@@ -5,6 +5,7 @@
 2、汉化所有的BH界面<br/>
 3、汉化filter文件（filter文件编码需要改成ANSI）<br/>
 4、添加修复部分新功能（主要来源于开源的D2hackmap）<br/>
+5、中文输入功能（主要来源于开源的D2hackmap）<br/>
 # 效果预览
 ![图1](https://github.com/weili0677/BH/blob/main/%E7%89%A9%E5%93%81%E6%98%BE%E7%A4%BA.png)<br/>
 ![图2](https://github.com/weili0677/BH/blob/main/%E5%BF%AB%E6%8D%B7%E8%AF%B4%E6%98%8E.png)<br/>
