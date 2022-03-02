@@ -341,6 +341,7 @@ void MapNotify::OnUnload() {
 }
 
 void MapNotify::OnLoop() {
+
 	//// Remove or install patchs based on state.
 	ResetPatches();
 	BH::settingsUI->SetVisible(Toggles["Show Settings"].state);
@@ -587,20 +588,37 @@ void MapNotify::OnAutomapDraw() {
 						
 					}
 
+					//显示特殊怪的名字(MonStats.txt文件中的hcIdx,NameStr列对应的tbl文件里面的key)
 					string superUniqName;
 					MonsterDataHM* mdhm = (MonsterDataHM*)unit->pMonsterData;  //转成HM的结构才是正常的
-					if (mdhm->pMonsterTxt->fBoss == 1 && mdhm->wUniqueNo == 0) {
-						wchar_t* name = mdhm->wszMonName;
-						superUniqName = UnicodeToAnsi(name);
-						for (int i = 0; i < 100; i++) {  //by zyl 这里解决名字里面有颜色的代码
-							int pos = superUniqName.find("ÿ");
-							if (pos >= 0) {
-								superUniqName = superUniqName.replace(pos, 1, "\377");
-							}
-							else {
-								break;
+					if ((mdhm->pMonsterTxt->fBoss == 1 && mdhm->wUniqueNo == 0)
+						||unit->dwTxtFileNo==919   //919 Horazon
+						|| unit->dwTxtFileNo == 944   //944 Butcher屠夫
+						|| unit->dwTxtFileNo == 921   //921 Dark Wanderer 黑暗流浪者
+						|| unit->dwTxtFileNo == 922   //922 Shadow of Mendeln
+						) {
+						if ((unit->dwTxtFileNo>=546&& unit->dwTxtFileNo<=550)   //xx污秽者=>不显示
+							|| (unit->dwTxtFileNo >= 880 && unit->dwTxtFileNo <= 881)   //血蛆幼生、血蛆之蛋=>不显示
+							|| (unit->dwTxtFileNo >= 790 && unit->dwTxtFileNo <= 794)   //被困的灵魂(大黑毛旁边的)=>不显示
+							|| (unit->dwTxtFileNo == 754)   //血石魔=>不显示
+							|| (unit->dwTxtFileNo == 965)   //T3市场图boss旁的沉沦魔=>不显示
+							) {  
+							//这里过滤一些不想要显示名字的怪物
+						}
+						else {
+							wchar_t* name = mdhm->wszMonName;
+							superUniqName = UnicodeToAnsi(name);
+							for (int i = 0; i < 100; i++) {  //by zyl 这里解决名字里面有颜色的代码
+								int pos = superUniqName.find("ÿ");
+								if (pos >= 0) {
+									superUniqName = superUniqName.replace(pos, 1, "\377");
+								}
+								else {
+									break;
+								}
 							}
 						}
+						
 					}
 
 
@@ -725,7 +743,10 @@ void MapNotify::OnAutomapDraw() {
 			return;
 		for (list<LevelList*>::iterator it = automapLevels.begin(); it != automapLevels.end(); it++) {
 			if (player->pAct->dwAct == (*it)->act) {
-				string tombStar = ((*it)->levelId == player->pAct->pMisc->dwStaffTombLevel) ? "\377c2*" : "\377c4";
+				string tombStar = ((*it)->levelId == player->pAct->pMisc->dwStaffTombLevel) ? "\377c2*来呀来呀~" : "";  //正确的古墓
+				//if ((*it)->levelId == player->pAct->pMisc->dwBossTombLvl) {  //古墓的boss，暂时就不显示了
+				//	tombStar = "\377c1*来打我呀~";
+				//}
 				POINT unitLoc;
 				Hook::ScreenToAutomap(&unitLoc, (*it)->x, (*it)->y);
 				char* name = UnicodeToAnsi(D2CLIENT_GetLevelName((*it)->levelId));
@@ -741,11 +762,11 @@ void MapNotify::OnAutomapDraw() {
 }
 
 void MapNotify::OnGameJoin() {
-	if (!D2CLIENT_GetUIState(UI_CHAT_CONSOLE)) {  //这句是我补的，不加这句，打字会有点卡
+	//if (!D2CLIENT_GetUIState(UI_CHAT_CONSOLE)) {  //这句是我补的，不加这句，打字会有点卡
 		ResetRevealed();
 		automapLevels.clear();
 		//*p_D2CLIENT_AutomapOn = Toggles["Show Automap On Join"].state;   //这句是消失的主要一句，但是上面这2句也有冲突，会访问冲突
-	}
+	//}
 }
 
 void Squelch(DWORD Id, BYTE button) {

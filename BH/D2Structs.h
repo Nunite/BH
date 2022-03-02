@@ -380,6 +380,8 @@ struct ActMisc {
 	Act* pAct;				//0x46C
 	DWORD _3[3];			//0x470
 	Level* pLevelFirst;		//0x47C
+	DWORD _4;				//+480 参考了HM 
+	DWORD dwBossTombLvl;	//+484 参考了HM
 };
 
 struct Act {

@@ -7,6 +7,7 @@
 #pragma   comment(lib,"imm32.lib")  
 
 static BOOL fDisabled = FALSE;
+static BOOL fInGame = FALSE;
 void ToggleIMEInput(BOOL fEnable) {
 
 	static HIMC hIMC = NULL;
@@ -45,37 +46,47 @@ void OOGDraw() {
 }
 
 void GameLoop() {
+	if (fInGame == FALSE) {
+		fInGame = TRUE;
+		__raise BH::moduleManager->OnGameJoin();
+		BH::oogDraw->Remove();
+	}
 	ToggleIMEInput(D2CLIENT_GetUIState(UI_CHAT_CONSOLE));
 	//if (D2CLIENT_GetUIState(UI_CHAT_CONSOLE)) return;
 	__raise BH::moduleManager->OnLoop();
 }
 
 void GameEnd() {
+	fInGame = FALSE;
 	ToggleIMEInput(1);
 	__raise BH::moduleManager->OnEnd();
+	//游戏退出后
+	__raise BH::moduleManager->OnGameExit();
+	BH::config->Write();
+	BH::oogDraw->Install();
 }
 
 DWORD WINAPI GameThread(VOID* lpvoid) {
 	bool inGame = false;
 	while (true) {
-		if (D2CLIENT_GetUIState(UI_CHAT_CONSOLE)) {
-			Sleep(10);
-			continue;
-		}
+		//if (D2CLIENT_GetUIState(UI_CHAT_CONSOLE)) {
+		//	Sleep(10);
+		//	continue;
+		//}
 		if ((*p_D2WIN_FirstControl) && inGame) {
 			inGame = false;
-			if (!D2CLIENT_GetUIState(UI_CHAT_CONSOLE)) {
+			//if (!D2CLIENT_GetUIState(UI_CHAT_CONSOLE)) {
 				__raise BH::moduleManager->OnGameExit();
 				BH::config->Write();
 				BH::oogDraw->Install();
-			}
+			//}
 		}
 		else if (D2CLIENT_GetPlayerUnit() && !inGame) {
 			inGame = true;
-			if (!D2CLIENT_GetUIState(UI_CHAT_CONSOLE)) {
+			//if (!D2CLIENT_GetUIState(UI_CHAT_CONSOLE)) {
 				__raise BH::moduleManager->OnGameJoin();
 				BH::oogDraw->Remove();
-			}
+			//}
 		}
 		Sleep(10);
 	}

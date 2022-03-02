@@ -97,7 +97,7 @@ bool IsValidMonster(UnitAny* pUnit)
 	if ((pUnit->dwTxtFileNo == 258 || (pUnit->dwTxtFileNo == 261)) && (pUnit->dwMode == 14))
 		return false;
 
-	DWORD badMonIds[] = {
+	DWORD badMonIds[] = {  //patch_d2.mpq=>MonStats.txt=>hcIdx
 						146,147,148,149,150,151,152,153,154,155,157,158,159,175,176,177,178,
 						179,185,195,196,197,198,199,200,201,202,203,204,205,210,227,244,245,
 						246,251,252,253,254,255,257,264,265,266,268,269,272,283,293,294,296,
@@ -105,9 +105,10 @@ bool IsValidMonster(UnitAny* pUnit)
 						344,351,352,353,355,358,359,366,367,368,369,377,378,392,393,401,403,
 						404,405,406,408,410,411,412,413,414,415,416,432,433,434,435,511,512,
 						513,514,515,516,517,518,519,520,521,523,524,525,527,534,535,536,537,
-						538,539,543,545,556,559,567,568,569,574 };
-	
-	for (DWORD n = 0; n < 129; n++)
+						538,539,543,545,556,559,567,568,569,574,738,739,740,786,787,788 };
+	int badMonSize = sizeof(badMonIds) / sizeof(DWORD);
+
+	for (DWORD n = 0; n < badMonSize; n++)
 	{
 		if (pUnit->dwTxtFileNo == badMonIds[n])
 			return false;
@@ -117,14 +118,15 @@ bool IsValidMonster(UnitAny* pUnit)
 	if (D2COMMON_GetUnitStat(pUnit, 172, 0) == 2)
 		return false;
 
-	wchar_t* name = D2CLIENT_GetUnitName(pUnit);
-	char* tmp = UnicodeToAnsi(name);
+	//这里可以不用了，用上面的怪物id来过滤了
+	//wchar_t* name = D2CLIENT_GetUnitName(pUnit);
+	//char* tmp = UnicodeToAnsi(name);
 
-	if ((strcmp(tmp, "an evil force") == 0) || (strcmp(tmp, "dummy") == 0) || (strcmp(tmp, "Maggot") == 0)) {
-		delete[] tmp;
-		return false;
-	}
-	delete[] tmp;
+	//if ((strcmp(tmp, "an evil force") == 0) || (strcmp(tmp, "dummy") == 0) || (strcmp(tmp, "Maggot") == 0)) {
+	//	delete[] tmp;
+	//	return false;
+	//}
+	//delete[] tmp;
 
 	return true;
 }

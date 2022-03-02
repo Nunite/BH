@@ -555,7 +555,7 @@ void __stdcall MultiByteFix(LPSTR str)
 		char txt[100];
 	};
 	tagChat* pc = (tagChat*)str;
-	if (InGame == FALSE && pc->flag != 4 && pc->flag != 10)return;
+	if (InGame == FALSE && pc->flag != 4 && pc->flag != 10 && pc->flag != 6)return;
 	//if (pc->flag != 4 && pc->flag != 10)return;
 
 	char szTemp[300];
@@ -927,6 +927,16 @@ DWORD __stdcall ShowLifeWithMyPattern(DWORD callBack, int min, int max) {
 	int iPercent = 100 * min / max;
 	wsprintfW2(wszTemp, szOrbPattern, min, max, iPercent);
 	DrawDefaultFontText(wszTemp, 75, Hook::GetScreenHeight() - 95, 0);
+	return callBack;
+
+}
+
+DWORD __stdcall ShowManaWithMyPattern(DWORD callBack, int min, int max) {
+
+	wchar_t wszTemp[64];
+	int iPercent = 100 * min / max;
+	wsprintfW2(wszTemp, szOrbPattern, min, max, iPercent);
+	DrawDefaultFontText(wszTemp, Hook::GetScreenWidth() - 65, Hook::GetScreenHeight() - 95, 0);
 
 	//这段代码写在这里，主要是不会把物品的属性给挡住（目前还不知道D2的Draw的优先级问题）
 	//这里开始计算腰带剩余数量
@@ -972,16 +982,6 @@ DWORD __stdcall ShowLifeWithMyPattern(DWORD callBack, int min, int max) {
 	return callBack;
 
 }
-
-DWORD __stdcall ShowManaWithMyPattern(DWORD callBack, int min, int max) {
-
-	wchar_t wszTemp[64];
-	int iPercent = 100 * min / max;
-	wsprintfW2(wszTemp, szOrbPattern, min, max, iPercent);
-	DrawDefaultFontText(wszTemp, Hook::GetScreenWidth() - 65, Hook::GetScreenHeight() - 95, 0);
-	return callBack;
-
-}
 BYTE showOrbs = 2;  //显示自己的格式 
 void __declspec(naked) ShowLifePatch_ASM()
 {
@@ -992,9 +992,9 @@ void __declspec(naked) ShowLifePatch_ASM()
 		ret
 		showme :
 		call ShowLifeWithMyPattern
-			push eax
-			add dword ptr[esp], 0x4E
-			ret
+		push eax
+		add dword ptr[esp], 0x4E
+		ret
 	}
 }
 
@@ -1007,9 +1007,9 @@ void __declspec(naked) ShowManaPatch_ASM()
 		ret
 		showme :
 		call ShowManaWithMyPattern
-			push eax
-			add dword ptr[esp], 0x5B
-			ret
+		push eax
+		add dword ptr[esp], 0x5B
+		ret
 	}
 }
 

@@ -172,7 +172,7 @@ void BH::Initialize()
 
 	// GameThread can potentially run oogDraw->Install, so create the thread after all
 	// loading/installation finishes.
-	CreateThread(0, 0, GameThread, 0, 0, 0);
+	//CreateThread(0, 0, GameThread, 0, 0, 0);  //这里去掉，参考HM的onJoinGame和ExitGame
 
 	initialized = true;
 }
