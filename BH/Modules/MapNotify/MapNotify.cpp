@@ -1087,7 +1087,61 @@ int HoverMonsterColor(UnitAny* pUnit) {
 		color = Blue;
 	return color;
 }
-static int lastHp = -1;  //上一次的血量
+
+//获取玩家距离，单位码数
+double __fastcall GetUnitDistanceInSubtiles(UnitAnyHM* pUnit1, UnitAnyHM* pUnit2) {
+
+	DWORD xpos1, xpos2, ypos1, ypos2;
+	if (pUnit1->nUnitType == UNIT_PLAYER || pUnit1->nUnitType == UNIT_MONSTER || pUnit1->nUnitType == UNIT_MISSILE) {
+		xpos1 = D2COMMON_GetUnitPosX(pUnit1->pMonPath);
+		ypos1 = D2COMMON_GetUnitPosY(pUnit1->pMonPath);
+	}
+	else {
+		xpos1 = pUnit1->pItemPath->dwPosX;
+		ypos1 = pUnit1->pItemPath->dwPosY;
+	}
+	if (pUnit2->nUnitType == UNIT_PLAYER || pUnit2->nUnitType == UNIT_MONSTER || pUnit2->nUnitType == UNIT_MISSILE) {
+		xpos2 = D2COMMON_GetUnitPosX(pUnit2->pMonPath);
+		ypos2 = D2COMMON_GetUnitPosY(pUnit2->pMonPath);
+	}
+	else {
+		xpos2 = pUnit2->pItemPath->dwPosX;
+		ypos2 = pUnit2->pItemPath->dwPosY;
+	}
+
+	return 2 * sqrt(double((xpos1 - xpos2) * (xpos1 - xpos2) + (ypos1 - ypos2) * (ypos1 - ypos2))) / 3;
+}
+
+char* DblToStr(double dblSour, int decimal, char* desc)
+{
+	int dec, sign;
+
+	char* buffer;
+	char* p = desc;
+	buffer = _ecvt(dblSour, 10, &dec, &sign);
+
+	if (dec > 0)
+	{
+		for (int i = 0; i < dec; i++)
+		{
+			*p++ = *buffer++;
+		}
+	}
+	else
+	{
+		p[0] = '0';
+		p++;
+	}
+	*p = '.';
+	p++;
+	for (int j = 0; j < decimal; j++) {
+		if (*buffer) *p++ = *buffer++;
+		else *p++ = '0';
+	}
+	*p = '\0';
+	return desc;
+}
+
 int HoverObjectPatch(UnitAny* pUnit, DWORD tY, DWORD unk1, DWORD unk2, DWORD tX, wchar_t* wTxt)
 {
 	if (!pUnit || pUnit->dwType != UNIT_MONSTER || pUnit->pMonsterData->pMonStatsTxt->bAlign != MONSTAT_ALIGN_ENEMY)
@@ -1117,6 +1171,13 @@ int HoverObjectPatch(UnitAny* pUnit, DWORD tY, DWORD unk1, DWORD unk2, DWORD tX,
 			lvl += 3;
 		}
 	}
+
+	//怪物的距离 by zyl from HM
+	UnitAny* pUnit1 = D2CLIENT_GetPlayerUnit();  //当前玩家
+	double yards = GetUnitDistanceInSubtiles((UnitAnyHM*)pUnit, (UnitAnyHM*)pUnit1);
+	//char strVal[10];
+	//DblToStr(GetUnitDistanceInSubtiles((UnitAnyHM*)pUnit, (UnitAnyHM*)pUnit1), 2, strVal);
+
 	DWORD dwImmunities[] = {
 		STAT_DMGREDUCTIONPCT,
 		STAT_MAGICDMGREDUCTIONPCT,
@@ -1137,7 +1198,7 @@ int HoverObjectPatch(UnitAny* pUnit, DWORD tY, DWORD unk1, DWORD unk2, DWORD tX,
 	int center = tX + (p.x / 2);
 	int y = tY - p.y;
 	Texthook::Draw(center, y - 16, Center, 13, White, L"\377c7%d \377c8%d \377c1%d \377c9%d \377c3%d \377c2%d", dwResistances[0], dwResistances[1], dwResistances[2], dwResistances[3], dwResistances[4], dwResistances[5]);
-	Texthook::Draw(center, y+2, Center, 6, White, L"\377c%d(L%d)%s(%.0f%%)", HoverMonsterColor(pUnit),lvl, wTxt , (hp / maxhp) * 100.0);
+	Texthook::Draw(center, y+2, Center, 6, White, L"\377c%d(L%d)%s(%.0f%%)~%.0f码", HoverMonsterColor(pUnit),lvl, wTxt , (hp / maxhp) * 100.0, yards);
 	//Texthook::Draw(center, y + 12, Center, 6, White, L"%.0f%%", (hp / maxhp) * 100.0);
 	return 1;
 }

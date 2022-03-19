@@ -342,8 +342,16 @@ void __fastcall Item::ItemNamePatch(wchar_t* name, UnitAny* item)
 	/* Test code to display item codes */
 	//string test3 = code;
 	//itemName += " {" + test3 + "}";
-
+	int nameMaxLng = 124;
+	if (item->pItemData->NodePage == 0 && itemName.length()>nameMaxLng) {  //如果是在地上的东西，长度最长124，不然会c000005
+		itemName = itemName.substr(0, nameMaxLng);
+		itemName[nameMaxLng - 3] = '.';
+		itemName[nameMaxLng - 2] = '.';
+		itemName[nameMaxLng - 1] = '.';
+	}
 	MultiByteToWideChar(CODE_PAGE, MB_PRECOMPOSED, itemName.c_str(), itemName.length(), name, itemName.length());
+	
+
 	//by zyl
 	for (DWORD i = 0; i < wcslen(name); i++)
 	{
@@ -370,14 +378,15 @@ void __fastcall Item::ItemNamePatch(wchar_t* name, UnitAny* item)
 	// 32=0x20 可能是指在地上？
 	// 152=0x98 也可能是指在地上？
 	// BYTE	nLocation;	BH里面是node_page		//+69 实际位置, 0 ground, 1 cube/stash/inv,2 belt,3 body
-	int nameMaxLng = 124;
-	if (item->pItemData->NodePage == 0
-		&& itemName.length() > nameMaxLng) {   //测试出来，长度不能超过124
-		name[nameMaxLng-3] = '.';
-		name[nameMaxLng-2] = '.';
-		name[nameMaxLng-1] = '.';
-		name[nameMaxLng] = 0;
-	}
+
+	//if (item->pItemData->NodePage == 0
+	//	&& wcslen(name) > nameMaxLng) {   //测试出来，长度不能超过124
+	//	name[nameMaxLng-3] = '.';
+	//	name[nameMaxLng-2] = '.';
+	//	name[nameMaxLng-1] = '.';
+	//	name[nameMaxLng] = 0;
+	//}
+	
 	//name = L"测试一下";
 	delete[] szName;
 }
