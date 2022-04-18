@@ -26,7 +26,7 @@ int CUBE_LEFT = 197;
 int CUBE_TOP = 199;
 int CELL_SIZE = 29;
 
-std::string POTIONS[] = { "hp", "mp", "rv" };
+std::string POTIONS[] = { "hp", "mp", "rv" , "yp"};
 
 DWORD idBookId;
 DWORD unidItemId;
@@ -415,6 +415,13 @@ void ItemMover::AutoToBelt()
 				*reinterpret_cast<int*>(PacketData + 1) = itemId;
 				D2NET_SendPacket(5, 0, PacketData);
 			}
+			if (code[0] == 'y' && code[1] == 'p' && code[2] == 's') {
+				DWORD itemId = pItem->dwUnitId;  //解毒药
+				//试一下这个不知道是不是填充的数据包
+				BYTE PacketData[5] = { 0x63, 0, 0, 0, 0 };
+				*reinterpret_cast<int*>(PacketData + 1) = itemId;
+				D2NET_SendPacket(5, 0, PacketData);
+			}
 		}
 	}
 }
@@ -549,6 +556,7 @@ void ItemMover::LoadConfig() {
 	BH::config->ReadKey("Use Healing Potion", "VK_1", HealKey);
 	BH::config->ReadKey("Use Mana Potion", "VK_2", ManaKey);
 	BH::config->ReadKey("Use Rejuv Potion", "VK_3", JuvKey);
+	BH::config->ReadKey("Use Antidote Potion", "VK_4", YpsKey);
 	BH::config->ReadKey("Use Potion To Belt", "VK_OEM_3", BeltKey); //自动填充腰带
 
 	BH::config->ReadInt("Low TP Warning", tp_warn_quantity);
@@ -569,6 +577,7 @@ void ItemMover::OnLoad() {
 	new Drawing::Keyhook(settingsTab, x, (y += 15), &HealKey, "使用红药:       ");
 	new Drawing::Keyhook(settingsTab, x, (y += 15), &ManaKey, "使用蓝药:       ");
 	new Drawing::Keyhook(settingsTab, x, (y += 15), &JuvKey, "使用紫药:       ");
+	new Drawing::Keyhook(settingsTab, x, (y += 15), &YpsKey, "使用解药:       ");  //解毒
 	new Drawing::Keyhook(settingsTab, x, (y += 15), &BeltKey, "填充腰带:       ");
 	int keyhook_x = 150;
 	new Checkhook(settingsTab, 4, (y += 15), &ChatColor::Toggles["Merc Protect"].state, "佣兵保护");
@@ -608,8 +617,8 @@ void ItemMover::OnKey(bool up, BYTE key, LPARAM lParam, bool* block) {
 	bool shiftState = ((GetKeyState(VK_LSHIFT) & 0x80) || (GetKeyState(VK_RSHIFT) & 0x80));
 	//if (shiftState) return;  //按了shift就不处理,继续走下去,主要用于佣兵喝药
 
-	if (!up && (key == HealKey || key == ManaKey || key == JuvKey)) {
-		int idx = key == JuvKey ? 2 : key == ManaKey ? 1 : 0;
+	if (!up && (key == HealKey || key == ManaKey || key == JuvKey || key == YpsKey)) {
+		int idx = key == YpsKey ? 3 : key == JuvKey ? 2 : key == ManaKey ? 1 : 0;
 		std::string startChars = POTIONS[idx];
 		char minPotion = 127;
 		DWORD minItemId = 0;
@@ -624,6 +633,10 @@ void ItemMover::OnKey(bool up, BYTE key, LPARAM lParam, bool* block) {
 					minItemId = pItem->dwUnitId;
 					isBelt = pItem->pItemData->NodePage == NODEPAGE_BELTSLOTS;
 				}
+				//else if (code[0] == 'y'&& code[1] == 'p'&& code[2] == 's') {  //解毒药
+				//	minItemId = pItem->dwUnitId;
+				//	isBelt = pItem->pItemData->NodePage == NODEPAGE_BELTSLOTS;
+				//}
 			}
 			//char *code = D2COMMON_GetItemText(pItem->dwTxtFileNo)->szCode;
 			//if (code[0] == 'b' && code[1] == 'o' && code[2] == 'x') {

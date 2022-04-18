@@ -602,6 +602,8 @@ void MapNotify::OnAutomapDraw() {
 							|| (unit->dwTxtFileNo >= 790 && unit->dwTxtFileNo <= 794)   //被困的灵魂(大黑毛旁边的)=>不显示
 							|| (unit->dwTxtFileNo == 754)   //血石魔=>不显示
 							|| (unit->dwTxtFileNo == 965)   //T3市场图boss旁的沉沦魔=>不显示
+							|| (unit->dwTxtFileNo == 966)   //rathma第一个boss旁边的远古尖塔=>不显示
+							|| (unit->dwTxtFileNo >= 937 && unit->dwTxtFileNo <= 939)   ///rathma相关的=>不显示
 							) {  
 							//这里过滤一些不想要显示名字的怪物
 						}

@@ -49,6 +49,7 @@ private:
 	unsigned int HealKey;
 	unsigned int ManaKey;
 	unsigned int JuvKey;
+	unsigned int YpsKey;  //解毒药，主要用于打拉斯玛map的第一个boss用
 	unsigned int BeltKey;  //腰带开关
 	ItemPacketData ActivePacket;
 	CRITICAL_SECTION crit;
