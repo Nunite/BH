@@ -3,6 +3,7 @@
 #include "D2Stubs.h"
 #include "Common.h"
 #include "Constants.h"
+#include "direct.h"
 
 int quality_to_color[] = {
 	White, // none
@@ -373,4 +374,37 @@ DWORD GetPlayerArea() {
 	if (!IsGameReady())
 		return 0;
 	return player->pPath->pRoom1->pRoom2->pLevel->dwLevelNo;
+}
+
+
+void LogMsg(const char* pFormat, ...)
+{
+	char log_file[MAX_PATH] = "";
+	char info[MAX_PATH] = "";
+	sprintf(info, "zylpd2.log");
+	_getcwd(log_file, MAX_PATH);
+	if (log_file[strlen(log_file)] != '\\')
+		strcat(log_file, "\\");
+	strcat(log_file, info);
+	va_list lArgs;
+	va_start(lArgs, pFormat);
+
+	FILE* lDebug = fopen(log_file, "a");
+
+	if (lDebug != NULL)
+	{
+		time_t timep;
+		struct tm* p;
+		time(&timep);
+		p = localtime(&timep);
+		fprintf(lDebug, "Time:%04d-%02d-%02d %02d:%02d:%02d  ", p->tm_year + 1900, p->tm_mon + 1, p->tm_mday, p->tm_hour, p->tm_min, p->tm_sec);
+		vfprintf(lDebug, pFormat, lArgs);
+		fprintf(lDebug, "\n");
+		fclose(lDebug);
+	}
+	else
+	{
+		//Fog::D2Assert(TRUE, "Failed In Open File", __FILE__, __LINE__);
+	}
+	va_end(lArgs);
 }

@@ -32,6 +32,7 @@ public:
 };
 
 static double mercLastHP=100;  //佣兵上1次的血量百分比
+static long mercLastTime = 0;  //佣兵上1次喝药的时间
 
 #define		KEY_CODE_COPY			0x03
 #define		KEY_CODE_PASTE			0x16

@@ -3,6 +3,7 @@
 #include "../../D2Ptrs.h"
 #include "../../D2Stubs.h"
 #include "../../D2Intercepts.h"
+#include "../../D2Helpers.h"
 
 
 using namespace Drawing;  //这个是Hook的namespace
@@ -1118,19 +1119,26 @@ void __fastcall DrawPetHeadPath(int xpos, UnitAny* pUnit) {
 	if (test1) {
 		//下面是佣兵自动喝药
 		DWORD mHP = D2COMMON_GetUnitStat(pUnit, STAT_HP, 0);
-		if (mHP > 0x8000) {  //这个说明merc的血发生了变化
-			double maxhp = (double)(D2COMMON_GetUnitStat(pUnit, STAT_MAXHP, 0) >> 8);
+		DWORD mMAXHP = D2COMMON_GetUnitStat(pUnit, STAT_MAXHP, 0);
+		//if (mHP > 0x8000) {  //这个说明merc的血发生了变化,暂时先不用这个去判断 by zyl 20220422
+			double maxhp = (double)(mMAXHP >> 8);  //这个佣兵取过来是300，不知道为什么
+			if (maxhp > 128) maxhp = 128;   //这里先限制为128试试看了。
 			double hp = (double)(mHP >> 8);
 			double perHP = (hp / maxhp) * 100.0;
-			
+			if (perHP > 100) perHP = 100;  //这里喝药的时候有可能会有超出100的情况
+			if ((GetTickCount() - mercLastTime) < 3000) {  //这里先固定3秒吧
+				//PrintText(White, "上次刚喝过药，先不喝");
+				return;  //上次喝药时间少于3秒先不喝
+			}
 			if (perHP < mercLastHP)
 			{
-				//PrintText(White, "佣兵血变少：%.0f%%", perHP);
+				//PrintText(White, "佣兵血变少：%.0f%%，%.0f%%", perHP, mercLastHP);
 				//开始喝药
 				AutoMercDrink(perHP);
+				mercLastTime = GetTickCount();  //记录一下喝药的时间
 			}
 			mercLastHP = perHP;
-		}
+		//}
 	}
 }
 
