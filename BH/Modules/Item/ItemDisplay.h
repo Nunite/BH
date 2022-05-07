@@ -896,6 +896,7 @@ struct Action
     int    pxColor;
     int    lineColor;
     int    notifyColor;
+    bool noTracking;
     unsigned int pingLevel;
 
     Action() :

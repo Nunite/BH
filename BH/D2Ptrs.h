@@ -395,6 +395,17 @@ FUNCPTR(D2COMMON, IsTownByRoom, BOOL __stdcall, (Room1* pRoom1), -10057, -10691)
 FUNCPTR(D2COMMON, GetCursorItem, UnitAny* __stdcall, (Inventory* pInv), -11017);
 FUNCPTR(D2COMMON, ITEMS_GetRunesTxtRecordFromItem, RunesTxt* __stdcall, (UnitAny* pItem), -10918);
 
+FUNCPTR(D2COMMON, GetItemFromInventoryHM, UnitAnyHM* __stdcall, (UnitInventory* inv), -10460, -11132)
+FUNCPTR(D2COMMON, GetNextItemFromInventoryHM, UnitAnyHM* __stdcall, (UnitAnyHM* pItem), -10464, -10879)
+FUNCPTR(D2COMMON, GetItemPage, BYTE __stdcall, (UnitAnyHM* ptUnit), -10020, -10020);  //by zyl from MxCen113
+FUNCPTR(D2COMMON, InvRemoveItem, UnitAnyHM* __stdcall, (UnitInventory* ptInventory, UnitAnyHM* ptItem), -10646, -10646);  //by zyl from MxCen113
+FUNCPTR(D2COMMON, InvAddItem, DWORD __stdcall, (UnitInventory* ptInventory, UnitAnyHM* ptItem, DWORD posX, DWORD posY, DWORD vValueC, DWORD bIsClient, BYTE page), -11107, -11107);  //by zyl from MxCen113
+
+FUNCPTR(D2COMMON, GetUnitPosX, DWORD __stdcall, (DynamicPath* pPath), 0x34B80, 0x34B80)  //by zyl from HM
+//D2FUNCPTR2(D2COMMON, 0x6FD84B80, 0x6FDC7670, GetUnitPosX, DWORD __stdcall, (DynamicPath* pPath)) //(Players, Monsters, Missiles) #10750
+FUNCPTR(D2COMMON, GetUnitPosY, DWORD __stdcall, (DynamicPath* pPath), 0x34BB0, 0x34BB0)  //by zyl from HM
+//D2FUNCPTR2(D2COMMON, 0x6FD84BB0, 0x6FDC76A0, GetUnitPosY, DWORD __stdcall, (DynamicPath* pPath)) //(Players, Monsters, Missiles)  #10867
+
 ////////////////////////////////////////////////////////////////////////////////////////////////
 // D2Common Globals
 ////////////////////////////////////////////////////////////////////////////////////////////////
