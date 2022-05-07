@@ -33,3 +33,5 @@ bool IsTown(DWORD levelId);
 bool IsGameReady();
 DWORD GetPlayerArea();
 int ItemColorFromQuality(unsigned int quality);
+
+void LogMsg(const char* pFormat, ...);

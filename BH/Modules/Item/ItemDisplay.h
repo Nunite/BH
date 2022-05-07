@@ -907,6 +907,7 @@ struct Action
         notifyColor(UNDEFINED_COLOR),
         pingLevel(0),
         stopProcessing(true),
+        noTracking(false),
         name(""),
         description("")
     {

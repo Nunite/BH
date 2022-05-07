@@ -24,6 +24,7 @@ void Module::Load() {
 	__hook(&ModuleManager::OnGameExit, BH::moduleManager, &Module::OnGameExit, this);
 
 	__hook(&ModuleManager::OnLoop, BH::moduleManager, &Module::OnLoop, this);
+	__hook(&ModuleManager::OnEnd, BH::moduleManager, &Module::OnEnd, this);
 
 	__hook(&ModuleManager::OnLeftClick, BH::moduleManager, &Module::OnLeftClick, this);
 	__hook(&ModuleManager::OnRightClick, BH::moduleManager, &Module::OnRightClick, this);
@@ -53,6 +54,7 @@ void Module::Unload() {
 	__unhook(&ModuleManager::OnGameExit, BH::moduleManager, &Module::OnGameExit, this);
 
 	__unhook(&ModuleManager::OnLoop, BH::moduleManager, &Module::OnLoop, this);
+	__unhook(&ModuleManager::OnEnd, BH::moduleManager, &Module::OnEnd, this);
 
 	__unhook(&ModuleManager::OnLeftClick, BH::moduleManager, &Module::OnLeftClick, this);
 	__unhook(&ModuleManager::OnRightClick, BH::moduleManager, &Module::OnRightClick, this);

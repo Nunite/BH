@@ -17,22 +17,23 @@
 	{"PRES", STAT_POISONRESIST},	\
 	{"MINDMG", STAT_MINIMUMDAMAGE},	\
 	{"MAXDMG", STAT_MAXIMUMDAMAGE},
-#define MAX_NAME_SIZE 56
+//#define MAX_NAME_SIZE 56
+#define MAX_NAME_SIZE 100
 // For ignoring size
 std::vector<std::string> colorreps =
 {
-	"ÿc0",
-	"ÿc1",
-	"ÿc2",
-	"ÿc3",
-	"ÿc4",
-	"ÿc5",
-	"ÿc6",
-	"ÿc7",
-	"ÿc8",
-	"ÿc9",
-	"ÿc;",
-	"ÿc:",
+	"\377c0",
+	"\377c1",
+	"\377c2",
+	"\377c3",
+	"\377c4",
+	"\377c5",
+	"\377c6",
+	"\377c7",
+	"\377c8",
+	"\377c9",
+	"\377c;",
+	"\377c:",
 	"\xFF""c\x06",
 	"\xFF""c\x07",
 	"\xFF""c\x09",
@@ -41,18 +42,18 @@ std::vector<std::string> colorreps =
 
 // All colors here must also be defined in MAP_COLOR_REPLACEMENTS
 #define COLOR_REPLACEMENTS	\
-	{"WHITE", "ÿc0"},		\
-	{"RED", "ÿc1"},			\
-	{"GREEN", "ÿc2"},		\
-	{"BLUE", "ÿc3"},		\
-	{"GOLD", "ÿc4"},		\
-	{"GRAY", "ÿc5"},		\
-	{"BLACK", "ÿc6"},		\
-	{"TAN", "ÿc7"},			\
-	{"ORANGE", "ÿc8"},		\
-	{"YELLOW", "ÿc9"},		\
-	{"PURPLE", "ÿc;"},		\
-	{"DARK_GREEN", "ÿc:"},	\
+	{"WHITE", "\377c0"},		\
+	{"RED", "\377c1"},			\
+	{"GREEN", "\377c2"},		\
+	{"BLUE", "\377c3"},		\
+	{"GOLD", "\377c4"},		\
+	{"GRAY", "\377c5"},		\
+	{"BLACK", "\377c6"},		\
+	{"TAN", "\377c7"},			\
+	{"ORANGE", "\377c8"},		\
+	{"YELLOW", "\377c9"},		\
+	{"PURPLE", "\377c;"},		\
+	{"DARK_GREEN", "\377c:"},	\
 	{"CORAL", "\xFF" "c\x06"},		\
 	{"SAGE", "\xFF" "c\x07"},		\
 	{"TEAL", "\xFF" "c\x09"},		\
@@ -502,6 +503,7 @@ string ItemDescLookupCache::make_cached_T(UnitItemInfo* uInfo)
 		if ((*it)->Evaluate(uInfo, NULL))
 		{
 			SubstituteNameVariables(uInfo, new_name, (*it)->action.description, FALSE);
+			//SubstituteNameVariables(uInfo, new_name, "\377c7zyltest", FALSE);
 			if ((*it)->action.stopProcessing) { break; }
 		}
 	}
@@ -529,7 +531,8 @@ string ItemNameLookupCache::make_cached_T(UnitItemInfo* uInfo,
 	{
 		if ((*it)->Evaluate(uInfo, NULL))
 		{
-			SubstituteNameVariables(uInfo, new_name, (*it)->action.name, TRUE);
+			//by zyl TRUE => FALSE  名字长度不做限制
+			SubstituteNameVariables(uInfo, new_name, (*it)->action.name, FALSE);
 			if ((*it)->action.stopProcessing) { break; }
 		}
 	}
@@ -582,7 +585,7 @@ void SubstituteNameVariables(UnitItemInfo* uInfo,
 	const string& action_name,
 	BOOL          bLimit)
 {
-	char origName[512], sockets[4], code[5], ilvl[4], alvl[4], craftalvl[4], runename[16] = "", runenum[4] = "0";
+	char origName[512], sockets[4], code[5], ilvl[4], alvl[4], craftalvl[4], runename[160] = "", runenum[4] = "0";
 	char gemtype[16] = "", gemlevel[16] = "", sellValue[16] = "", statVal[16] = "", qty[4] = "";
 	char lvlreq[4], wpnspd[4], rangeadder[4];
 
@@ -606,7 +609,7 @@ void SubstituteNameVariables(UnitItemInfo* uInfo,
 	sprintf_s(ilvl, "%d", item->pItemData->dwItemLevel);
 	sprintf_s(alvl, "%d", GetAffixLevel((BYTE)item->pItemData->dwItemLevel, (BYTE)uInfo->attrs->qualityLevel, uInfo->attrs->magicLevel));
 	sprintf_s(origName, "%s", name.c_str());
-
+	
 	// (1) ilvl = int(.5 * clvl) + int(.5 * ilvl)
 	auto craft_ilvl = static_cast<int>(0.5 * clvl_int) + static_cast<int>(0.5 * ilvl_int);
 	// (2) if ilvl > 99 then ilvl = 99
@@ -623,21 +626,23 @@ void SubstituteNameVariables(UnitItemInfo* uInfo,
 	sprintf_s(wpnspd, "%d", txt->dwspeed); //Add these as matchable stats too, maybe?
 	sprintf_s(rangeadder, "%d", txt->brangeadder);
 	sprintf_s(qty, "%d", D2COMMON_GetUnitStat(item, STAT_AMMOQUANTITY, 0));
-
+	
 	UnitAny* pUnit = D2CLIENT_GetPlayerUnit();
 	if (pUnit && txt->bquest == 0) { sprintf_s(sellValue, "%d", D2COMMON_GetItemPrice(pUnit, item, D2CLIENT_GetDifficulty(), (DWORD)D2CLIENT_GetQuestInfo(), 0x201, 1)); }
-
+	
 	ItemAttributes* attrs = ItemAttributeMap[code];
 	if (IsRune(attrs))
 	{
 		sprintf_s(runenum, "%d", RuneNumberFromItemCode(code));
-		sprintf_s(runename, name.substr(0, name.find(' ')).c_str());
+		//sprintf_s(runename, name.substr(0, name.find(' ')).c_str());
+		sprintf_s(runename, name.c_str());  //by zyl，上面的runename长度从16改到160
 	}
 	else if (IsGem(attrs))
 	{
 		sprintf_s(gemlevel, "%s", GetGemLevelString(GetGemLevel(uInfo->attrs)));
 		sprintf_s(gemtype, "%s", GetGemTypeString(GetGemType(uInfo->attrs)));
 	}
+	
 	ActionReplace replacements[] = {
 		{ "NAME", origName },
 		{ "SOCKETS", sockets },
@@ -663,11 +668,30 @@ void SubstituteNameVariables(UnitItemInfo* uInfo,
 	{
 		while (name.find("%" + replacements[n].key + "%") != string::npos)
 		{
-			if (bLimit && replacements[n].key == "NL") { name.replace(name.find("%" + replacements[n].key + "%"), replacements[n].key.length() + 2, ""); }
-			else { name.replace(name.find("%" + replacements[n].key + "%"), replacements[n].key.length() + 2, replacements[n].value); }
+			if (bLimit && replacements[n].key == "NL") { 
+				name.replace(name.find("%" + replacements[n].key + "%"), replacements[n].key.length() + 2, ""); 
+			}
+			//else if (name.length()>110) {
+			//	break;
+			//}
+			else { 
+				name.replace(name.find("%" + replacements[n].key + "%"), replacements[n].key.length() + 2, replacements[n].value); 
+			}
 		}
 	}
 
+	//int pos = name.find("?");
+	//name = name + "zyl:" + to_string(pos)+":";
+	//for (int i = 0; i < 10; i++) {  //by zyl 这里解决名字里面有颜色的代码
+	//	int pos = name.find("c7");
+	//	if (pos >= 0) {
+	//		name = name.replace(pos-1, 3, "ÿc7");
+	//	}
+	//	else {
+	//		break;
+	//	}
+	//}
+	
 	// stat replacements
 	if (name.find("%STAT-") != string::npos)
 	{
@@ -692,7 +716,7 @@ void SubstituteNameVariables(UnitItemInfo* uInfo,
 				statVal);
 		}
 	}
-
+	
 	if (bLimit)
 	{
 		// Calc the extra size from colors

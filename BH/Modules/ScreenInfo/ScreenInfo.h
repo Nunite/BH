@@ -44,6 +44,8 @@ class ScreenInfo : public Module {
 		int startLevel;
 
 		void ScreenInfo::drawExperienceInfo();
+		DWORD CalSrollOfTownportal();
+		DWORD CalSrollOfIdentify();
 	public:
 		static map<std::string, Toggle> Toggles;
 
@@ -63,6 +65,7 @@ class ScreenInfo : public Module {
 		void OnDraw();
 		void OnAutomapDraw();
 		void OnGamePacketRecv(BYTE* packet, bool *block);
+
 };
 
 StateCode GetStateCode(unsigned int nKey);

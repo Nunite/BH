@@ -56,6 +56,15 @@ void __declspec(naked) GameLoop_Interception()
 	}
 }
 
+void __declspec(naked) GameEnd_Interception()
+{
+	__asm {
+		call GameEnd;
+		mov ecx, 0xb4;
+		ret;
+	}
+}
+
 VOID __declspec(naked) GamePacketRecv_Interception() {
 	__asm
 	{

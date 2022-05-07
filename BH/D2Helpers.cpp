@@ -3,6 +3,7 @@
 #include "D2Stubs.h"
 #include "Common.h"
 #include "Constants.h"
+#include "direct.h"
 
 int quality_to_color[] = {
 	White, // none
@@ -97,26 +98,36 @@ bool IsValidMonster(UnitAny* pUnit)
 	if ((pUnit->dwTxtFileNo == 258 || (pUnit->dwTxtFileNo == 261)) && (pUnit->dwMode == 14))
 		return false;
 
-	DWORD badMonIds[] = { 227, 283, 326, 327, 328, 329, 330, 410, 411, 412, 413, 414, 415, 416, 366, 406,
-						 351, 352, 353, 266, 408, 516, 517, 518, 519, 522, 523, 543, 543, 545 };
+	DWORD badMonIds[] = {  //patch_d2.mpq=>MonStats.txt=>hcIdx
+						146,147,148,149,150,151,152,153,154,155,157,158,159,175,176,177,178,
+						179,185,195,196,197,198,199,200,201,202,203,204,205,210,227,244,245,
+						246,251,252,253,254,255,257,264,265,266,268,269,272,283,293,294,296,
+						297,318,319,320,321,322,323,324,325,326,327,328,329,330,331,332,339,
+						344,351,352,353,355,358,359,366,367,368,369,377,378,392,393,401,403,
+						404,405,406,408,410,411,412,413,414,415,416,432,433,434,435,511,512,
+						513,514,515,516,517,518,519,520,521,523,524,525,527,534,535,536,537,
+						538,539,543,545,556,559,567,568,569,574,738,739,740,786,787,788 };
+	int badMonSize = sizeof(badMonIds) / sizeof(DWORD);
 
-	for (DWORD n = 0; n < 30; n++)
+	for (DWORD n = 0; n < badMonSize; n++)
 	{
 		if (pUnit->dwTxtFileNo == badMonIds[n])
 			return false;
 	}
 
+
 	if (D2COMMON_GetUnitStat(pUnit, 172, 0) == 2)
 		return false;
 
-	wchar_t* name = D2CLIENT_GetUnitName(pUnit);
-	char* tmp = UnicodeToAnsi(name);
+	//这里可以不用了，用上面的怪物id来过滤了
+	//wchar_t* name = D2CLIENT_GetUnitName(pUnit);
+	//char* tmp = UnicodeToAnsi(name);
 
-	if ((strcmp(tmp, "an evil force") == 0) || (strcmp(tmp, "dummy") == 0) || (strcmp(tmp, "Maggot") == 0)) {
-		delete[] tmp;
-		return false;
-	}
-	delete[] tmp;
+	//if ((strcmp(tmp, "an evil force") == 0) || (strcmp(tmp, "dummy") == 0) || (strcmp(tmp, "Maggot") == 0)) {
+	//	delete[] tmp;
+	//	return false;
+	//}
+	//delete[] tmp;
 
 	return true;
 }
@@ -149,6 +160,19 @@ void Print(char* format, ...)
 
 	wchar_t* wstr = new wchar_t[len];
 	MultiByteToWideChar(CODE_PAGE, 0, str, -1, wstr, len);
+
+	//by zyl
+	for (DWORD i = 0; i < wcslen(wstr); i++)
+	{
+		if ((wstr[i] >= 0xFF || wstr[i] == 0x79) && wstr[i + 1] == L'c')
+		{
+			//if (name[i + 2] >= L'0' && name[i + 2] <= L':')
+			//{
+			wstr[i] = L'\377';
+			//}
+		};
+	}
+
 	if (IsGameReady())
 		D2CLIENT_PrintGameString(wstr, 0);
 	delete[] wstr;
@@ -350,4 +374,37 @@ DWORD GetPlayerArea() {
 	if (!IsGameReady())
 		return 0;
 	return player->pPath->pRoom1->pRoom2->pLevel->dwLevelNo;
+}
+
+
+void LogMsg(const char* pFormat, ...)
+{
+	char log_file[MAX_PATH] = "";
+	char info[MAX_PATH] = "";
+	sprintf(info, "zylpd2.log");
+	_getcwd(log_file, MAX_PATH);
+	if (log_file[strlen(log_file)] != '\\')
+		strcat(log_file, "\\");
+	strcat(log_file, info);
+	va_list lArgs;
+	va_start(lArgs, pFormat);
+
+	FILE* lDebug = fopen(log_file, "a");
+
+	if (lDebug != NULL)
+	{
+		time_t timep;
+		struct tm* p;
+		time(&timep);
+		p = localtime(&timep);
+		fprintf(lDebug, "Time:%04d-%02d-%02d %02d:%02d:%02d  ", p->tm_year + 1900, p->tm_mon + 1, p->tm_mday, p->tm_hour, p->tm_min, p->tm_sec);
+		vfprintf(lDebug, pFormat, lArgs);
+		fprintf(lDebug, "\n");
+		fclose(lDebug);
+	}
+	else
+	{
+		//Fog::D2Assert(TRUE, "Failed In Open File", __FILE__, __LINE__);
+	}
+	va_end(lArgs);
 }

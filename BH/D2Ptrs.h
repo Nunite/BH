@@ -166,6 +166,9 @@ FUNCPTR(D2CLIENT, GetLevelName_I, wchar_t* __fastcall, (DWORD levelId), 0xBE240,
 FUNCPTR(D2GFX, DrawAutomapCell, void __stdcall, (CellContext* context, DWORD xpos, DWORD ypos, RECT* cliprect, DWORD bright), -10079, -10060)
 ASMPTR(D2CLIENT, OverrideShrinePatch_ORIG, 0x1155B8, 0x101B08)//Updated 1.13c
 
+FUNCPTR(D2CLIENT, ShowMap, void __fastcall, (), 0x3B8B0, 0x3B8B0) // by zyl from HM 1.13D先不管
+//D2FUNCPTR2(D2CLIENT, 0x6FAEB8B0, 0x6FAED660, ShowMap, void __fastcall, ())
+
 ////////////////////////////////////////////////////////////////////////////////////////////////
 // D2Client Globals
 ////////////////////////////////////////////////////////////////////////////////////////////////
@@ -182,6 +185,8 @@ VARPTR(D2CLIENT, MouseY, DWORD, 0x11B824, 0x11C94C)
 VARPTR(D2CLIENT, MouseOffsetY, int, 0x11995C, 0x106840)
 VARPTR(D2CLIENT, MouseOffsetX, int, 0x119960, 0x106844)
 
+VARPTR(D2CLIENT, AutomapPos, POINT, 0x11C1E8, 0x11C1E8)  //1.13d的先不管了
+//D2VARPTR2(D2CLIENT, 0x6FBCC1E8, 0x6FBCCF4C, AutomapPos, D2_POINT)
 VARPTR(D2CLIENT, AutomapOn, DWORD, 0xFADA8, 0x11C8B8)
 VARPTR(D2CLIENT, AutomapMode, int, 0xF16B0, 0xF34F8)
 VARPTR(D2CLIENT, Offset, POINT, 0x11C1F8, 0x11CF5C)
@@ -250,6 +255,16 @@ VARPTR(D2CLIENT, NoPickUp, DWORD, 0x11C2F0, 0x11D574) // unused but I want to ad
 
 VARPTR(D2CLIENT, ChatMsg, wchar_t*, 0x11EC80, 0x11D650)
 
+VARPTR(D2CLIENT, ShowLifeStr, BOOL, 0x11C4B0, 0x11D650)
+//D2VARPTR2(D2CLIENT, 0x6FBCC4B0, 0x6FBCD008, ShowLifeStr, BOOL)
+VARPTR(D2CLIENT, ShowManaStr, BOOL, 0x11C4B4, 0x11D650)
+//D2VARPTR2(D2CLIENT, 0x6FBCC4B4, 0x6FBCD00C, ShowManaStr, BOOL)
+
+VARPTR(D2CLIENT, ChatTextLength, int, 0x11C028, 0x11CAA4)  //by zyl from HM
+//D2VARPTR2(D2CLIENT, 0x6FBCC028, 0x6FBCCAA4, ChatTextLength, int)
+VARPTR(D2CLIENT, LastChatMsg, wchar_t, 0x11EC80, 0x11D650)  //by zyl from HM
+VARPTR(BNCLIENT, BnChatMessage, LPDWORD, 0x1F64C, 0x1F618)  //by zyl from HM
+//D2VARPTR2(BNCLIENT, 0x6FF3F64C, 0x6FF3F618, BnChatMessage, LPDWORD)
 VARPTR(D2CLIENT, HoverItem, UnitAny*, 0x11BC38);
 
 VARPTR(D2CLIENT, MapId, DWORD, 0x11C310)
@@ -332,6 +347,8 @@ FUNCPTR(D2COMMON, GetItemText, ItemsTxt* __stdcall, (DWORD dwItemNo), -10695, -1
 
 FUNCPTR(D2COMMON, GetLayer, AutomapLayer2* __fastcall, (DWORD dwLevelNo), -10749, -10087)
 FUNCPTR(D2COMMON, GetLevel, Level* __fastcall, (ActMisc* pMisc, DWORD dwLevelNo), -10207, -10287)
+FUNCPTR(D2COMMON, GetLevelTxt, LevelTxt* __stdcall, (DWORD levelno), 0x6CCC0, 0x6CCC0)  //by zyl from HM 1.13d先不管
+//D2FUNCPTR2(D2COMMON, 0x6FDBCCC0, 0x6FD80CA0, GetLevelTxt, LevelTxt* __stdcall, (DWORD levelno))
 
 FUNCPTR(D2COMMON, GetStatList, StatList* __stdcall, (UnitAny* pUnit, DWORD dwUnk, DWORD dwMaxEntries), -10930, -10449)
 FUNCPTR(D2COMMON, CopyStatList, DWORD __stdcall, (StatList* pStatList, Stat* pStatArray, DWORD dwMaxEntries), -10658, -10195)
@@ -500,6 +517,9 @@ FUNCPTR(D2WIN, DrawCellFile, void __fastcall, (CellFile* pCellFile, int xPos, in
 ////////////////////////////////////////////////////////////////////////////////////////////////
 
 FUNCPTR(D2WIN, DrawText, void __fastcall, (const wchar_t* wStr, int xPos, int yPos, DWORD dwColor, DWORD dwUnk), -10150, -10076)
+FUNCPTR(D2WIN, GetTextPixelLen, DWORD __fastcall, (wchar_t* wStr), 0x12B20, -10047)
+//D2FUNCPTR2(D2WIN, 0x6F8F2B20, 0x6F8F36B0, GetTextPixelLen, DWORD __fastcall, (wchar_t* wStr))//这个函数不能分辨颜色代码，只能用于无色字符串
+
 
 FUNCPTR(D2WIN, GetTextSize, DWORD __fastcall, (wchar_t* wStr, DWORD* dwWidth, DWORD* dwFileNo), -10177, -10179)
 FUNCPTR(D2WIN, SetTextSize, DWORD __fastcall, (DWORD dwSize), -10184, -10047)
@@ -508,12 +528,33 @@ FUNCPTR(D2WIN, SetControlText, void* __fastcall, (Control* box, wchar_t* txt), -
 FUNCPTR(D2WIN, GetTextWidthFileNo, DWORD __fastcall, (wchar_t* wStr, DWORD* dwWidth, DWORD* dwFileNo), -10177, -10179)
 
 FUNCPTR(D2WIN, CreateEditBox, Control* __fastcall, (DWORD dwPosX, DWORD dwPosY, DWORD _1, DWORD _2, DWORD _3, DWORD _4, DWORD _5, BOOL(__stdcall* pCallback)(wchar_t* wText), DWORD _6, DWORD _7, ControlPreferences* pPreferences), 0x161B0, 0x11A10)//1.13c
+FUNCPTR(D2WIN, CreateEditBoxHM, D2EditBox* __fastcall, (DWORD dwPosX, DWORD dwPosY, DWORD dwSizeX, DWORD dwSizeY, DWORD dwOffsetX, DWORD dwOffsetY, CellFile* pCellFile, DWORD dwReturnHandler, DWORD arg9, DWORD dwIsCloaked, void* buf), 0x161B0, 0x11A10)//1.13c
+//D2FUNCPTR2(D2WIN, 0x6F8F61B0, 0x11A10 + DLLBASE_D2WIN, CreateEditBox, D2EditBox* __fastcall, (DWORD dwPosX, DWORD dwPosY, DWORD dwSizeX, DWORD dwSizeY, DWORD dwOffsetX, DWORD dwOffsetY, CellFile* pCellFile, DWORD dwReturnHandler, DWORD arg9, DWORD dwIsCloaked, void* buf))
+
 FUNCPTR(D2WIN, DestroyEditBox, VOID __fastcall, (Control* pControl), 0x159E0, 0xF320)//1.13c
+FUNCPTR(D2WIN, DestroyEditBoxHM, DWORD __fastcall, (D2EditBox* box), 0x159E0, 0xF320)//1.13c by zyl
+//D2FUNCPTR2(D2WIN, 0x6F8F59E0, 0xF320 + DLLBASE_D2WIN, DestroyEditBox, DWORD __fastcall, (D2EditBox* box))
 FUNCPTR(D2WIN, DestroyControl, VOID __stdcall, (Control* pControl), 0x18490, 0xE5F0)//1.13c
 FUNCPTR(D2WIN, SetEditBoxCallback, VOID __fastcall, (Control* pControl, BOOL(__stdcall* FunCallBack)(Control* pControl, DWORD dwInputType, char* pChar)), 0x13970, 0xF1D0)//1.13c
 FUNCPTR(D2WIN, SetEditBoxProc, void __fastcall, (Control* box, BOOL(__stdcall* FunCallBack)(Control*, DWORD, DWORD)), 0x13970, 0xF1D0)//Updated 1.13c
+FUNCPTR(D2WIN, SetEditBoxProcHM, void __fastcall, (D2EditBox* box, BOOL(__stdcall* FunCallBack)(D2EditBox*, DWORD, char*)), 0x13970, 0xF1D0)//Updated 1.13c
+//D2FUNCPTR2(D2WIN, 0x6F8F3970, 0xF1D0 + DLLBASE_D2WIN, SetEditBoxProc, void __fastcall, (D2EditBox* box, BOOL(__stdcall* FunCallBack)(D2EditBox*, DWORD, char*)))
+
+
 FUNCPTR(D2WIN, SelectEditBoxText, void __fastcall, (Control* box), 0x13720, 0xEF80) //Updated 1.13c
 FUNCPTR(D2WIN, InitMPQ, DWORD __stdcall, (char* dll, const char* mpqfile, char* mpqname, int v4, int v5), 0x7E60, 0x7E50)
+
+FUNCPTR(D2WIN, SetEditBoxText, void* __fastcall, (Control* box, wchar_t* wcszTxt), 0x14DF0, 0x14DF0) //by zyl,1.13d还不知道
+FUNCPTR(D2WIN, SetEditBoxTextHM, void* __fastcall, (D2EditBox* box, wchar_t* wcszTxt), 0x14DF0, 0x14DF0) //by zyl,1.13d还不知道
+//D2FUNCPTR2(D2WIN, 0x6F8F4DF0, 0x6F8F0680, SetEditBoxText, void* __fastcall, (D2EditBox* box, wchar_t* wcszTxt))
+FUNCPTR(D2WIN, GetEditBoxText, wchar_t* __fastcall, (Control* box), 0x136A0, 0x136A0) //by zyl,1.13d还不知道
+FUNCPTR(D2WIN, GetEditBoxTextHM, wchar_t* __fastcall, (D2EditBox* box), 0x136A0, 0x136A0) //by zyl,1.13d还不知道
+//D2FUNCPTR2(D2WIN,  0x6F8F36A0, 0x6F8EEF00,  GetEditBoxText,         wchar_t* __fastcall, (D2EditBox* box))
+FUNCPTR(D2WIN, SetTextFont, DWORD __fastcall, (DWORD dwFont), 0x12FE0, 0x12FE0) //by zyl,1.13d还不知道
+// D2FUNCPTR2(D2WIN,  0x6F8F2FE0, 0x6F8F3B70,   SetTextFont,            DWORD __fastcall, (DWORD dwFont))
+FUNCPTR(D2WIN, AddEditBoxChar, DWORD __fastcall, (D2EditBox* box, BYTE keycode), 0x15450, 0x15450) //by zyl,1.13d还不知道
+//D2FUNCPTR2(D2WIN, 0x6F8F5450, 0x6F8F0CE0, AddEditBoxChar, DWORD __fastcall, (D2EditBox* box, BYTE keycode))
+
 
 ////////////////////////////////////////////////////////////////////////////////////////////////
 // D2Win Globals
@@ -521,7 +562,8 @@ FUNCPTR(D2WIN, InitMPQ, DWORD __stdcall, (char* dll, const char* mpqfile, char* 
 
 VARPTR(D2WIN, FirstControl, Control*, 0x214A0, 0x8DB34)
 VARPTR(D2WIN, FocusedControl, Control*, 0x214B0, 0x8DB44) // unused, but we ought to use it
-
+VARPTR(D2WIN, FocusedControlHM, D2EditBox*, 0x214B0, 0x8DB44) // unused, but we ought to use it
+//D2VARPTR2(D2WIN, 0x6F9014B0, 0x8DB44 + DLLBASE_D2WIN, FocusedControl, D2EditBox*)
 ////////////////////////////////////////////////////////////////////////////////////////////////
 // D2Game Functions
 ////////////////////////////////////////////////////////////////////////////////////////////////

@@ -30,6 +30,8 @@ class ModuleManager {
 
 		__event void OnLoop();
 
+		__event void OnEnd();
+
 		__event void OnGameJoin();
 		__event void OnGameExit();
 

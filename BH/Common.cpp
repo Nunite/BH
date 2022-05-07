@@ -134,11 +134,22 @@ void PrintText(DWORD Color, char* szText, ...) {
 	va_end(Args);
 	wchar_t Buffer[0x130];
 	MultiByteToWideChar(CODE_PAGE, 1, szBuffer, 152, Buffer, 304);
+	//by zyl
+	for (DWORD i = 0; i < wcslen(Buffer); i++)
+	{
+		if ((Buffer[i] >= 0xFF || Buffer[i] == 0x79) && Buffer[i + 1] == L'c')
+		{
+			//if (name[i + 2] >= L'0' && name[i + 2] <= L':')
+			//{
+			Buffer[i] = L'\377';
+			//}
+		};
+	}
 	D2CLIENT_PrintGameString(Buffer, Color);
 }
 
 KeyCode pCodes[] = {
-	{"None", 0, "Not Set"},
+	{"None", 0, "未设置"},
 	{"VK_BACK", 0x08, "Backspace"},
 	{"VK_TAB", 0x09, "Tab"},
 	{"VK_CLEAR", 0x0C, "Clear"},
@@ -191,7 +202,7 @@ KeyCode pCodes[] = {
 	{"VK_RSHIFT", 0xA1, "Right Shift"}, {"VK_LCTRL", 0xA2, "Left Ctrl"}, {"VK_RCTRL", 0xA3, "Right Ctrl"},
 	{"VK_LMENU", 0xA4, "Left Menu"}, {"VK_RMENU", 0xA5, "Right Menu"},
 	{"VK_SEMICOLON", 0xBA, ";"}, {"VK_PLUS", 0xBB, "+"}, {"VK_COMMA", 0xBC, ","}, {"VK_MINUS", 0xBD, "-"},
-	{"VK_PERIOD", 0xBE, "."}, {"VK_FORWARDSLASH", 0xBD, "/"}, {"VK_TILDE", 0xBF, "~"},
+	{"VK_PERIOD", 0xBE, "."}, {"VK_FORWARDSLASH", 0xBD, "/"}, {"VK_TILDE", 0xBF, "~"}, {"VK_OEM_3", 0xC0, "`~"},
 	{"VK_LEFTBRACKET", 0xDB, "["}, {"VK_BACKSLASH", 0xDC, "\\"}, {"VK_RIGHTBRACKET", 0xDD, "]"},
 	{"VK_QUOTE", 0xDE, "'"} };
 

@@ -28,6 +28,8 @@ map<string, bool>* BH::GamefilterBools;
 
 Patch* patches[] = {
 	new Patch(Call, D2CLIENT, { 0x44230, 0x45280 }, (int)GameLoop_Interception, 7),
+	new Patch(Call, D2CLIENT, { 0x45153, 0x461A3 }, (int)GameEnd_Interception, 5),
+	//{PatchCALL,   DLLOFFSET2(D2CLIENT, 0x6FAF5153, 0x6FAF61A3),    (DWORD)GameEndPatch_ASM,                5 ,   &fDefault},
 
 	new Patch(Jump, D2CLIENT, { 0xC3DB4, 0x1D7B4 }, (int)GameDraw_Interception, 6),
 	new Patch(Jump, D2CLIENT, { 0x626C9, 0x73469 }, (int)GameAutomapDraw_Interception, 5),
@@ -145,8 +147,8 @@ void BH::Initialize()
 	new Item();
 	new Party();
 	new ItemMover();
-	new StashExport();
-	new MapNotify();
+	//new StashExport();   //这个先不要吧
+	new MapNotify();   //这个就是MapHack修改而来
 	new ChatColor();
 
 	BnetBools = ((Bnet*)moduleManager->Get("bnet"))->GetBools();
@@ -170,7 +172,7 @@ void BH::Initialize()
 
 	// GameThread can potentially run oogDraw->Install, so create the thread after all
 	// loading/installation finishes.
-	CreateThread(0, 0, GameThread, 0, 0, 0);
+	//CreateThread(0, 0, GameThread, 0, 0, 0);  //这里去掉，参考HM的onJoinGame和ExitGame
 
 	initialized = true;
 }

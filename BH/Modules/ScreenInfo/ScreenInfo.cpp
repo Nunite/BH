@@ -24,7 +24,7 @@ void ScreenInfo::OnLoad() {
 	//d2VersionText->SetFont(1);
 
 	if (BH::cGuardLoaded) {
-		Texthook* cGuardText = new Texthook(Perm, 790, 23, "ÿc4cGuard Loaded");
+		Texthook* cGuardText = new Texthook(Perm, 790, 23, "?c4cGuard Loaded");
 		cGuardText->SetAlignment(Right);
 	}
 	gameTimer = GetTickCount();
@@ -215,9 +215,10 @@ void ScreenInfo::OnDraw() {
 		}
 	}*/
 
-	if (Toggles["Experience Meter"].state) {
-		drawExperienceInfo();
-	}
+	//µÈ¼¶¾­ÑéÒÆµ½ChatColor.cppÀïÃæÁË
+	//if (Toggles["Experience Meter"].state) {
+	//	drawExperienceInfo();
+	//}
 }
 
 void ScreenInfo::drawExperienceInfo(){
@@ -250,16 +251,52 @@ void ScreenInfo::drawExperienceInfo(){
 		expPerSecond /= 1E3;
 		unit = "K";
 	}
-	sprintf_s(sExp, "%00.2f%% (%s%00.2f%%) [%s%.2f%s/s]", pExp, expGainPct >= 0 ? "+" : "", expGainPct, expPerSecond >= 0 ? "+" : "", expPerSecond, unit);
 
-	Texthook::Draw((*p_D2CLIENT_ScreenSizeX / 2) - 100, *p_D2CLIENT_ScreenSizeY - 60, Center, 6, White, "%s", sExp);
+	sprintf_s(sExp, "µÈ¼¶£º%00d£¬¾­Ñé£º%00.2f%% (%s%00.2f%%) [%s%.2f%s/s]", cLevel, pExp, expGainPct >= 0 ? "+" : "", expGainPct, expPerSecond >= 0 ? "+" : "", expPerSecond, unit);
+
+	Texthook::Draw((*p_D2CLIENT_ScreenSizeX / 2) - 200, *p_D2CLIENT_ScreenSizeY - 60, Center, 6, White, "%s", sExp);
 }
 
+//»Ø³Ç¾íÊýÁ¿
+DWORD ScreenInfo::CalSrollOfTownportal() {
+	UnitAny* pUnit = D2CLIENT_GetPlayerUnit();
+	SkillInfoHM* skillInfo = (SkillInfoHM*)pUnit->pInfo;
+	if (skillInfo) {
+		SkillHM* pSkill = skillInfo->pFirstSkill;
+
+		while (pSkill) {
+			if (pSkill->pSkillInfo->wSkillId == 220) {
+				return pSkill->dwQuality;
+			}
+			pSkill = pSkill->pNextSkill;
+		}
+	}
+	return 0;
+}
+//¼ø¶¨¾íÊýÁ¿
+DWORD ScreenInfo::CalSrollOfIdentify() {
+	UnitAny* pUnit = D2CLIENT_GetPlayerUnit();
+	SkillInfoHM* skillInfo = (SkillInfoHM*)pUnit->pInfo;
+	if (skillInfo) {
+		SkillHM* pSkill = skillInfo->pFirstSkill;
+
+		while (pSkill) {
+			if (pSkill->pSkillInfo->wSkillId == 218) {
+				return pSkill->dwQuality;
+			}
+			pSkill = pSkill->pNextSkill;
+		}
+	}
+	return 0;
+}
+
+DWORD dTPsCheck = -1; //µ±Ç°ÒÑ¾­´òÓ¡¹ýµÄÊýÁ¿,²»ÄÜÒ»Ö±´òÓ¡
+DWORD dIDsCheck = -1;
 void ScreenInfo::OnAutomapDraw() {
 	GameStructInfo* pInfo = (*p_D2CLIENT_GameInfo);
 	BnetData* pData = (*p_D2LAUNCH_BnData);
 	UnitAny* pUnit = D2CLIENT_GetPlayerUnit();
-	char* szDiff[3] = {"Normal", "Nightmare", "Hell"};
+	char* szDiff[3] = {"ÆÕÍ¨", "¶ñÃÎ", "µØÓü"};
 	if (!pInfo || !pData || !pUnit)
 		return;
 	int y = 6+(BH::cGuardLoaded?16:0);
@@ -273,7 +310,7 @@ void ScreenInfo::OnAutomapDraw() {
 	CHAR szTime[128] = "";
 	struct tm time;
 	localtime_s(&time, &tTime);
-	strftime(szTime, sizeof(szTime), "%I:%M:%S %p", &time);
+	strftime(szTime, sizeof(szTime), "%H:%M:%S", &time);
 
 	// The call to GetLevelName somehow invalidates pUnit. This is only observable in O2 builds. The game
 	// will crash when you attempt to open the map (which calls OnAutomapDraw function). We need to get the player unit
@@ -282,11 +319,32 @@ void ScreenInfo::OnAutomapDraw() {
 	char *level = UnicodeToAnsi(D2CLIENT_GetLevelName(pUnit->pPath->pRoom1->pRoom2->pLevel->dwLevelNo));
 	std::string szLevel = std::string(level);
 
+	LevelTxt* pLvlTxt = D2COMMON_GetLevelTxt(pUnit->pPath->pRoom1->pRoom2->pLevel->dwLevelNo);
+	WORD  wAreaLevel = pLvlTxt->nMonLv[1][D2CLIENT_GetDifficulty()];   //EXPANSION: 1×ÊÁÏÆ¬ 0 ·Ç×ÊÁÏÆ¬
+	string cAreaLevel = to_string(wAreaLevel);
+
 	pUnit = D2CLIENT_GetPlayerUnit();
 	if (!pUnit) return;
 
 	CHAR szPing[10] = "";
 	sprintf_s(szPing, sizeof(szPing), "%d", *p_D2CLIENT_Ping);
+	
+	DWORD dTPs = CalSrollOfTownportal();
+	DWORD dIDs = CalSrollOfIdentify();
+	string tpcount = to_string(dTPs);
+	string idcount = to_string(dIDs);
+	if (dTPs <= 5 && dTPs!=dTPsCheck) {
+		CHAR temp[255] = "";
+		sprintf_s(temp, sizeof(temp), "»Ø³Ç¾íÖáÖ»Ê£ÏÂ%d¸öÁË!", dTPs);
+		PrintText(Red, temp);
+		dTPsCheck = dTPs;
+	}
+	if (dIDs <= 5 && dIDs != dIDsCheck) {
+		CHAR temp[255] = "";
+		sprintf_s(temp, sizeof(temp), "¼ø¶¨¾íÖáÖ»Ê£ÏÂ%d¸öÁË!", dIDs);
+		PrintText(Red, temp);
+		dIDsCheck = dIDs;
+	}
 
 	DWORD levelId = pUnit->pPath->pRoom1->pRoom2->pLevel->dwLevelNo;
 	LevelsTxt* levelTxt = &(*p_D2COMMON_sgptDataTable)->pLevelsTxt[levelId];
@@ -313,6 +371,10 @@ void ScreenInfo::OnAutomapDraw() {
 		{"ACCOUNTNAME", pData->szAccountName},
 		{"CHARNAME", pUnit->pPlayerData->szName},
 		{"LEVEL", szLevel},
+		//{"LEVEL", level},
+		//{"AREALEVEL", cAreaLevel},
+		{"TPCOUNT", tpcount},
+		{"IDCOUNT", idcount},
 		{"PING", szPing},
 		{"GAMETIME", gameTime},
 		{"REALTIME", szTime},
@@ -331,7 +393,16 @@ void ScreenInfo::OnAutomapDraw() {
 				key.replace(key.find("%" + automap[n].key + "%"), automap[n].key.length() + 2, automap[n].value);
 		}
 		if (key.length() > 0) {
-			Texthook::Draw(*p_D2CLIENT_ScreenSizeX - 10, y, Right,0,Gold,"%s", key.c_str());
+			if (key.find("»Ø³Ç") != string::npos) {
+				Texthook::Draw(*p_D2CLIENT_ScreenSizeX - 10, y, Right, 0, Blue, "%s", key.c_str());
+			}
+			else if (key.find("¼ø¶¨") != string::npos) {
+				Texthook::Draw(*p_D2CLIENT_ScreenSizeX - 10, y, Right, 0, Red, "%s", key.c_str());
+			}
+			else {
+				Texthook::Draw(*p_D2CLIENT_ScreenSizeX - 10, y, Right, 0, Gold, "%s", key.c_str());
+			}
+			
 			y += 16;
 		}
 	}
@@ -583,109 +654,109 @@ StateCode StateCodes[] = {
 	{"FADE", 159}
 };
 
-long long ExpByLevel[] = {
-	0,
-	500,
-	1500,
-	3750,
-	7875,
-	14175,
-	22680,
-	32886,
-	44396,
-	57715,
-	72144,
-	90180,
-	112725,
-	140906,
-	176132,
-	220165,
-	275207,
-	344008,
-	430010,
-	537513,
-	671891,
-	839864,
-	1049830,
-	1312287,
-	1640359,
-	2050449,
-	2563061,
-	3203826,
-	3902260,
-	4663553,
-	5493363,
-	6397855,
-	7383752,
-	8458379,
-	9629723,
-	10906488,
-	12298162,
-	13815086,
-	15468534,
-	17270791,
-	19235252,
-	21376515,
-	23710491,
-	26254525,
-	29027522,
-	32050088,
-	35344686,
-	38935798,
-	42850109,
-	47116709,
-	51767302,
-	56836449,
-	62361819,
-	68384473,
-	74949165,
-	82104680,
-	89904191,
-	98405658,
-	107672256,
-	117772849,
-	128782495,
-	140783010,
-	153863570,
-	168121381,
-	183662396,
-	200602101,
-	219066380,
-	239192444,
-	261129853,
-	285041630,
-	311105466,
-	339515048,
-	370481492,
-	404234916,
-	441026148,
-	481128591,
-	524840254,
-	572485967,
-	624419793,
-	681027665,
-	742730244,
-	809986056,
-	883294891,
-	963201521,
-	1050299747,
-	1145236814,
-	1248718217,
-	1361512946,
-	1484459201,
-	1618470619,
-	1764543065,
-	1923762030,
-	2097310703,
-	2286478756,
-	2492671933,
-	2717422497,
-	2962400612,
-	3229426756,
-	3520485254,
-	3837739017,
-	9999999999
-};
+//long long ExpByLevel[] = {
+//	0,
+//	500,
+//	1500,
+//	3750,
+//	7875,
+//	14175,
+//	22680,
+//	32886,
+//	44396,
+//	57715,
+//	72144,
+//	90180,
+//	112725,
+//	140906,
+//	176132,
+//	220165,
+//	275207,
+//	344008,
+//	430010,
+//	537513,
+//	671891,
+//	839864,
+//	1049830,
+//	1312287,
+//	1640359,
+//	2050449,
+//	2563061,
+//	3203826,
+//	3902260,
+//	4663553,
+//	5493363,
+//	6397855,
+//	7383752,
+//	8458379,
+//	9629723,
+//	10906488,
+//	12298162,
+//	13815086,
+//	15468534,
+//	17270791,
+//	19235252,
+//	21376515,
+//	23710491,
+//	26254525,
+//	29027522,
+//	32050088,
+//	35344686,
+//	38935798,
+//	42850109,
+//	47116709,
+//	51767302,
+//	56836449,
+//	62361819,
+//	68384473,
+//	74949165,
+//	82104680,
+//	89904191,
+//	98405658,
+//	107672256,
+//	117772849,
+//	128782495,
+//	140783010,
+//	153863570,
+//	168121381,
+//	183662396,
+//	200602101,
+//	219066380,
+//	239192444,
+//	261129853,
+//	285041630,
+//	311105466,
+//	339515048,
+//	370481492,
+//	404234916,
+//	441026148,
+//	481128591,
+//	524840254,
+//	572485967,
+//	624419793,
+//	681027665,
+//	742730244,
+//	809986056,
+//	883294891,
+//	963201521,
+//	1050299747,
+//	1145236814,
+//	1248718217,
+//	1361512946,
+//	1484459201,
+//	1618470619,
+//	1764543065,
+//	1923762030,
+//	2097310703,
+//	2286478756,
+//	2492671933,
+//	2717422497,
+//	2962400612,
+//	3229426756,
+//	3520485254,
+//	3837739017,
+//	9999999999
+//};
 
 StateCode GetStateCode(unsigned int nKey) {
 	for (int n = 0; n < (sizeof(StateCodes) / sizeof(StateCodes[0])); n++) {

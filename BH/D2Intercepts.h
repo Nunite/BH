@@ -5,6 +5,7 @@ void GameAutomapDraw_Interception();
 VOID OOGDraw_Interception();
 
 void GameLoop_Interception();
+void GameEnd_Interception();
 
 
 VOID GamePacketRecv_Interception();

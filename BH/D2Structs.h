@@ -187,6 +187,71 @@ struct Control {
 	Control* pChildControl;			//0x90
 };
 
+//by zyl from HM
+struct LevelTxt {				//size = 0x220
+	WORD	wLevelNo;			//+00
+	BYTE	nPal;				//+02
+	BYTE	nAct;				//+03
+	DWORD	_1[2];				//+04
+	DWORD	dwWarpDist;			//+0C
+	WORD	nMonLv[2][3];		//+10	Area Level
+	DWORD	nMonDen[3];			//+1C 
+	BYTE	monumin[3];			//+28
+	BYTE	monumax[3];			//+2B
+	BYTE	MonWndr;			//+2E
+	BYTE	MonSpcWalk;			//+2F
+	DWORD	_2[49];				//+30
+	BYTE	_3;					//+F4
+	char	szName[40];			//+F5
+	char	szEntranceText[40];	//+11D
+	char	szLvlDesc[40];		//+145
+	BYTE	_4;					//+16D	
+	wchar_t wszName[40];		//+16E
+	wchar_t wszEntranceText[40];//+1BE
+	BYTE	_5[2];				//+20E
+	DWORD	wSoundEnv;			//+210
+	DWORD	_6[2];				//+214
+	WORD	wThemes;			//+21C
+	WORD	_7;					//+21E
+};
+
+//这个是HM的状态数据结构
+struct StatMonitor {
+	wchar_t wszDesc[2][30];
+	DWORD	dwStatNo;
+	DWORD	dwTimer;
+	DWORD   dwColor;
+	BOOL	fEnable;
+	BOOL    fCountDown;   //1=倒计时
+};
+
+//HM的文字输入框
+struct D2EditBox {
+	DWORD	dwType;				//+00
+	CellFile* pCellFile;		//+04
+	DWORD   dwFlag;				//+08
+	DWORD	dwPosX;				//+0C   
+	DWORD	dwPosY;				//+10
+	DWORD	dwSizeX;			//+14
+	DWORD	dwSizeY;			//+18
+	void(__fastcall* fnCallBack)(D2EditBox*); // +1C
+	DWORD _3[7];				//+20
+	D2EditBox* pNext;			//+3C
+	DWORD   _4;					//+40
+	DWORD   dwOffsetY;			//+44
+	union {
+		DWORD   dwMaxLength;		//+48
+		DWORD	dwScrollEntries;	//+48
+	};
+	DWORD   dwScrollPosition;	//+4C ?
+	DWORD	_5;					//+50
+	DWORD	dwSelectStart;		//+54
+	DWORD	dwSelectEnd;		//+58
+	wchar_t wszText[256];		//+5C
+	DWORD	dwCursorPos;		//+25C
+	DWORD	dwIsCloaked;		//+260
+};
+
 #pragma pack(push)
 #pragma pack(1)
 
@@ -315,6 +380,8 @@ struct ActMisc {
 	Act* pAct;				//0x46C
 	DWORD _3[3];			//0x470
 	Level* pLevelFirst;		//0x47C
+	DWORD _4;				//+480 参考了HM 
+	DWORD dwBossTombLvl;	//+484 参考了HM
 };
 
 struct Act {
@@ -515,6 +582,109 @@ struct MonsterText {
 	BYTE _3[0x1a0];					//0x12C
 };
 
+//by zyl from HM
+struct MonsterTxt {			//size = 0x1A8
+	WORD	hcIdx;			//+00
+	WORD	hcIdx2;			//+02
+	BYTE	_1[2];			//+04
+	WORD	wLocaleTxtNo;	//+06
+	WORD	wFlag;			//+08
+	WORD	_2;				//+0A
+	union {
+		BYTE	nflag1;
+		struct {
+			BYTE _2a : 6;
+			BYTE fBoss : 1;
+			BYTE fPrimeevil : 1;
+		};
+	};						//+0C
+	union {
+		BYTE	nflag2;
+		struct {
+			BYTE fNpc : 1;
+		};
+	};						//+0D
+
+	BYTE	flag3;			//+0E
+	union {
+		BYTE	nflag4;
+		struct {
+			BYTE fInventory : 1;
+		};
+	};						//+0F
+	char   szCode[4];		//+10
+	char	_3[30];			//+14
+	WORD	velocity;		//+32
+	WORD	run;			//+34
+	BYTE	_4[24];			//+36
+	BYTE	nTreat;			//+4E
+	BYTE	Aidel[3];		//+4F
+	BYTE	Aidst[3];		//+52
+	BYTE	_5;				//+55
+	WORD	Aip1[3];		//+56
+	WORD	Aip2[3];		//+5C
+	WORD	Aip3[3];		//+62
+	WORD	Aip4[3];		//+68
+	char	_6[24];			//+6E
+	WORD	Tcs[3][4];		//+86
+	BYTE	nTcQuestId;		//+9E
+	BYTE	nTcQuestCp;		//+9F
+	BYTE	Drain[3];		//+A0
+	BYTE	ToBlock[3];		//+A3
+	BYTE	nCrit;			//+A6
+	BYTE	_7[3];			//+A7
+	WORD	Level[3];		//+AA
+	WORD	MinHp[3];		//+B0
+	WORD	MaxHp[3];		//+B6
+	WORD	Ac[3];			//+BC
+	WORD	A1TH[3];		//+C2
+	WORD	A2TH[3];		//+C8
+	WORD	S1TH[3];		//+CE
+	WORD	Exp[3];			//+D4
+	WORD	A1MinD[3];		//+DA
+	WORD	A1MaxD[3];		//+E0
+	WORD	A2MinD[3];		//+E6
+	WORD	A2MaxD[3];		//+EC
+	WORD	S1MinD[3];		//+F2
+	WORD	S1MaxD[3];		//+F8
+	WORD	_8[3];			//+FE
+	char	szDesc[48];		//+104
+	char	_9[116];		//+134
+
+};
+
+struct MonsterDataHM {
+	MonsterTxt* pMonsterTxt;	//+00
+	BYTE	nComponents[16];	//+04	Order: HD, TR, LG, RA, LA, RH, LH, SH, S1, S2, S3, S4, S5, S6, S7, S8
+	WORD	wNameSeed;			//+14;
+	union {
+		BYTE	bTypeFlags;	//+16
+		struct {
+			BYTE fOther : 1;		//set for some champs, uniques
+			BYTE fUnique : 1;		//super unique
+			BYTE fChamp : 1;
+			BYTE fBoss : 1;		//unique monster ,usually boss
+			BYTE fMinion : 1;
+			BYTE fPoss : 1;		//possessed
+			BYTE fGhost : 1;		//ghostly
+			BYTE fMulti : 1;		//multishotfiring
+		}; //+16
+	};//+16
+	BYTE	nLastMode;			//+17
+	DWORD	dwDuriel;			//+18
+	BYTE	anEnchants[9];		//+1C
+	BYTE	_1;					//+25
+	WORD	wUniqueNo;			//+26	hcIdx from superuniques.txt for superuniques 
+	void* pAiGeneral;		//+28
+	wchar_t* wszMonName;		//+2C	server side is pAiParams
+	BYTE	_2[16];				//+30
+	DWORD	dwNecroPet;			//+40
+	BYTE	_3[16];				//+44
+	DWORD	dwAiState;			//+54	this is used to tell monsters what special state has been set, this tells them they just got attacked etc
+	DWORD	dwLevelNo;			//+58	the Id from levels.txt of the level they got spawned in 
+	BYTE	nSummonerFlags;		//+5C	byte used only by the summoner
+};
+
 struct MonsterData {
 	MonStatsTxt* pMonStatsTxt;				//0x00
 	BYTE Components[16];					//0x04
@@ -522,6 +692,7 @@ struct MonsterData {
 	struct
 	{
 		BYTE fUnk : 1;
+		BYTE fSuperUniq : 1;
 		BYTE fNormal : 1;
 		BYTE fChamp : 1;
 		BYTE fBoss : 1;
@@ -556,6 +727,33 @@ struct ObjectPath {
 	DWORD dwPosX;					//0x0C
 	DWORD dwPosY;					//0x10
 	//Leaving rest undefined, use Path
+};
+
+//by zyl From HM
+struct SkillHM {
+	struct {
+		WORD	wSkillId;
+	} *pSkillInfo;			//+00
+	SkillHM* pNextSkill;	//+04
+	DWORD	dwMode;			//+08
+	DWORD	dwFlag0;		//+0C
+	DWORD	_1[2];			//+10
+	DWORD	dwTagets;		//+18
+	DWORD	dwTargetType;	//+1C unit type
+	DWORD	dwTargetId;		//+20 unit id
+	DWORD	_2;				//+24
+	DWORD	dwSkillLevel;	//+28
+	DWORD	dwLevelBonus;	//+2C
+	DWORD	dwQuality;		//+30  质量 ==> 回城书之类的数量
+	DWORD	dwFlags;		//+34
+};
+//by zyl from HM
+struct SkillInfoHM {
+	DWORD* pGame1C;			//+00
+	SkillHM* pFirstSkill;		//+04
+	SkillHM* pLeftSkill;		//+08
+	SkillHM* pRightSkill;		//+0C
+	SkillHM* pCurrentSkill;	//+10
 };
 
 struct UnitAny {

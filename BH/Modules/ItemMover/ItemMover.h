@@ -7,6 +7,7 @@
 #include "../../BitReader.h"
 #include "../Item/ItemDisplay.h"
 #include "../../MPQInit.h"
+#include "../../Task.h"
 
 extern int INVENTORY_WIDTH;
 extern int INVENTORY_HEIGHT;
@@ -38,16 +39,22 @@ struct ItemPacketData {
 class ItemMover : public Module {
 private:
 	bool FirstInit;
+	bool AutoBackTown;  //自动回城的开关
 	UnitAny** InventoryItems;
 	UnitAny** StashItems;
 	UnitAny** CubeItems;
 	int tp_warn_quantity;
 	unsigned int TpKey;
+	unsigned int TpBackKey;
 	unsigned int HealKey;
 	unsigned int ManaKey;
+	unsigned int JuvKey;
+	unsigned int YpsKey;  //解毒药，主要用于打拉斯玛map的第一个boss用
+	unsigned int BeltKey;  //腰带开关
 	ItemPacketData ActivePacket;
 	CRITICAL_SECTION crit;
 	Drawing::UITab* settingsTab;
+	map<std::string, Toggle> Toggles;
 public:
 	ItemMover() : Module("Item Mover"),
 		ActivePacket(),
@@ -84,6 +91,7 @@ public:
 	void PickUpItem();
 	void PutItemInContainer();
 	void PutItemOnGround();
+	void AutoToBelt();  //自动填充腰带
 
 	void LoadConfig();
 

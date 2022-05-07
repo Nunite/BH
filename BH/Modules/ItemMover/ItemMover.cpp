@@ -4,7 +4,8 @@
 #include "../../D2Stubs.h"
 #include "../../D2Helpers.h"
 #include "../Item/Item.h"
-
+#include "../ChatColor/ChatColor.h"
+using namespace Drawing;
 // This module was inspired by the RedVex plugin "Item Mover", written by kaiks.
 // Thanks to kaiks for sharing his code.
 
@@ -25,6 +26,8 @@ int CLASSIC_STASH_TOP = 334;
 int CUBE_LEFT = 197;
 int CUBE_TOP = 199;
 int CELL_SIZE = 29;
+
+std::string POTIONS[] = { "hp", "mp", "rv" , "yp"};
 
 DWORD idBookId;
 DWORD unidItemId;
@@ -378,6 +381,52 @@ void ItemMover::PutItemOnGround() {
 	D2NET_SendPacket(5, 1, PacketData);
 }
 
+void ItemMover::AutoToBelt()
+{
+	UnitAny* unit = D2CLIENT_GetPlayerUnit();
+	if (!unit)
+		return;
+
+	/*UnitAny* test1 = D2COMMON_GetBeltItem(unit->pInventory, 0);
+	DWORD test2 = D2COMMON_GetFreeBeltSlot(unit->pInventory,test1, 0);*/
+
+	//"hp", "mp", "rv"
+		//循环查找背包里面的药
+	for (UnitAny* pItem = unit->pInventory->pFirstItem; pItem; pItem = pItem->pItemData->pNextInvItem) {
+		if (pItem->pItemData->ItemLocation == STORAGE_INVENTORY || pItem->pItemData->ItemLocation == STORAGE_CUBE) {   //只取背包和盒子里面的
+			char* code = D2COMMON_GetItemText(pItem->dwTxtFileNo)->szCode;
+			if (code[0] == 'h' && code[1] == 'p') {
+				DWORD itemId = pItem->dwUnitId;  //红药
+				//试一下这个不知道是不是填充的数据包
+				BYTE PacketData[5] = { 0x63, 0, 0, 0, 0 };
+				*reinterpret_cast<int*>(PacketData + 1) = itemId;
+				D2NET_SendPacket(5, 0, PacketData);
+			}
+			if (code[0] == 'm' && code[1] == 'p') {
+				DWORD itemId = pItem->dwUnitId;  //蓝药
+				//试一下这个不知道是不是填充的数据包
+				BYTE PacketData[5] = { 0x63, 0, 0, 0, 0 };
+				*reinterpret_cast<int*>(PacketData + 1) = itemId;
+				D2NET_SendPacket(5, 0, PacketData);
+			}
+			if (code[0] == 'r' && code[1] == 'v') {
+				DWORD itemId = pItem->dwUnitId;  //紫药
+				//试一下这个不知道是不是填充的数据包
+				BYTE PacketData[5] = { 0x63, 0, 0, 0, 0 };
+				*reinterpret_cast<int*>(PacketData + 1) = itemId;
+				D2NET_SendPacket(5, 0, PacketData);
+			}
+			if (code[0] == 'y' && code[1] == 'p' && code[2] == 's') {
+				DWORD itemId = pItem->dwUnitId;  //解毒药
+				//试一下这个不知道是不是填充的数据包
+				BYTE PacketData[5] = { 0x63, 0, 0, 0, 0 };
+				*reinterpret_cast<int*>(PacketData + 1) = itemId;
+				D2NET_SendPacket(5, 0, PacketData);
+			}
+		}
+	}
+}
+
 void ItemMover::OnLeftClick(bool up, int x, int y, bool* block) {
 	BnetData* pData = (*p_D2LAUNCH_BnData);
 	UnitAny* unit = D2CLIENT_GetPlayerUnit();
@@ -503,40 +552,55 @@ void ItemMover::OnRightClick(bool up, int x, int y, bool* block) {
 }
 
 void ItemMover::LoadConfig() {
-	//BH::config->ReadKey("Use TP Tome", "VK_NUMPADADD", TpKey);
-	//BH::config->ReadKey("Use Healing Potion", "VK_NUMPADMULTIPLY", HealKey);
-	//BH::config->ReadKey("Use Mana Potion", "VK_NUMPADSUBTRACT", ManaKey);
+	BH::config->ReadKey("Use TP Tome", "VK_N", TpKey);
+	BH::config->ReadKey("Use TP Tome Back", "VK_BACK", TpBackKey);
+	BH::config->ReadKey("Use Healing Potion", "VK_1", HealKey);
+	BH::config->ReadKey("Use Mana Potion", "VK_2", ManaKey);
+	BH::config->ReadKey("Use Rejuv Potion", "VK_3", JuvKey);
+	BH::config->ReadKey("Use Antidote Potion", "VK_4", YpsKey);
+	BH::config->ReadKey("Use Potion To Belt", "VK_OEM_3", BeltKey); //自动填充腰带
 
-	//BH::config->ReadInt("Low TP Warning", tp_warn_quantity);
+	BH::config->ReadInt("Low TP Warning", tp_warn_quantity);
 }
 
 void ItemMover::OnLoad() {
 	LoadConfig();
+	AutoBackTown = false;
 	Drawing::Texthook* colored_text;
 
-	settingsTab = new Drawing::UITab("Interaction", BH::settingsUI);
+	settingsTab = new Drawing::UITab("快捷说明", BH::settingsUI);
 
 	unsigned int x = 8;
 	unsigned int y = 7;
-	/*new Drawing::Texthook(settingsTab, x, y, "Keys (esc to clear)");
-	new Drawing::Keyhook(settingsTab, x, (y += 15), &TpKey ,  "Quick Town Portal:     ");
-	new Drawing::Keyhook(settingsTab, x, (y += 15), &HealKey, "Use Healing Potion:    ");
-	new Drawing::Keyhook(settingsTab, x, (y += 15), &ManaKey, "Use Mana Potion:       ");*/
+	new Drawing::Texthook(settingsTab, x, y, "鼠标点击可自定义快捷键 (按esc清除快捷键)");
+	new Drawing::Keyhook(settingsTab, x, (y += 15), &TpKey, "快速开门:       ");
+	new Drawing::Keyhook(settingsTab, x, (y += 15), &TpBackKey, "快速回城:       ");
+	new Drawing::Keyhook(settingsTab, x, (y += 15), &HealKey, "使用红药:       ");
+	new Drawing::Keyhook(settingsTab, x, (y += 15), &ManaKey, "使用蓝药:       ");
+	new Drawing::Keyhook(settingsTab, x, (y += 15), &JuvKey, "使用紫药:       ");
+	new Drawing::Keyhook(settingsTab, x, (y += 15), &YpsKey, "使用解药:       ");  //解毒
+	new Drawing::Keyhook(settingsTab, x, (y += 15), &BeltKey, "填充腰带:       ");
+	int keyhook_x = 150;
+	new Checkhook(settingsTab, 4, (y += 15), &ChatColor::Toggles["Merc Protect"].state, "佣兵保护");
+	new Keyhook(settingsTab, keyhook_x, (y + 2), &ChatColor::Toggles["Merc Protect"].toggle, "");
+	new Checkhook(settingsTab, 4, (y += 15), &ChatColor::Toggles["Merc Boring"].state, "佣兵吐槽");
+	new Keyhook(settingsTab, keyhook_x, (y + 2), &ChatColor::Toggles["Merc Boring"].toggle, "");
 
-	//y += 7;
+	y += 15;
+	y += 15;
 
-	new Drawing::Texthook(settingsTab, x, (y), "QoL features");
+	new Drawing::Texthook(settingsTab, x, (y), "物品快速移动说明");
 	colored_text = new Drawing::Texthook(settingsTab, x, (y += 15),
-		"Shift-leftclick IDs an item if an ID tome is in inventory");
+		"Shift+左键 如果鉴定书在背包，就可以快速鉴定物品");
 	colored_text->SetColor(Gold);
 	colored_text = new Drawing::Texthook(settingsTab, x, (y += 15),
-		"Shift-rightclick moves between stash/open cube and inventory");
+		"Shift+右键 在背包和打开的箱子（或打开的盒子）之间移动");
 	colored_text->SetColor(Gold);
 	colored_text = new Drawing::Texthook(settingsTab, x, (y += 15),
-		"Ctrl-rightclick moves item to ground");
+		"Ctrl+右键 把物品扔地上");
 	colored_text->SetColor(Gold);
 	colored_text = new Drawing::Texthook(settingsTab, x, (y += 15),
-		"Ctrl-shift-rightclick moves item into closed cube");
+		"Ctrl+shift+右键 移动物品到关闭着的盒子");
 	colored_text->SetColor(Gold);
 
 	colored_text = new Drawing::Texthook(settingsTab, x, (y += 15),
@@ -545,25 +609,35 @@ void ItemMover::OnLoad() {
 
 }
 
+
 void ItemMover::OnKey(bool up, BYTE key, LPARAM lParam, bool* block) {
 	UnitAny* unit = D2CLIENT_GetPlayerUnit();
+	
 	if (!unit)
 		return;
+	bool shiftState = ((GetKeyState(VK_LSHIFT) & 0x80) || (GetKeyState(VK_RSHIFT) & 0x80));
+	//if (shiftState) return;  //按了shift就不处理,继续走下去,主要用于佣兵喝药
 
-	/*if (!up && (key == HealKey || key == ManaKey)) {
-		char firstChar = key == HealKey ? 'h' : 'm';
+	if (!up && (key == HealKey || key == ManaKey || key == JuvKey || key == YpsKey)) {
+		int idx = key == YpsKey ? 3 : key == JuvKey ? 2 : key == ManaKey ? 1 : 0;
+		std::string startChars = POTIONS[idx];
 		char minPotion = 127;
 		DWORD minItemId = 0;
 		bool isBelt = false;
-		for (UnitAny *pItem = unit->pInventory->pFirstItem; pItem; pItem = pItem->pItemData->pNextInvItem) {
-			if (pItem->pItemData->ItemLocation == STORAGE_INVENTORY ||
+		for (UnitAny* pItem = unit->pInventory->pFirstItem; pItem; pItem = pItem->pItemData->pNextInvItem) {
+			if (
+				pItem->pItemData->ItemLocation == STORAGE_INVENTORY ||
 				pItem->pItemData->ItemLocation == STORAGE_NULL && pItem->pItemData->NodePage == NODEPAGE_BELTSLOTS) {
 				char* code = D2COMMON_GetItemText(pItem->dwTxtFileNo)->szCode;
-				if (code[0] == firstChar && code[1] == 'p' && code[2] < minPotion) {
+				if (code[0] == startChars[0] && code[1] == startChars[1] && code[2] < minPotion) {
 					minPotion = code[2];
 					minItemId = pItem->dwUnitId;
 					isBelt = pItem->pItemData->NodePage == NODEPAGE_BELTSLOTS;
 				}
+				//else if (code[0] == 'y'&& code[1] == 'p'&& code[2] == 's') {  //解毒药
+				//	minItemId = pItem->dwUnitId;
+				//	isBelt = pItem->pItemData->NodePage == NODEPAGE_BELTSLOTS;
+				//}
 			}
 			//char *code = D2COMMON_GetItemText(pItem->dwTxtFileNo)->szCode;
 			//if (code[0] == 'b' && code[1] == 'o' && code[2] == 'x') {
@@ -574,13 +648,16 @@ void ItemMover::OnKey(bool up, BYTE key, LPARAM lParam, bool* block) {
 			//	break;
 			//}
 		}
+		
 		if (minItemId > 0) {
-			if (isBelt){
+			if (isBelt) {
 				BYTE PacketData[13] = { 0x26, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0 };
 				*reinterpret_cast<int*>(PacketData + 1) = minItemId;
+				if(shiftState)   //按shift
+					*reinterpret_cast<int*>(PacketData + 5) = 1;  //是否给佣兵吃药,1是给，0是不给
 				D2NET_SendPacket(13, 0, PacketData);
 			}
-			else{
+			else {
 				//PrintText(1, "Sending packet %d, %d, %d", minItemId, unit->pPath->xPos, unit->pPath->yPos);
 				BYTE PacketData[13] = { 0x20, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0 };
 				*reinterpret_cast<int*>(PacketData + 1) = minItemId;
@@ -588,16 +665,25 @@ void ItemMover::OnKey(bool up, BYTE key, LPARAM lParam, bool* block) {
 				*reinterpret_cast<WORD*>(PacketData + 9) = (WORD)unit->pPath->yPos;
 				D2NET_SendPacket(13, 0, PacketData);
 			}
-			*block = true;
+			/**block = true;*/
 		}
-	}*/
-	/*if (!up && (key == TpKey)) {
+		Task::Enqueue([=]()->void {
+			Sleep(1000);  //停1秒试试看
+			AutoToBelt();
+		});
+		*block = true;  //设置了喝药快捷键，如果没有蓝就不喝红。
+	}
+	if (!up && (key == TpKey || key == TpBackKey)) {
+		AutoBackTown = false;
+		if (key == TpBackKey) {
+			AutoBackTown = true;
+		}
 		DWORD tpId = 0;
 		int tp_quantity = 0;
-		for (UnitAny *pItem = unit->pInventory->pFirstItem; pItem; pItem = pItem->pItemData->pNextInvItem) {
+		for (UnitAny* pItem = unit->pInventory->pFirstItem; pItem; pItem = pItem->pItemData->pNextInvItem) {
 			if (pItem->pItemData->ItemLocation == STORAGE_INVENTORY) {
 				char* code = D2COMMON_GetItemText(pItem->dwTxtFileNo)->szCode;
-				if (code[0] == 't' && code[1] == 'b' && code[2] =='k') {
+				if (code[0] == 't' && code[1] == 'b' && code[2] == 'k') {
 					tp_quantity = D2COMMON_GetUnitStat(pItem, STAT_AMMOQUANTITY, 0);
 					if (tp_quantity > 0) {
 						tpId = pItem->dwUnitId;
@@ -617,7 +703,11 @@ void ItemMover::OnKey(bool up, BYTE key, LPARAM lParam, bool* block) {
 			D2NET_SendPacket(13, 0, PacketData);
 			*block = true;
 		}
-	}*/
+	}
+	if (!up && key == BeltKey) {  //自动填充腰带
+		AutoToBelt();
+		//*block = true;   //不让它继续向下触发按键事件
+	}
 }
 
 void ItemMover::OnGamePacketRecv(BYTE* packet, bool* block) {
@@ -750,11 +840,37 @@ void ItemMover::OnGamePacketRecv(BYTE* packet, bool* block) {
 		}
 		break;
 	}
+	case 0x60:  //by zyl 自动回城
+	{
+		if (!AutoBackTown) return;   //不自动回城就直接返回
+		if (packet[1] == 0x00) { //00限定只能走通向城里的传送门
+			BYTE castMove[9] = { 0x13 };
+			*(DWORD*)&castMove[1] = 2;
+			*(DWORD*)&castMove[5] = *(DWORD*)&packet[3]; // portal ID
+			D2NET_SendPacket(sizeof(castMove), 0, castMove);
+			AutoBackTown = false;
+		}
+	}
 	default:
 		break;
 	}
 	return;
 }
+
+//void AutoBackToTown(BYTE* aPacket)
+//{
+//	//PrintText(Blue, "%s", "RecvCommand...");
+//	if (aPacket[0] == 0x60 && aPacket[1] == 0x00) //00限定只能走通向城里的传送门
+//	{
+//		PrintText(Blue, "%s", "RecvCommand...");
+//		BYTE castMove[9] = { 0x13 };
+//		*(DWORD*)&castMove[1] = 2;
+//		*(DWORD*)&castMove[5] = *(DWORD*)&aPacket[3]; // portal ID
+//		D2NET_SendPacket(sizeof(castMove), 0, castMove);
+//
+//
+//	}
+//}
 
 void ItemMover::OnGameExit() {
 	ActivePacket.itemId = 0;
@@ -1209,3 +1325,6 @@ bool ProcessStat(unsigned int stat, BitReader& reader, ItemProperty& itemProp) {
 	}
 	}
 }
+
+
+
