@@ -60,7 +60,7 @@ RunesTxt* GetRunewordTxtById(int rwId);
 void FixDecimalString(wchar_t* s, int n);
 
 map<std::string, Toggle> Item::Toggles;
-unsigned int Item::filterLevelSetting = 0;
+unsigned int Item::filterLevelSetting = 1;
 UnitAny* Item::viewingUnit;
 
 Patch* itemNamePatch = new Patch(Call, D2CLIENT, { 0x92366, 0x96736 }, (int)ItemName_Interception, 6);
@@ -217,11 +217,11 @@ void Item::DrawSettings() {
 
 	vector<string> options;
 	options.push_back("0 - No Filtering");
-	options.push_back("1 - Minimal");
+	options.push_back("1 - Lowest");
 	options.push_back("2 - Low");
 	options.push_back("3 - Moderate");
 	options.push_back("4 - High");
-	options.push_back("5 - Maximal");
+	options.push_back("5 - Highest");
 	new Combohook(settingsTab, 120, y, 120, &filterLevelSetting, options);
 	
 }
