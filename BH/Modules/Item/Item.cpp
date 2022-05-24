@@ -145,7 +145,7 @@ void Item::LoadConfig() {
 }
 
 void Item::DrawSettings() {
-	settingsTab = new UITab("物品显示", BH::settingsUI);
+	settingsTab = new UITab("物品显示", BH::settingsUI, pushFront);
 	int y = 10;
 	int keyhook_x = 230;
 
@@ -215,15 +215,18 @@ void Item::DrawSettings() {
 
 	new Texthook(settingsTab, 4, y + 2, "Filter Strictness:");
 
-	vector<string> options;
-	options.push_back("0 - No Filtering");
-	options.push_back("1 - Lowest");
-	options.push_back("2 - Low");
-	options.push_back("3 - Moderate");
-	options.push_back("4 - High");
-	options.push_back("5 - Highest");
-	new Combohook(settingsTab, 120, y, 120, &filterLevelSetting, options);
-	
+	// Just a default as this is called first time around, not used
+	if (ItemFilterNames.size() == 0) {
+		ItemFilterNames.clear();
+		ItemFilterNames.push_back(string("0 - No Filtering"));
+		ItemFilterNames.push_back("1 - Normal");
+	}
+
+	new Combohook(settingsTab, 120, y, 250, &filterLevelSetting, ItemFilterNames);
+}
+
+void Item::RemoveSettingsTab() {
+	settingsTab->~UITab();
 }
 
 void Item::OnUnload() {
