@@ -60,7 +60,7 @@ RunesTxt* GetRunewordTxtById(int rwId);
 void FixDecimalString(wchar_t* s, int n);
 
 map<std::string, Toggle> Item::Toggles;
-unsigned int Item::filterLevelSetting = 1;
+unsigned int Item::filterLevelSetting;
 UnitAny* Item::viewingUnit;
 
 Patch* itemNamePatch = new Patch(Call, D2CLIENT, { 0x92366, 0x96736 }, (int)ItemName_Interception, 6);
@@ -141,7 +141,7 @@ void Item::LoadConfig() {
 	BH::config->ReadKey("Resync Hotkey", "VK_9", resyncKey);
 	BH::config->ReadKey("Character Stats", "VK_8", advStatMenuKey);
 
-	BH::config->ReadInt("Filter Level", filterLevelSetting);
+	BH::config->ReadInt("Filter Level", filterLevelSetting, 1);
 }
 
 void Item::DrawSettings() {
@@ -225,8 +225,24 @@ void Item::DrawSettings() {
 	new Combohook(settingsTab, 120, y, 250, &filterLevelSetting, ItemFilterNames);
 }
 
-void Item::RemoveSettingsTab() {
-	settingsTab->~UITab();
+void Item::ReplaceItemFilters(vector<string> itemFilterNames) {
+	Hook* prev = NULL;
+	for (auto it = settingsTab->Hooks.begin(); it != settingsTab->Hooks.end(); it++) {
+		Hook* h = *it;
+		Combohook* dropDown = dynamic_cast<Combohook*> (h);
+		if (dropDown != NULL) {
+			if (dropDown->GetOptions()[0] == "0 - No Filtering") {
+				dropDown->ClearOptions();
+
+				for each (string option in ItemFilterNames)
+				{
+					dropDown->NewOption(option);
+				}
+
+				break;
+			}
+		}
+	}
 }
 
 void Item::OnUnload() {
@@ -246,7 +262,7 @@ void Item::OnUnload() {
 }
 
 void Item::OnLoop() {
-	static unsigned int localFilterLevel = 0;
+	static unsigned int localFilterLevel = 9999;
 
 	// This is a bit of a hack to reset the cache when the user changes the item filter level
 	if (localFilterLevel != filterLevelSetting) {
@@ -723,28 +739,28 @@ void __stdcall Item::OnProperties(wchar_t* wTxt)
 
 	if (Toggles["Advanced Item Display"].state)
 	{
-			string desc = item_desc_cache.Get(&uInfo);
-			if (desc != "") {
-					static wchar_t wDesc[MAXDESCRIPTION];
-					auto chars_written = MultiByteToWideChar(CODE_PAGE, MB_PRECOMPOSED, desc.c_str(), -1, wDesc, MAXDESCRIPTION);
-					// by zyl
-					for (DWORD i = 0; i < wcslen(wDesc); i++)
+		string desc = item_desc_cache.Get(&uInfo);
+		if (desc != "") {
+				static wchar_t wDesc[MAXDESCRIPTION];
+				auto chars_written = MultiByteToWideChar(CODE_PAGE, MB_PRECOMPOSED, desc.c_str(), -1, wDesc, MAXDESCRIPTION);
+				// by zyl
+				for (DWORD i = 0; i < wcslen(wDesc); i++)
+				{
+					if ((wDesc[i] >= 0xFF || wDesc[i] == 0x79) && wDesc[i + 1] == L'c')
 					{
-						if ((wDesc[i] >= 0xFF || wDesc[i] == 0x79) && wDesc[i + 1] == L'c')
-						{
-							//if (name[i + 2] >= L'0' && name[i + 2] <= L':')
-							//{
-							wDesc[i] = L'\377';
-							//}
-						};
-					}
-					int aLen = wcslen(wTxt);
-					swprintf_s(wTxt + aLen, MAXLEN - aLen, 
-							L"%s%s\n",
-							(chars_written > 0) ? wDesc : L"\377c1Item Description is too long.",
-							GetColorCode(TextColor::White).c_str()
-					);
-			}
+						//if (name[i + 2] >= L'0' && name[i + 2] <= L':')
+						//{
+						wDesc[i] = L'\377';
+						//}
+					};
+				}
+				int aLen = wcslen(wTxt);
+				swprintf_s(wTxt + aLen, MAXLEN - aLen, 
+						L"%s%s\n",
+						(chars_written > 0) ? wDesc : L"\377c1Item Description is too long.",
+						GetColorCode(TextColor::White).c_str()
+				);
+		}
 	}
 
 	if (!(Toggles["Always Show Item Stat Ranges"].state ||
