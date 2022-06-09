@@ -587,7 +587,7 @@ void ItemMover::OnLoad() {
 	new Drawing::Keyhook(settingsTab, x, (y += 15), &JuvKey, "使用紫药:       ");
 	new Drawing::Keyhook(settingsTab, x, (y += 15), &YpsKey, "使用解药:       ");  //解毒
 	new Drawing::Keyhook(settingsTab, x, (y += 15), &BeltKey, "填充腰带:       ");
-	int keyhook_x = 150;
+	int keyhook_x = 200;
 	new Checkhook(settingsTab, 4, (y += 15), &ChatColor::Toggles["Merc Protect"].state, "佣兵保护");
 	new Keyhook(settingsTab, keyhook_x, (y + 2), &ChatColor::Toggles["Merc Protect"].toggle, "");
 	new Checkhook(settingsTab, 4, (y += 15), &ChatColor::Toggles["Merc Boring"].state, "佣兵吐槽");

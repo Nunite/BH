@@ -144,7 +144,7 @@ void Item::LoadConfig() {
 	BH::config->ReadInt("Filter Level", filterLevelSetting, 1);
 }
 
-void Item::DrawSettings() {
+void Item::DrawSettings(bool pushFront) {
 	settingsTab = new UITab("物品显示", BH::settingsUI, pushFront);
 	int y = 10;
 	int keyhook_x = 230;
