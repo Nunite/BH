@@ -51,6 +51,7 @@
 #include "ItemDisplay.h"
 #include "../../MPQInit.h"
 #include "../../lrucache.hpp"
+#include "../GameSettings/GameSettings.h"
 
 ItemsTxtStat* GetAllStatModifier(ItemsTxtStat* pStats, int nStats, int nStat, ItemsTxtStat* pOrigin);
 ItemsTxtStat* GetMaxElemStatFromMin(ItemsTxtStat* pStats, int nStats, int nStat, ItemsTxtStat* pOrigin);
@@ -137,92 +138,99 @@ void Item::LoadConfig() {
 
 	//InitializeMPQData();
 
-	BH::config->ReadKey("Show Players Gear", "VK_0", showPlayer);
-	BH::config->ReadKey("Resync Hotkey", "VK_9", resyncKey);
-	BH::config->ReadKey("Character Stats", "VK_8", advStatMenuKey);
-
 	BH::config->ReadInt("Filter Level", filterLevelSetting, 1);
 }
 
-void Item::DrawSettings(bool pushFront) {
-	settingsTab = new UITab("物品显示", BH::settingsUI, pushFront);
-	int y = 10;
-	int keyhook_x = 230;
+void Item::DrawSettings() {
+	Drawing::Texthook* colored_text;
+	settingsTab = new UITab("物品显示", BH::settingsUI);
+	unsigned int x = 8;
+	unsigned int y = 7;
 
-	new Checkhook(settingsTab, 4, y, &Toggles["Show Ethereal"].state, "显示ETH(无形)");
-	new Keyhook(settingsTab, keyhook_x, y + 2, &Toggles["Show Ethereal"].toggle, "");
+	// Settings
+	new Drawing::Texthook(settingsTab, x, (y), "设置");
 	y += 15;
 
-	new Checkhook(settingsTab, 4, y, &Toggles["Show Sockets"].state, "显示孔数");
-	new Keyhook(settingsTab, keyhook_x, y + 2, &Toggles["Show Sockets"].toggle, "");
+	new Checkhook(settingsTab, x, y, &Toggles["Always Show Items"].state, "永久显示物品");
+	new Keyhook(settingsTab, GameSettings::KeyHookOffset, y + 2, &Toggles["Always Show Items"].toggle, "");
 	y += 15;
 
-	new Checkhook(settingsTab, 4, y, &Toggles["Show iLvl"].state, "显示物品等级");
-	new Keyhook(settingsTab, keyhook_x, y + 2, &Toggles["Show iLvl"].toggle, "");
+	new Checkhook(settingsTab, x, y, &Toggles["Always Show Item Stat Ranges"].state, "显示物品变量");
+	new Keyhook(settingsTab, GameSettings::KeyHookOffset, y + 2, &Toggles["Always Show Item Stat Ranges"].toggle, "");
 	y += 15;
 
-	new Checkhook(settingsTab, 4, y, &Toggles["Show Rune Numbers"].state, "显示符文编号#");
-	new Keyhook(settingsTab, keyhook_x, y + 2, &Toggles["Show Rune Numbers"].toggle, "");
+	new Checkhook(settingsTab, x, y, &Toggles["Show iLvl"].state, "显示物品等级");
+	new Keyhook(settingsTab, GameSettings::KeyHookOffset, y + 2, &Toggles["Show iLvl"].toggle, "");
+	y += 20;
+
+	// Display Style
+	new Drawing::Texthook(settingsTab, x, (y), "显示样式 (仅不启用loot过滤时生效)");
 	y += 15;
 
-	new Checkhook(settingsTab, 4, y, &Toggles["Alt Item Style"].state, "Alt物品样式");
-	new Keyhook(settingsTab, keyhook_x, y + 2, &Toggles["Alt Item Style"].toggle, "");
+	Checkhook* etheral = new Checkhook(settingsTab, x, y, &Toggles["Show Ethereal"].state, "显示ETH(无形)");
+	new Keyhook(settingsTab, GameSettings::KeyHookOffset, y + 2, &Toggles["Show Ethereal"].toggle, "");
 	y += 15;
 
-	new Checkhook(settingsTab, 4, y, &Toggles["Color Mod"].state, "多彩模式");
-	new Keyhook(settingsTab, keyhook_x, y + 2, &Toggles["Color Mod"].toggle, "");
+	Checkhook* sockets = new Checkhook(settingsTab, x, y, &Toggles["Show Sockets"].state, "显示孔数");
+	new Keyhook(settingsTab, GameSettings::KeyHookOffset, y + 2, &Toggles["Show Sockets"].toggle, "");
 	y += 15;
 
-	new Checkhook(settingsTab, 4, y, &Toggles["Shorten Item Names"].state, "物品短名称");
-	new Keyhook(settingsTab, keyhook_x, y + 2, &Toggles["Shorten Item Names"].toggle, "");
+	Checkhook* runes = new Checkhook(settingsTab, x, y, &Toggles["Show Rune Numbers"].state, "显示符文编号#");
+	new Keyhook(settingsTab, GameSettings::KeyHookOffset, y + 2, &Toggles["Show Rune Numbers"].toggle, "");
 	y += 15;
 
-	new Checkhook(settingsTab, 4, y, &Toggles["Always Show Items"].state, "物品永久显示");
-	new Keyhook(settingsTab, keyhook_x, y + 2, &Toggles["Always Show Items"].toggle, "");
+	Checkhook* alt = new Checkhook(settingsTab, x, y, &Toggles["Alt Item Style"].state, "Alt物品样式");
+	new Keyhook(settingsTab, GameSettings::KeyHookOffset, y + 2, &Toggles["Alt Item Style"].toggle, "");
 	y += 15;
 
-	new Checkhook(settingsTab, 4, y, &Toggles["Always Show Item Stat Ranges"].state, "显示物品变量");
-	new Keyhook(settingsTab, keyhook_x, y + 2, &Toggles["Always Show Item Stat Ranges"].toggle, "");
+	Checkhook* color = new Checkhook(settingsTab, x, y, &Toggles["Color Mod"].state, "多彩模式");
+	new Keyhook(settingsTab, GameSettings::KeyHookOffset, y + 2, &Toggles["Color Mod"].toggle, "");
 	y += 15;
 
-	new Checkhook(settingsTab, 4, y, &Toggles["Advanced Item Display"].state, "物品高级显示(Filter)");
-	new Keyhook(settingsTab, keyhook_x, y + 2, &Toggles["Advanced Item Display"].toggle, "");
-	y += 15;
+	Checkhook* shorten = new Checkhook(settingsTab, x, y, &Toggles["Shorten Item Names"].state, "物品短名称");
+	new Keyhook(settingsTab, GameSettings::KeyHookOffset, y + 2, &Toggles["Shorten Item Names"].toggle, "");
+	y += 20;
 
-	new Checkhook(settingsTab, 4, y, &Toggles["Item Drop Notifications"].state, "物品掉落提示(Filter)");
-	new Keyhook(settingsTab, keyhook_x, y + 2, &Toggles["Item Drop Notifications"].toggle, "");
-	y += 15;
-
-	new Checkhook(settingsTab, 4, y, &Toggles["Item Close Notifications"].state, "物品接近提示(Filter)");
-	new Keyhook(settingsTab, keyhook_x, y + 2, &Toggles["Item Close Notifications"].toggle, "");
-	y += 15;
-
-	new Checkhook(settingsTab, 4, y, &Toggles["Item Detailed Notifications"].state, "物品明细提示(Filter)");
-	new Keyhook(settingsTab, keyhook_x, y + 2, &Toggles["Item Detailed Notifications"].toggle, "");
-	y += 15;
-
-	new Checkhook(settingsTab, 4, y, &Toggles["Verbose Notifications"].state, "提示更加丰富(Filter)");
-	new Keyhook(settingsTab, keyhook_x, y + 2, &Toggles["Verbose Notifications"].toggle, "");
-	y += 15;
-
-	new Keyhook(settingsTab, 4, y + 2, &showPlayer, "显示其它玩家鸡儿:                             ");
-	y += 15;
-	new Keyhook(settingsTab, 4, y + 2, &resyncKey, "同步(卡角色的时候按一下试试):         ");
-	y += 15;
-	new Keyhook(settingsTab, 4, y + 2, &advStatMenuKey, "玩家/雇佣兵高级属性:                        ");
+	// Loot Filter
+	new Drawing::Texthook(settingsTab, x, (y), "Loot过滤器");
 
 	y += 15;
+	new Checkhook(settingsTab, x, y, &Toggles["Advanced Item Display"].state, "开启Loot过滤");
+	new Keyhook(settingsTab, GameSettings::KeyHookOffset, y + 2, &Toggles["Advanced Item Display"].toggle, "");
+	y += 15;
 
-	new Texthook(settingsTab, 4, y + 2, "Filter Strictness:");
+	new Checkhook(settingsTab, x, y, &Toggles["Item Drop Notifications"].state, "物品掉落提示");
+	new Keyhook(settingsTab, GameSettings::KeyHookOffset, y + 2, &Toggles["Item Drop Notifications"].toggle, "");
+	y += 15;
 
+	new Checkhook(settingsTab, x, y, &Toggles["Item Close Notifications"].state, "物品接近提示");
+	new Keyhook(settingsTab, GameSettings::KeyHookOffset, y + 2, &Toggles["Item Close Notifications"].toggle, "");
+	y += 15;
+
+	new Checkhook(settingsTab, x, y, &Toggles["Item Detailed Notifications"].state, "物品明细提示");
+	new Keyhook(settingsTab, GameSettings::KeyHookOffset, y + 2, &Toggles["Item Detailed Notifications"].toggle, "");
+	y += 15;
+
+	new Checkhook(settingsTab, x, y, &Toggles["Verbose Notifications"].state, "提示更加丰富");
+	new Keyhook(settingsTab, GameSettings::KeyHookOffset, y + 2, &Toggles["Verbose Notifications"].toggle, "");
+	y += 15;
+
+	// 	new Keyhook(settingsTab, 4, y + 2, &showPlayer, "显示其它玩家鸡儿:                             ");
+	// y += 15;
+	// new Keyhook(settingsTab, 4, y + 2, &resyncKey, "同步(卡角色的时候按一下试试):         ");
+	// y += 15;
+	// new Keyhook(settingsTab, 4, y + 2, &advStatMenuKey, "玩家/雇佣兵高级属性:                        ");
+
+	colored_text = new Texthook(settingsTab, x, y + 2, "过滤等级:");
+	colored_text->SetColor(Gold);
 	// Just a default as this is called first time around, not used
 	if (ItemFilterNames.size() == 0) {
 		ItemFilterNames.clear();
-		ItemFilterNames.push_back(string("0 - No Filtering"));
-		ItemFilterNames.push_back("1 - Normal");
+		ItemFilterNames.push_back(string("0 - 不过滤"));
+		ItemFilterNames.push_back("1 - 正常");
 	}
 
-	new Combohook(settingsTab, 120, y, 250, &filterLevelSetting, ItemFilterNames);
+	new Combohook(settingsTab, 120, y, 200, &filterLevelSetting, ItemFilterNames);
 }
 
 void Item::ReplaceItemFilters(vector<string> itemFilterNames) {
@@ -231,7 +239,7 @@ void Item::ReplaceItemFilters(vector<string> itemFilterNames) {
 		Hook* h = *it;
 		Combohook* dropDown = dynamic_cast<Combohook*> (h);
 		if (dropDown != NULL) {
-			if (dropDown->GetOptions()[0] == "0 - No Filtering") {
+			if (dropDown->GetOptions()[0] == "0 - 不过滤") {
 				dropDown->ClearOptions();
 
 				for each (string option in ItemFilterNames)
@@ -290,22 +298,6 @@ void Item::OnLoop() {
 }
 
 void Item::OnKey(bool up, BYTE key, LPARAM lParam, bool* block) {
-	if (key == showPlayer) {
-		*block = true;
-		if (up)
-			return;
-		UnitAny* selectedUnit = D2CLIENT_GetSelectedUnit();
-		if (selectedUnit && selectedUnit->dwMode != 0 && selectedUnit->dwMode != 17 && ( // Alive
-			selectedUnit->dwType == 0 ||					// Player
-			selectedUnit->dwTxtFileNo == 291 ||		// Iron Golem
-			selectedUnit->dwTxtFileNo == 357 ||		// Valkerie
-			selectedUnit->dwTxtFileNo == 418)) {	// Shadow Master
-			viewingUnit = selectedUnit;
-			if (!D2CLIENT_GetUIState(0x01))
-				D2CLIENT_SetUIVar(0x01, 0, 0);
-			return;
-		}
-	}
 	for (map<string, Toggle>::iterator it = Toggles.begin(); it != Toggles.end(); it++) {
 		if (key == (*it).second.toggle) {
 			*block = true;

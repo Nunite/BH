@@ -129,7 +129,7 @@ void BH::Initialize()
 		SetWindowLong(D2GFX_GetHwnd(), GWL_WNDPROC, (LONG)GameWindowEvent);
 		});
 
-	settingsUI = new Drawing::UI(SETTINGS_TEXT, 400, 341);
+	settingsUI = new Drawing::UI(SETTINGS_TEXT, 400, 321);
 
 	Task::InitializeThreadPool(2);
 
@@ -141,6 +141,7 @@ void BH::Initialize()
 		});
 
 
+	new GameSettings();
 	new ScreenInfo();
 	new Gamefilter();
 	new Bnet();

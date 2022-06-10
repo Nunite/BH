@@ -564,10 +564,10 @@ void ItemMover::LoadConfig() {
 	BH::config->ReadKey("Use Potion To Belt", "VK_OEM_3", BeltKey); //自动填充腰带
 
 	BH::config->ReadInt("Low TP Warning", tp_warn_quantity);
-	BH::config->ReadToggle("Quick Cast", "None", false, ScreenInfo::Toggles["Quick Cast"]);
-	BH::config->ReadToggle("Skill Bar", "None", false, ScreenInfo::Toggles["Skill Bar"]);
-	BH::config->ReadToggle("Skill Bar Disable", "None", false, ScreenInfo::Toggles["Skill Bar Disable"]);
-	BH::config->ReadToggle("Buff Timers", "None", false, ScreenInfo::Toggles["Buff Timers"]);
+	// BH::config->ReadToggle("Quick Cast", "None", false, ScreenInfo::Toggles["Quick Cast"]);
+	// BH::config->ReadToggle("Skill Bar", "None", false, ScreenInfo::Toggles["Skill Bar"]);
+	// BH::config->ReadToggle("Skill Bar Disable", "None", false, ScreenInfo::Toggles["Skill Bar Disable"]);
+	// BH::config->ReadToggle("Buff Timers", "None", false, ScreenInfo::Toggles["Buff Timers"]);
 }
 
 void ItemMover::OnLoad() {
@@ -592,21 +592,21 @@ void ItemMover::OnLoad() {
 	new Keyhook(settingsTab, keyhook_x, (y + 2), &ChatColor::Toggles["Merc Protect"].toggle, "");
 	new Checkhook(settingsTab, 4, (y += 15), &ChatColor::Toggles["Merc Boring"].state, "佣兵吐槽");
 	new Keyhook(settingsTab, keyhook_x, (y + 2), &ChatColor::Toggles["Merc Boring"].toggle, "");
-	y += 15;
-	new Drawing::Checkhook(settingsTab, 4, y, &ScreenInfo::Toggles["Quick Cast"].state, "Quick Cast");
-	new Drawing::Keyhook(settingsTab, keyhook_x, y + 2, &ScreenInfo::Toggles["Quick Cast"].toggle, "");
-	y += 15;
+	// y += 15;
+	// new Drawing::Checkhook(settingsTab, 4, y, &ScreenInfo::Toggles["Quick Cast"].state, "Quick Cast");
+	// new Drawing::Keyhook(settingsTab, keyhook_x, y + 2, &ScreenInfo::Toggles["Quick Cast"].toggle, "");
+	// y += 15;
 
-	new Drawing::Checkhook(settingsTab, 4, y, &ScreenInfo::Toggles["Skill Bar"].state, "Skill Bar");
-	new Drawing::Keyhook(settingsTab, keyhook_x, y + 2, &ScreenInfo::Toggles["Skill Bar"].toggle, "");
-	y += 15;
+	// new Drawing::Checkhook(settingsTab, 4, y, &ScreenInfo::Toggles["Skill Bar"].state, "Skill Bar");
+	// new Drawing::Keyhook(settingsTab, keyhook_x, y + 2, &ScreenInfo::Toggles["Skill Bar"].toggle, "");
+	// y += 15;
 
-	new Drawing::Checkhook(settingsTab, 4 + 15, y, &ScreenInfo::Toggles["Skill Bar Disable"].state, "Disable along Quick Cast");
-	new Drawing::Keyhook(settingsTab, keyhook_x, y + 2, &ScreenInfo::Toggles["Skill Bar Disable"].toggle, "");
-	y += 15;
+	// new Drawing::Checkhook(settingsTab, 4 + 15, y, &ScreenInfo::Toggles["Skill Bar Disable"].state, "Disable along Quick Cast");
+	// new Drawing::Keyhook(settingsTab, keyhook_x, y + 2, &ScreenInfo::Toggles["Skill Bar Disable"].toggle, "");
+	// y += 15;
 
-	new Drawing::Checkhook(settingsTab, 4, y, &ScreenInfo::Toggles["Buff Timers"].state, "Always show Buff Timers");
-	new Drawing::Keyhook(settingsTab, keyhook_x, y + 2, &ScreenInfo::Toggles["Buff Timers"].toggle, "");
+	// new Drawing::Checkhook(settingsTab, 4, y, &ScreenInfo::Toggles["Buff Timers"].state, "Always show Buff Timers");
+	// new Drawing::Keyhook(settingsTab, keyhook_x, y + 2, &ScreenInfo::Toggles["Buff Timers"].toggle, "");
 
 
 	y += 15;
