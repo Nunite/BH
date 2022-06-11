@@ -227,7 +227,7 @@ void Item::DrawSettings() {
 	if (ItemFilterNames.size() == 0) {
 		ItemFilterNames.clear();
 		ItemFilterNames.push_back(string("0 - 不过滤"));
-		ItemFilterNames.push_back("1 - 正常");
+		ItemFilterNames.push_back("1 - 标准");
 	}
 
 	new Combohook(settingsTab, 120, y, 200, &filterLevelSetting, ItemFilterNames);

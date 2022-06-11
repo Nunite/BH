@@ -34,34 +34,34 @@ void GameSettings::LoadConfig() {
 void GameSettings::LoadGeneralTab() {
 	Drawing::Texthook* colored_text;
 
-	Drawing::UITab* generalTab = new Drawing::UITab("General", BH::settingsUI);
+	Drawing::UITab* generalTab = new Drawing::UITab("通用", BH::settingsUI);
 
 	unsigned int x_tab = 15;
 	unsigned int x = 8;
 	unsigned int y = 7;
 
 	// General
-	new Drawing::Texthook(generalTab, x, (y), "General");
+	new Drawing::Texthook(generalTab, x, (y), "通用");
 
 	y += 15;
-	colored_text = new Drawing::Texthook(generalTab, x, (y), "Show Player's Gear");
+	colored_text = new Drawing::Texthook(generalTab, x, (y), "显示其它玩家鸡儿");
 	colored_text->SetColor(Gold);
 	new Drawing::Keyhook(generalTab, GameSettings::KeyHookOffset, y + 2, &showPlayer, "");
 
 	y += 15;
-	colored_text = new Drawing::Texthook(generalTab, x, (y), "Resync");
+	colored_text = new Drawing::Texthook(generalTab, x, (y), "同步(卡角色的时候按一下)");
 	colored_text->SetColor(Gold);
 	new Drawing::Keyhook(generalTab, GameSettings::KeyHookOffset, y + 2, &resyncKey, "");
 
 	y += 15;
-	colored_text = new Drawing::Texthook(generalTab, x, (y), "Advanced Stat Display");
+	colored_text = new Drawing::Texthook(generalTab, x, (y), "显示玩家/雇佣兵高级属性");
 	colored_text->SetColor(Gold);
 	new Drawing::Keyhook(generalTab, GameSettings::KeyHookOffset, y + 2, &advStatMenuKey, "");
 
 
 	// Quick Cast
 	y += 20;
-	new Drawing::Texthook(generalTab, x, (y), "Quick Cast");
+	new Drawing::Texthook(generalTab, x, (y), "Quick Cast（可能是快速施法？但是功能未实现，暂时先不翻译）");
 
 	y += 15;
 	new Drawing::Checkhook(generalTab, x, y, &GameSettings::Toggles["Quick Cast"].state, "Quick Cast");
@@ -83,7 +83,7 @@ void GameSettings::LoadGeneralTab() {
 
 void GameSettings::LoadInteractionTab() {
 	Drawing::Texthook* colored_text;
-	Drawing::UITab* tab = new Drawing::UITab("Interaction", BH::settingsUI);
+	Drawing::UITab* tab = new Drawing::UITab("快捷说明", BH::settingsUI);
 
 	unsigned int x = 8;
 	unsigned int y = 7;
@@ -92,88 +92,88 @@ void GameSettings::LoadInteractionTab() {
 
 	// QoL
 	colored_text = new Drawing::Texthook(tab, x, y,
-		"Hovering an item");
+		"鼠标移物品上时");
 
 	y += 15;
 	colored_text = new Drawing::Texthook(tab, x + indent, y,
-		"Shift+Left Click");
+		"Shift+左键");
 	colored_text->SetColor(Gold);
 	colored_text = new Drawing::Texthook(tab, x + indent + offset, y,
-		"ID with an ID tome");
-	colored_text->SetColor(Gold);
-
-	y += 15;
-	colored_text = new Drawing::Texthook(tab, x + indent, y,
-		"Shift+Right Click");
-	colored_text->SetColor(Gold);
-	colored_text = new Drawing::Texthook(tab, x + indent + offset, y,
-		"Move between inventories");
+		"如果鉴定书在背包，就可以快速鉴定物品");
 	colored_text->SetColor(Gold);
 
 	y += 15;
 	colored_text = new Drawing::Texthook(tab, x + indent, y,
-		"Ctrl+Right Click");
+		"Shift+右键");
 	colored_text->SetColor(Gold);
 	colored_text = new Drawing::Texthook(tab, x + indent + offset, y,
-		"Move to ground");
+		"在打开的背包、箱子、盒子之间移动");
 	colored_text->SetColor(Gold);
 
 	y += 15;
 	colored_text = new Drawing::Texthook(tab, x + indent, y,
-		"Ctrl+Shift+Right Click");
+		"Ctrl+右键");
 	colored_text->SetColor(Gold);
 	colored_text = new Drawing::Texthook(tab, x + indent + offset, y,
-		"Move to closed cube");
+		"把物品扔地上");
 	colored_text->SetColor(Gold);
 
 	y += 15;
 	colored_text = new Drawing::Texthook(tab, x + indent, y,
-		"Ctrl+Shift+Left Click");
+		"Ctrl+Shift+右键");
 	colored_text->SetColor(Gold);
 	colored_text = new Drawing::Texthook(tab, x + indent + offset, y,
-		"Toggle stacked/unstacked");
+		"移动物品到关闭着的盒子");
+	colored_text->SetColor(Gold);
+
+	y += 15;
+	colored_text = new Drawing::Texthook(tab, x + indent, y,
+		"Ctrl+Shift+左键");
+	colored_text->SetColor(Gold);
+	colored_text = new Drawing::Texthook(tab, x + indent + offset, y,
+		"切换 堆叠/非堆叠");
 	colored_text->SetColor(Gold);
 
 	y += 20;
 	colored_text = new Drawing::Texthook(tab, x, y,
-		"Holding an item");
+		"鼠标拿起物品时");
 
 	y += 15;
 	colored_text = new Drawing::Texthook(tab, x + indent, y,
-		"Ctrl+Left Click");
+		"Ctrl+左键");
 	colored_text->SetColor(Gold);
 	colored_text = new Drawing::Texthook(tab, x + indent + offset, y,
-		"Place 1 stacked item");
+		"放置 1 个堆叠的物品");
 	colored_text->SetColor(Gold);
 
 	y += 15;
 	colored_text = new Drawing::Texthook(tab, x + indent, y,
-		"Ctrl+Shift+Left Click");
+		"Ctrl+Shift+左键");
 	colored_text->SetColor(Gold);
 	colored_text = new Drawing::Texthook(tab, x + indent + offset, y,
-		"Place 1 unstacked item");
+		"放置 1 个非堆叠的物品");
 	colored_text->SetColor(Gold);
 
 	// Auras
 	y += 20;
-	new Drawing::Texthook(tab, x, (y), "Auras (only for top 3 players)");
+	new Drawing::Texthook(tab, x, (y), "荣誉光环 (仅限全服前3玩家)");
 
 	y += 15;
-	new Drawing::Checkhook(tab, x, y, &GameSettings::Toggles["99 Aura"].state, "Show 99 Aura");
+	new Drawing::Checkhook(tab, x, y, &GameSettings::Toggles["99 Aura"].state, "显示 99级 荣誉光环");
 	new Drawing::Keyhook(tab, GameSettings::KeyHookOffset, y + 2, &GameSettings::Toggles["99 Aura"].toggle, "");
 
 	y += 15;
-	new Drawing::Checkhook(tab, x, y, &GameSettings::Toggles["Dclone Aura"].state, "Show Dclone Aura");
+	new Drawing::Checkhook(tab, x, y, &GameSettings::Toggles["Dclone Aura"].state, "显示 DC击杀 荣誉光环");
 	new Drawing::Keyhook(tab, GameSettings::KeyHookOffset, y + 2, &GameSettings::Toggles["Dclone Aura"].toggle, "");
 
 	y += 15;
-	new Drawing::Checkhook(tab, x, y, &GameSettings::Toggles["Rathma Aura"].state, "Show Rathma Aura");
+	new Drawing::Checkhook(tab, x, y, &GameSettings::Toggles["Rathma Aura"].state, "显示 拉斯玛击杀 荣誉光环");
 	new Drawing::Keyhook(tab, GameSettings::KeyHookOffset, y + 2, &GameSettings::Toggles["Rathma Aura"].toggle, "");
 
 	y += 20;
-	new Drawing::Texthook(tab, x, (y), "Developer Only");
+	new Drawing::Texthook(tab, x, (y), "仅限开发者");
 	y += 15;
-	new Drawing::Checkhook(tab, x, y, &GameSettings::Toggles["Developer Aura"].state, "Show Developer Aura");
+	new Drawing::Checkhook(tab, x, y, &GameSettings::Toggles["Developer Aura"].state, "显示 开发者 荣誉光环");
 	new Drawing::Keyhook(tab, GameSettings::KeyHookOffset, y + 2, &GameSettings::Toggles["Developer Aura"].toggle, "");
 }
 

@@ -575,7 +575,7 @@ void ItemMover::OnLoad() {
 	AutoBackTown = false;
 	Drawing::Texthook* colored_text;
 
-	settingsTab = new Drawing::UITab("快捷说明", BH::settingsUI);
+	settingsTab = new Drawing::UITab("增强功能", BH::settingsUI);
 
 	unsigned int x = 8;
 	unsigned int y = 7;
@@ -609,7 +609,7 @@ void ItemMover::OnLoad() {
 	// new Drawing::Keyhook(settingsTab, keyhook_x, y + 2, &ScreenInfo::Toggles["Buff Timers"].toggle, "");
 
 
-	y += 15;
+	/*y += 15;
 	y += 15;
 
 	new Drawing::Texthook(settingsTab, x, (y), "物品快速移动说明");
@@ -624,7 +624,7 @@ void ItemMover::OnLoad() {
 	colored_text->SetColor(Gold);
 	colored_text = new Drawing::Texthook(settingsTab, x, (y += 15),
 		"Ctrl+shift+右键 移动物品到关闭着的盒子");
-	colored_text->SetColor(Gold);
+	colored_text->SetColor(Gold);*/
 
 	colored_text = new Drawing::Texthook(settingsTab, x, (y += 15),
 		"");
