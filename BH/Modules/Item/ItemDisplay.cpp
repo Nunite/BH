@@ -864,12 +864,12 @@ namespace ItemDisplay
 
 		// Clear and add 0 to the list
 		item->ItemFilterNames.clear();
-		item->ItemFilterNames.push_back("0 - 不过滤");
+		item->ItemFilterNames.push_back("0 - 显示所有物品");
 
 		vector<pair<string, string>> filterDefinitions;
 		BH::lootFilter->ReadMapList("ItemDisplayFilterName", filterDefinitions);
 		for (unsigned int i = 0; i < filterDefinitions.size(); i++) {
-			item->ItemFilterNames.push_back(to_string(i+1) + " - " + filterDefinitions[i].second);
+			item->ItemFilterNames.push_back(to_string(i + 1) + " - " + filterDefinitions[i].second);
 
 			// Max 9 entries
 			if (i >= 8) {
@@ -988,7 +988,7 @@ void BuildAction(string* str,
 int ParsePingLevel(Action* act, const string& key_string) {
 	std::regex pattern("%" + key_string + "-([0-9])%",
 		std::regex_constants::ECMAScript | std::regex_constants::icase);
-	int ping_level = 0;
+	int ping_level = -1;
 	std::smatch the_match;
 
 	if (std::regex_search(act->name, the_match, pattern)) {

@@ -226,7 +226,7 @@ void Item::DrawSettings() {
 	// Just a default as this is called first time around, not used
 	if (ItemFilterNames.size() == 0) {
 		ItemFilterNames.clear();
-		ItemFilterNames.push_back(string("0 - 不过滤"));
+		ItemFilterNames.push_back(string("0 - 显示所有物品"));
 		ItemFilterNames.push_back("1 - 标准");
 	}
 
@@ -239,7 +239,7 @@ void Item::ReplaceItemFilters(vector<string> itemFilterNames) {
 		Hook* h = *it;
 		Combohook* dropDown = dynamic_cast<Combohook*> (h);
 		if (dropDown != NULL) {
-			if (dropDown->GetOptions()[0] == "0 - 不过滤") {
+			if (dropDown->GetOptions()[0] == "0 - 显示所有物品") {
 				dropDown->ClearOptions();
 
 				for each (string option in ItemFilterNames)
@@ -250,6 +250,10 @@ void Item::ReplaceItemFilters(vector<string> itemFilterNames) {
 				break;
 			}
 		}
+	}
+
+	if (filterLevelSetting >= ItemFilterNames.size()) {
+		filterLevelSetting = 1;
 	}
 }
 
