@@ -5,6 +5,7 @@
 #include "../../Common.h"
 #include "../../BH.h"
 #include "../Item/Item.h"
+#include "../ScreenInfo/ScreenInfo.h"
 
 // This module was inspired by the RedVex plugin "Item Mover", written by kaiks.
 // Thanks to kaiks for sharing his code.
@@ -58,6 +59,9 @@ void GameSettings::LoadGeneralTab() {
 	colored_text->SetColor(Gold);
 	new Drawing::Keyhook(generalTab, GameSettings::KeyHookOffset, y + 2, &advStatMenuKey, "");
 
+	y += 15;
+	new Drawing::Checkhook(generalTab, x, y, &ScreenInfo::Toggles["Experience Meter"].state, "Experience Meter");
+	new Drawing::Keyhook(generalTab, GameSettings::KeyHookOffset, y + 2, &ScreenInfo::Toggles["Experience Meter"].toggle, "");
 
 	// Quick Cast
 	y += 20;
@@ -189,6 +193,7 @@ void GameSettings::OnKey(bool up, BYTE key, LPARAM lParam, bool* block) {
 			*block = true;
 			if (up) {
 				(*it).second.state = !(*it).second.state;
+				BH::config->Write();
 			}
 			return;
 		}
