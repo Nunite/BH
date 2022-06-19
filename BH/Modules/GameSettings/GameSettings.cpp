@@ -60,27 +60,27 @@ void GameSettings::LoadGeneralTab() {
 	new Drawing::Keyhook(generalTab, GameSettings::KeyHookOffset, y + 2, &advStatMenuKey, "");
 
 	y += 15;
-	new Drawing::Checkhook(generalTab, x, y, &ScreenInfo::Toggles["Experience Meter"].state, "Experience Meter");
+	new Drawing::Checkhook(generalTab, x, y, &ScreenInfo::Toggles["Experience Meter"].state, "显示经验条");
 	new Drawing::Keyhook(generalTab, GameSettings::KeyHookOffset, y + 2, &ScreenInfo::Toggles["Experience Meter"].toggle, "");
 
 	// Quick Cast
 	y += 20;
-	new Drawing::Texthook(generalTab, x, (y), "Quick Cast（可能是快速施法？但是功能未实现，暂时先不翻译）");
+	new Drawing::Texthook(generalTab, x, (y), "快速施法");
 
 	y += 15;
-	new Drawing::Checkhook(generalTab, x, y, &GameSettings::Toggles["Quick Cast"].state, "Quick Cast");
+	new Drawing::Checkhook(generalTab, x, y, &GameSettings::Toggles["Quick Cast"].state, "快速施法");
 	new Drawing::Keyhook(generalTab, GameSettings::KeyHookOffset, y + 2, &GameSettings::Toggles["Quick Cast"].toggle, "");
 
 	y += 15;
-	new Drawing::Checkhook(generalTab, x, y, &GameSettings::Toggles["Skill Bar"].state, "Skill Bar");
+	new Drawing::Checkhook(generalTab, x, y, &GameSettings::Toggles["Skill Bar"].state, "技能栏");
 	new Drawing::Keyhook(generalTab, GameSettings::KeyHookOffset, y + 2, &GameSettings::Toggles["Skill Bar"].toggle, "");
 
 	y += 15;
-	new Drawing::Checkhook(generalTab, x + x_tab, y, &GameSettings::Toggles["Skill Bar Disable"].state, "Only enable with Quick Cast");
+	new Drawing::Checkhook(generalTab, x + x_tab, y, &GameSettings::Toggles["Skill Bar Disable"].state, "只启用快速施法，不显示技能栏");
 	new Drawing::Keyhook(generalTab, GameSettings::KeyHookOffset, y + 2, &GameSettings::Toggles["Skill Bar Disable"].toggle, "");
 
 	y += 15;
-	new Drawing::Checkhook(generalTab, x, y, &GameSettings::Toggles["Buff Timers"].state, "Always show Buff Timers");
+	new Drawing::Checkhook(generalTab, x, y, &GameSettings::Toggles["Buff Timers"].state, "总是显示状态计时器");
 	new Drawing::Keyhook(generalTab, GameSettings::KeyHookOffset, y + 2, &GameSettings::Toggles["Buff Timers"].toggle, "");
 
 }

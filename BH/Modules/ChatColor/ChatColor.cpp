@@ -1,4 +1,5 @@
 #include "ChatColor.h"
+#include "../ScreenInfo/ScreenInfo.h"
 #include "../../BH.h"
 #include "../../D2Ptrs.h"
 #include "../../D2Stubs.h"
@@ -978,7 +979,9 @@ DWORD __stdcall ShowManaWithMyPattern(DWORD callBack, int min, int max) {
 	Texthook::Draw(*p_D2CLIENT_ScreenSizeX / 2 + 40 + beltOffsetX * 3, *p_D2CLIENT_ScreenSizeY - 33, None, 0, White, "%d", col4);
 
 	//等级经验显示移到这里
-	drawExperienceInfo();
+	if (ScreenInfo::Toggles["Experience Meter"].state) {
+		drawExperienceInfo();
+	}
 
 	return callBack;
 
