@@ -1,11 +1,15 @@
-#include "Screeninfo.h"
+﻿#include "Screeninfo.h"
 #include "../../BH.h"
 #include "../../D2Ptrs.h"
 #include "../../D2Stubs.h"
 #include "../Item/ItemDisplay.h"
 #include "../../MPQReader.h"
 #include "../../D2Version.h"
+#include "../../D2Helpers.h"
 #include <time.h>
+#include <iomanip>
+#include <numeric>
+#include <filesystem>
 
 using namespace Drawing;
 
@@ -24,16 +28,49 @@ void ScreenInfo::OnLoad() {
 	//d2VersionText->SetFont(1);
 
 	if (BH::cGuardLoaded) {
-		Texthook* cGuardText = new Texthook(Perm, 790, 23, "?c4cGuard Loaded");
+		Texthook* cGuardText = new Texthook(Perm, 790, 23, "\377c4cGuard Loaded");
 		cGuardText->SetAlignment(Right);
 	}
 	gameTimer = GetTickCount();
+
+	//run tracker相关
+	nTotalGames = 0;
+	szGamesToLevel = "N/A";
+	szTimeToLevel = "N/A";
+	szLastXpGainPer = "N/A";
+	szLastXpGainPer = "N/A";
+	szLastGameTime = "N/A";
+	automap["GAMESTOLVL"] = szGamesToLevel;
+	automap["TIMETOLVL"] = szTimeToLevel;
+	automap["LASTXPPERCENT"] = szLastXpGainPer;
+	automap["LASTXPPERSEC"] = szLastXpPerSec;
+	automap["LASTGAMETIME"] = szLastGameTime;
+	automap["SESSIONGAMECOUNT"] = to_string(nTotalGames);
 }
 
 void ScreenInfo::LoadConfig() {
 	BH::config->ReadToggle("Experience Meter", "VK_NUMPAD7", false, Toggles["Experience Meter"]);
 
 	BH::config->ReadArray("AutomapInfo", automapInfo);
+
+	BH::config->ReadToggle("Run Details On Join", "None", false, Toggles["Run Details On Join"]);
+	BH::config->ReadToggle("Save Run Details", "None", false, Toggles["Save Run Details"]);
+	BH::config->ReadString("Save Run Details Location", szSavePath);
+
+	runDetailsColumns.clear();
+	BH::config->ReadMapList("Run Details", runDetailsColumns);
+
+	const string delimiter = ",";
+	szColumnHeader = accumulate(runDetailsColumns.begin(), runDetailsColumns.end(), string(),
+		[delimiter](const string& s, const pair<const string, const string>& p) {
+			//标题汉化到时候写这里试试(可以写在ProjectDiablo.cfg里面)
+			return s + (s.empty() ? string() : delimiter) + p.first;
+		});
+	szColumnData = accumulate(runDetailsColumns.begin(), runDetailsColumns.end(), string(),
+		[delimiter](const string& s, const pair<const string, const string>& p) {
+			//T几T几用*的数量来确定吧，没有*的话，就用T0
+			return s + (s.empty() ? string() : delimiter) + p.second;
+		});
 
 	/*BH::config->ReadAssoc("Skill Warning", SkillWarnings);
 	SkillWarningMap.clear();
@@ -68,10 +105,137 @@ void ScreenInfo::OnGameJoin() {
 		}
 	}*/
 
+	//run tracker相关，翻译成“游戏统计”吧
+	if (bFailedToWrite) {
+		bFailedToWrite = false;
+		string path = ReplaceAutomapTokens(szSavePath);
+		for (int i = 0; i < 5; i++) {
+			PrintText(Red, "文件 \"%s\" 被其它程序锁定! 上一次游戏统计不能保存!", ReplaceAutomapTokens(szSavePath));
+		}
+	}
+
 	gameTimer = GetTickCount();
 	UnitAny* pUnit = D2CLIENT_GetPlayerUnit();
 	startExperience = (int)D2COMMON_GetUnitStat(pUnit, STAT_EXP, 0);
+	startExperience = (int)D2COMMON_GetUnitStat(pUnit, STAT_EXP, 0);
+	if (currentPlayer.compare(0, 16, pUnit->pPlayerData->szName) != 0) {
+		szGamesToLevel = "N/A";
+		szTimeToLevel = "N/A";
+		szLastXpGainPer = "N/A";
+		szLastXpPerSec = "N/A";
+		szLastGameTime = "N/A";
+	}
+	fill_n(aPlayerCountAverage, 8, 0);
+
+	BnetData* pData = (*p_D2LAUNCH_BnData);
+
+	char* szDiff[3] = { "普通", "恶梦", "地狱" };
+	currentPlayer = string(pUnit->pPlayerData->szName);
 	startLevel = (int)D2COMMON_GetUnitStat(pUnit, STAT_LEVEL, 0);
+	double startPctExp = ((double)startExperience - ExpByLevel[startLevel - 1]) / (ExpByLevel[startLevel] - ExpByLevel[startLevel - 1]) * 100.0;
+
+	time_t t
+		= chrono::system_clock::to_time_t(chrono::system_clock::now());
+
+	string path = ReplaceAutomapTokens(szSavePath);
+
+	automap["JOINDATE"] = FormatTime(t, "%F");
+	automap["JOINTIME"] = FormatTime(t, "%T%z");
+	automap["CHARLEVEL"] = to_string(startLevel);
+	automap["CHARLEVELPERCENT"] = to_string(static_cast<double>(startLevel) + (startPctExp / 100.0));
+	automap["CHARXPPERCENT"] = to_string(startPctExp);
+	automap["CHARXP"] = to_string(startExperience);
+	automap["GAMENAME"] = pData->szGameName;
+	string runname = SimpleGameName(pData->szGameName);
+	automap["RUNNAME"] = runname;
+	if (runcounter.find(runname) == runcounter.end()) {
+		runcounter[runname] = 0;
+	}
+	automap["GAMEPASS"] = pData->szGamePass;
+	automap["GAMEDESC"] = pData->szGameDesc;
+	automap["GAMEIP"] = pData->szGameIP;
+	automap["GAMEDIFF"] = szDiff[D2CLIENT_GetDifficulty()];
+	automap["ACCOUNTNAME"] = pData->szAccountName;
+	automap["CHARNAME"] = pUnit->pPlayerData->szName;
+	automap["SESSIONGAMECOUNT"] = to_string(++nTotalGames);
+
+	/*
+	string p = ReplaceAutomapTokens(szSavePath);
+	cRunData = new Config(p + ".dat");
+	if (!cRunData->Parse()) {
+		cRunData->SetConfigName(p + ".dat");
+		std::ofstream os;
+		os.open(cRunData->GetConfigName(), std::ios_base::out);
+		os << endl;
+		os.close();
+	}
+	cRunData->ReadAssoc(pUnit->pPlayerData->szName, runs);
+	if (runs.find(runname) == runs.end()) {
+		runs[runname] = 0;
+		std::ofstream os;
+		os.open(cRunData->GetConfigName(), std::ios_base::app);
+		os << pUnit->pPlayerData->szName << "[" << runname << "]: 0" << endl;
+		os.close();
+		cRunData->Parse();
+		cRunData->ReadAssoc(pUnit->pPlayerData->szName, runs);
+	}
+	runs[runname]++;
+	*/
+	runcounter[runname]++;
+
+	if (!Toggles["Run Details On Join"].state) {
+		return;
+	}
+	if (runname.length() > 0) {
+		//mp
+		PrintText(Orange, "%d 次总游戏数。", nTotalGames);
+		PrintText(Orange, "%d 次 \"%s\" 游戏数。", runcounter[runname], runname.c_str());
+		//PrintText(Orange, "%d \"%s\" games played total.", runs[runname], runname.c_str());
+	}
+	else {
+		//sp
+		PrintText(Orange, "%d 次总游戏数。", nTotalGames);
+		PrintText(Orange, "%d 次单人游戏数。", runcounter[runname]);
+		//PrintText(Orange, "%d single player games played on this character.", runs[runname], runname.c_str());
+	}
+}
+
+int	ScreenInfo::GetPlayerCount() {
+	int i = 0;
+	for (RosterUnit* pRoster = *p_D2CLIENT_PlayerUnitList; pRoster; pRoster = pRoster->pNext)
+		++i;
+	return i;
+}
+
+void ScreenInfo::FormattedXPPerSec(char* buffer, double xpPerSec) {
+	char* unit = "";
+	if (xpPerSec > 1E9) {
+		xpPerSec /= 1E9;
+		unit = "B";
+	}
+	else if (xpPerSec > 1E6) {
+		xpPerSec /= 1E6;
+		unit = "M";
+	}
+	else if (xpPerSec > 1E3) {
+		xpPerSec /= 1E3;
+		unit = "K";
+	}
+	sprintf(buffer, "%s%.2f%s/s", xpPerSec >= 0 ? "+" : "", xpPerSec, unit);
+}
+
+string ScreenInfo::SimpleGameName(const string& gameName) {
+	std::smatch match;
+	if (regex_search(gameName, match, regex("^(.*?)(\\d+)$")) && match.size() == 3) {
+		return match.format("$1");
+	}
+	return gameName;
+}
+
+string ScreenInfo::FormatTime(time_t t, const char* format) {
+	stringstream ss;
+	ss << put_time(std::localtime(&t), format);
+	return ss.str();
 }
 
 void ScreenInfo::OnKey(bool up, BYTE key, LPARAM lParam, bool* block) {
@@ -215,10 +379,81 @@ void ScreenInfo::OnDraw() {
 		}
 	}*/
 
-	//�ȼ������Ƶ�ChatColor.cpp������
+	//等级经验移到ChatColor.cpp里面了
 	//if (Toggles["Experience Meter"].state) {
 	//	drawExperienceInfo();
 	//}
+
+	//下面还是run tracker相关
+	UnitAny* pUnit = D2CLIENT_GetPlayerUnit();
+	currentExperience = (int)D2COMMON_GetUnitStat(pUnit, STAT_EXP, 0);
+	currentLevel = (int)D2COMMON_GetUnitStat(pUnit, STAT_LEVEL, 0);
+
+	endTimer = ((GetTickCount() - gameTimer) / 1000);
+	if (startLevel == 0) { startLevel = currentLevel; }
+
+	char sExp[255] = { 0 };
+	double oldPctExp = ((double)startExperience - ExpByLevel[startLevel - 1]) / (ExpByLevel[startLevel] - ExpByLevel[startLevel - 1]) * 100.0;
+	double pExp = ((double)currentExperience - ExpByLevel[currentLevel - 1]) / (ExpByLevel[currentLevel] - ExpByLevel[currentLevel - 1]) * 100.0;
+	currentExpGainPct = pExp - oldPctExp;
+	if (currentLevel > startLevel) {
+		currentExpGainPct = (100 - oldPctExp) + pExp + ((currentLevel - startLevel) - 1) * 100;
+	}
+	currentExpPerSecond = endTimer > 0 ? (currentExperience - startExperience) / (double)endTimer : 0;
+	char xpPerSec[32];
+	FormattedXPPerSec(xpPerSec, currentExpPerSecond);
+
+	//等级经验移到ChatColor.cpp里面了
+	//if (Toggles["Experience Meter"].state) {
+	//	sprintf_s(sExp, "%00.2f%% (%s%00.2f%%) [%s]", pExp, currentExpGainPct >= 0 ? "+" : "", currentExpGainPct, xpPerSec);
+	//	Texthook::Draw((*p_D2CLIENT_ScreenSizeX / 2) - 100, *p_D2CLIENT_ScreenSizeY - 60, Center, 6, White, "%s", sExp);
+	//}
+
+
+	char gameTime[20];
+	sprintf_s(gameTime, 20, "%.2d:%.2d:%.2d", endTimer / 3600, (endTimer / 60) % 60, endTimer % 60);
+
+	time_t tTime;
+	time(&tTime);
+	CHAR szTime[128] = "";
+	struct tm time;
+	localtime_s(&time, &tTime);
+	strftime(szTime, sizeof(szTime), "%H:%M:%S", &time);
+
+	// The call to GetLevelName somehow invalidates pUnit. This is only observable in O2 builds. The game
+	// will crash when you attempt to open the map (which calls OnAutomapDraw function). We need to get the player unit
+	// again after calling this function. It may be a good idea in general not to store the return value of
+	// GetPlayerUnit.
+	char* level = UnicodeToAnsi(D2CLIENT_GetLevelName(pUnit->pPath->pRoom1->pRoom2->pLevel->dwLevelNo));
+	pUnit = D2CLIENT_GetPlayerUnit();
+	if (!pUnit) return;
+
+	CHAR szPing[10] = "";
+	sprintf_s(szPing, sizeof(szPing), "%d", *p_D2CLIENT_Ping);
+
+	DWORD levelId = pUnit->pPath->pRoom1->pRoom2->pLevel->dwLevelNo;
+	LevelsTxt* levelTxt = &(*p_D2COMMON_sgptDataTable)->pLevelsTxt[levelId];
+	WORD areaLevel = 0;
+	if (pData->nCharFlags & PLAYER_TYPE_EXPANSION) {
+		areaLevel = levelTxt->wMonLvlEx[D2CLIENT_GetDifficulty()];
+	}
+	else {
+		areaLevel = levelTxt->wMonLvl[D2CLIENT_GetDifficulty()];
+	}
+
+	automap["CURRENTCHARLEVEL"] = to_string(currentLevel);
+	automap["CURRENTCHARLEVELPERCENT"] = to_string(static_cast<double>(currentLevel) + (pExp / 100.0));
+	automap["CURRENTCHARXPPERCENT"] = to_string(pExp);
+	automap["CURRENTCHARXP"] = to_string(currentExperience);
+	automap["LEVEL"] = level;
+	automap["PING"] = szPing;
+	automap["GAMETIME"] = gameTime;
+	automap["REALTIME"] = szTime;
+	automap["AREALEVEL"] = to_string(areaLevel);
+	aPlayerCountAverage[GetPlayerCount() - 1]++;
+
+	delete[] level;
+
 }
 
 void ScreenInfo::drawExperienceInfo() {
@@ -252,12 +487,12 @@ void ScreenInfo::drawExperienceInfo() {
 		unit = "K";
 	}
 
-	sprintf_s(sExp, "�ȼ���%00d�����飺%00.2f%% (%s%00.2f%%) [%s%.2f%s/s]", cLevel, pExp, expGainPct >= 0 ? "+" : "", expGainPct, expPerSecond >= 0 ? "+" : "", expPerSecond, unit);
+	sprintf_s(sExp, "等级：%00d，经验：%00.2f%% (%s%00.2f%%) [%s%.2f%s/s]", cLevel, pExp, expGainPct >= 0 ? "+" : "", expGainPct, expPerSecond >= 0 ? "+" : "", expPerSecond, unit);
 
 	Texthook::Draw((*p_D2CLIENT_ScreenSizeX / 2) - 200, *p_D2CLIENT_ScreenSizeY - 60, Center, 6, White, "%s", sExp);
 }
 
-//�سǾ�����
+//回城卷数量
 DWORD ScreenInfo::CalSrollOfTownportal() {
 	UnitAny* pUnit = D2CLIENT_GetPlayerUnit();
 	SkillInfoHM* skillInfo = (SkillInfoHM*)pUnit->pInfo;
@@ -273,7 +508,7 @@ DWORD ScreenInfo::CalSrollOfTownportal() {
 	}
 	return 0;
 }
-//����������
+//鉴定卷数量
 DWORD ScreenInfo::CalSrollOfIdentify() {
 	UnitAny* pUnit = D2CLIENT_GetPlayerUnit();
 	SkillInfoHM* skillInfo = (SkillInfoHM*)pUnit->pInfo;
@@ -290,13 +525,45 @@ DWORD ScreenInfo::CalSrollOfIdentify() {
 	return 0;
 }
 
-DWORD dTPsCheck = -1; //��ǰ�Ѿ���ӡ��������,����һֱ��ӡ
+BOOL ScreenInfo::CheckRTP()
+{
+	UnitAny* unit = D2CLIENT_GetPlayerUnit();
+	bool rlt = false;
+	for (UnitAny* pItem = unit->pInventory->pFirstItem; pItem; pItem = pItem->pItemData->pNextInvItem) {
+		if (pItem->pItemData->ItemLocation == STORAGE_INVENTORY) {
+			char* code = D2COMMON_GetItemText(pItem->dwTxtFileNo)->szCode;
+			if (code[0] == 'r' && code[1] == 't' && code[2] == 'p') {
+				rlt = true;
+				break;
+			}
+		}
+	}
+	return rlt;
+}
+
+BOOL ScreenInfo::CheckRID()
+{
+	UnitAny* unit = D2CLIENT_GetPlayerUnit();
+	bool rlt = false;
+	for (UnitAny* pItem = unit->pInventory->pFirstItem; pItem; pItem = pItem->pItemData->pNextInvItem) {
+		if (pItem->pItemData->ItemLocation == STORAGE_INVENTORY) {
+			char* code = D2COMMON_GetItemText(pItem->dwTxtFileNo)->szCode;
+			if (code[0] == 'r' && code[1] == 'i' && code[2] == 'd') {
+				rlt = true;
+				break;
+			}
+		}
+	}
+	return rlt;
+}
+
+DWORD dTPsCheck = -1; //当前已经打印过的数量,不能一直打印
 DWORD dIDsCheck = -1;
 void ScreenInfo::OnAutomapDraw() {
 	GameStructInfo* pInfo = (*p_D2CLIENT_GameInfo);
 	BnetData* pData = (*p_D2LAUNCH_BnData);
 	UnitAny* pUnit = D2CLIENT_GetPlayerUnit();
-	char* szDiff[3] = {"��ͨ", "����", "����"};
+	char* szDiff[3] = {"普通", "恶梦", "地狱"};
 	if (!pInfo || !pData || !pUnit)
 		return;
 	int y = 6 + (BH::cGuardLoaded ? 16 : 0);
@@ -320,7 +587,7 @@ void ScreenInfo::OnAutomapDraw() {
 	std::string szLevel = std::string(level);
 
 	LevelTxt* pLvlTxt = D2COMMON_GetLevelTxt(pUnit->pPath->pRoom1->pRoom2->pLevel->dwLevelNo);
-	WORD  wAreaLevel = pLvlTxt->nMonLv[1][D2CLIENT_GetDifficulty()];   //EXPANSION: 1����Ƭ 0 ������Ƭ
+	WORD  wAreaLevel = pLvlTxt->nMonLv[1][D2CLIENT_GetDifficulty()];   //EXPANSION: 1资料片 0 非资料片
 	string cAreaLevel = to_string(wAreaLevel);
 
 	pUnit = D2CLIENT_GetPlayerUnit();
@@ -329,21 +596,28 @@ void ScreenInfo::OnAutomapDraw() {
 	CHAR szPing[10] = "";
 	sprintf_s(szPing, sizeof(szPing), "%d", *p_D2CLIENT_Ping);
 	
-	DWORD dTPs = CalSrollOfTownportal();
-	DWORD dIDs = CalSrollOfIdentify();
-	string tpcount = to_string(dTPs);
-	string idcount = to_string(dIDs);
-	if (dTPs <= 5 && dTPs!=dTPsCheck) {
-		CHAR temp[255] = "";
-		sprintf_s(temp, sizeof(temp), "�سǾ���ֻʣ��%d����!", dTPs);
-		PrintText(Red, temp);
-		dTPsCheck = dTPs;
+	string tpcount = "∞";
+	if (!CheckRTP()) {
+		DWORD dTPs = CalSrollOfTownportal();
+		tpcount = to_string(dTPs);
+		if (dTPs <= 5 && dTPs != dTPsCheck) {
+			CHAR temp[255] = "";
+			sprintf_s(temp, sizeof(temp), "回城卷轴只剩下%d个了!", dTPs);
+			PrintText(Red, temp);
+			dTPsCheck = dTPs;
+		}
 	}
-	if (dIDs <= 5 && dIDs != dIDsCheck) {
-		CHAR temp[255] = "";
-		sprintf_s(temp, sizeof(temp), "��������ֻʣ��%d����!", dIDs);
-		PrintText(Red, temp);
-		dIDsCheck = dIDs;
+
+	string idcount = "∞";
+	if (!CheckRID()) {
+		DWORD dIDs = CalSrollOfIdentify();
+		idcount = to_string(dIDs);
+		if (dIDs <= 5 && dIDs != dIDsCheck) {
+			CHAR temp[255] = "";
+			sprintf_s(temp, sizeof(temp), "鉴定卷轴只剩下%d个了!", dIDs);
+			PrintText(Red, temp);
+			dIDsCheck = dIDs;
+		}
 	}
 
 	DWORD levelId = pUnit->pPath->pRoom1->pRoom2->pLevel->dwLevelNo;
@@ -393,10 +667,10 @@ void ScreenInfo::OnAutomapDraw() {
 				key.replace(key.find("%" + automap[n].key + "%"), automap[n].key.length() + 2, automap[n].value);
 		}
 		if (key.length() > 0) {
-			if (key.find("�س�") != string::npos) {
+			if (key.find("回城") != string::npos) {
 				Texthook::Draw(*p_D2CLIENT_ScreenSizeX - 10, y, Right, 0, Blue, "%s", key.c_str());
 			}
-			else if (key.find("����") != string::npos) {
+			else if (key.find("鉴定") != string::npos) {
 				Texthook::Draw(*p_D2CLIENT_ScreenSizeX - 10, y, Right, 0, Red, "%s", key.c_str());
 			}
 			else {
@@ -482,11 +756,128 @@ void ScreenInfo::OnGamePacketRecv(BYTE* packet, bool* block) {
 	return;
 }
 
+std::string ScreenInfo::ReplaceAutomapTokens(std::string& v)
+{
+	std::string result;
+	result.assign(v.c_str());
+
+	for (auto const& am : automap) {
+		if (result.find("%" + am.first + "%") == string::npos)
+			continue;
+		if (am.second.length() == 0)
+			result.replace(result.find("%" + am.first + "%"), am.first.length() + 2, "");
+		else
+			result.replace(result.find("%" + am.first + "%"), am.first.length() + 2, am.second);
+	}
+	return result;
+}
+
+void ScreenInfo::AddDrop(UnitAny* pItem) {
+	ScreenInfo::AddDrop(GetItemName(pItem), pItem->pItemPath->dwPosX, pItem->pItemPath->dwPosY);
+}
+
+void ScreenInfo::AddDrop(const string& name, unsigned int x, unsigned int y) {
+	size_t h = 0;
+	hash_combine(h, hash<string>{}(name));
+	hash_combine(h, hash<long>{}(x << 8 | y));
+	string itemName = name;
+	for (int i = 0; i < 100; i++) {  //by zyl 这里解决名字里面有颜色的代码
+		int pos = itemName.find("ÿ");
+		if (pos >= 0) {
+			itemName = itemName.replace(pos, 1, "\377");
+		}
+		else {
+			break;
+		}
+	}
+	BH::drops[h] = itemName;
+}
+
 void ScreenInfo::OnGameExit() {
+	//run tracker相关
+	DWORD xpGained = (currentExperience - startExperience);
+	double gamesToLevel = (ExpByLevel[currentLevel] - currentExperience) / (1.0 * xpGained);
+	double lastExpGainPct = currentExpGainPct;
+	double lastExpPerSecond = currentExpPerSecond;
+	int lastGameLength = endTimer;
+	int timeToLevel = gamesToLevel * lastGameLength;
+
+	char buffer[128];
+	sprintf_s(buffer, sizeof(buffer), "%.2f", gamesToLevel);
+	szGamesToLevel = string(buffer);
+
+	sprintf_s(buffer, sizeof(buffer), "%d:%.2d:%.2d", timeToLevel / 3600, (timeToLevel / 60) % 60, timeToLevel % 60);
+	szTimeToLevel = string(buffer);
+
+	sprintf_s(buffer, sizeof(buffer), "%s%00.2f%%", lastExpGainPct >= 0 ? "+" : "", lastExpGainPct);
+	szLastXpGainPer = string(buffer);
+
+	FormattedXPPerSec(buffer, lastExpPerSecond);
+	szLastXpPerSec = string(buffer);
+
+	sprintf_s(buffer, sizeof(buffer), "%.2d:%.2d:%.2d", lastGameLength / 3600, (lastGameLength / 60) % 60, lastGameLength % 60);
+	szLastGameTime = string(buffer);
+
+	const string delimiter = ", ";
+	string drops = accumulate(BH::drops.begin(), BH::drops.end(), string(),
+		[delimiter](const string& s, const pair<const size_t, string>& p) {
+			return s + (s.empty() ? string() : delimiter) + p.second;
+		});
+	BH::drops.clear();
+
+	drops = regex_replace(drops, regex("\xFF" "c."), "");
+	drops = regex_replace(drops, regex("\n"), " ");
+
+	automap["GAMESTOLVL"] = szGamesToLevel;
+	automap["TIMETOLVL"] = szTimeToLevel;
+	automap["LASTXPGAINED"] = to_string(xpGained);
+	automap["LASTXPPERCENTGAINED"] = szLastXpGainPer;
+	automap["LASTXPPERSEC"] = szLastXpPerSec;
+	automap["LASTXPPERSECLONG"] = to_string(lastExpPerSecond);
+	automap["LASTGAMETIME"] = szLastGameTime;
+	automap["LASTGAMETIMESEC"] = to_string(lastGameLength);
+	automap["DROPS"] = regex_replace(drops, regex("\xFF" "c."), "");
+
+	int idx = 0;
+	for (int i = 0; i < 8; i++) {
+		if (aPlayerCountAverage[i] > aPlayerCountAverage[idx]) {
+			idx = i;
+		}
+	}
+	automap["AVGPLAYERCOUNT"] = to_string(idx + 1);
+
 	MephistoBlocked = false;
 	DiabloBlocked = false;
 	BaalBlocked = false;
 	ReceivedQuestPacket = false;
+
+	//run tracker相关
+	if (Toggles["Save Run Details"].state) {
+		WriteRunTrackerData();
+	}
+	/*
+	cRunData->Write();
+	delete cRunData;
+	*/
+}
+
+void ScreenInfo::WriteRunTrackerData() {
+	namespace fs = std::filesystem;
+	fs::path path(ReplaceAutomapTokens(szSavePath));
+	bool exist = fs::exists(path);
+
+	fs::create_directories(path.parent_path());
+
+	std::ofstream os;
+	os.open(path, std::ios_base::app);
+	if (os.fail()) {
+		bFailedToWrite = true;
+		return;
+	}
+	if (!exist) {
+		os << ReplaceAutomapTokens(szColumnHeader) << endl;
+	}
+	os << ReplaceAutomapTokens(szColumnData) << endl;
 }
 
 
@@ -654,109 +1045,109 @@ StateCode StateCodes[] = {
 	{"FADE", 159}
 };
 
-//long long ExpByLevel[] = {
-//	0,
-//	500,
-//	1500,
-//	3750,
-//	7875,
-//	14175,
-//	22680,
-//	32886,
-//	44396,
-//	57715,
-//	72144,
-//	90180,
-//	112725,
-//	140906,
-//	176132,
-//	220165,
-//	275207,
-//	344008,
-//	430010,
-//	537513,
-//	671891,
-//	839864,
-//	1049830,
-//	1312287,
-//	1640359,
-//	2050449,
-//	2563061,
-//	3203826,
-//	3902260,
-//	4663553,
-//	5493363,
-//	6397855,
-//	7383752,
-//	8458379,
-//	9629723,
-//	10906488,
-//	12298162,
-//	13815086,
-//	15468534,
-//	17270791,
-//	19235252,
-//	21376515,
-//	23710491,
-//	26254525,
-//	29027522,
-//	32050088,
-//	35344686,
-//	38935798,
-//	42850109,
-//	47116709,
-//	51767302,
-//	56836449,
-//	62361819,
-//	68384473,
-//	74949165,
-//	82104680,
-//	89904191,
-//	98405658,
-//	107672256,
-//	117772849,
-//	128782495,
-//	140783010,
-//	153863570,
-//	168121381,
-//	183662396,
-//	200602101,
-//	219066380,
-//	239192444,
-//	261129853,
-//	285041630,
-//	311105466,
-//	339515048,
-//	370481492,
-//	404234916,
-//	441026148,
-//	481128591,
-//	524840254,
-//	572485967,
-//	624419793,
-//	681027665,
-//	742730244,
-//	809986056,
-//	883294891,
-//	963201521,
-//	1050299747,
-//	1145236814,
-//	1248718217,
-//	1361512946,
-//	1484459201,
-//	1618470619,
-//	1764543065,
-//	1923762030,
-//	2097310703,
-//	2286478756,
-//	2492671933,
-//	2717422497,
-//	2962400612,
-//	3229426756,
-//	3520485254,
-//	3837739017,
-//	9999999999
-//};
+long long ExpByLevel[] = {
+	0,
+	500,
+	1500,
+	3750,
+	7875,
+	14175,
+	22680,
+	32886,
+	44396,
+	57715,
+	72144,
+	90180,
+	112725,
+	140906,
+	176132,
+	220165,
+	275207,
+	344008,
+	430010,
+	537513,
+	671891,
+	839864,
+	1049830,
+	1312287,
+	1640359,
+	2050449,
+	2563061,
+	3203826,
+	3902260,
+	4663553,
+	5493363,
+	6397855,
+	7383752,
+	8458379,
+	9629723,
+	10906488,
+	12298162,
+	13815086,
+	15468534,
+	17270791,
+	19235252,
+	21376515,
+	23710491,
+	26254525,
+	29027522,
+	32050088,
+	35344686,
+	38935798,
+	42850109,
+	47116709,
+	51767302,
+	56836449,
+	62361819,
+	68384473,
+	74949165,
+	82104680,
+	89904191,
+	98405658,
+	107672256,
+	117772849,
+	128782495,
+	140783010,
+	153863570,
+	168121381,
+	183662396,
+	200602101,
+	219066380,
+	239192444,
+	261129853,
+	285041630,
+	311105466,
+	339515048,
+	370481492,
+	404234916,
+	441026148,
+	481128591,
+	524840254,
+	572485967,
+	624419793,
+	681027665,
+	742730244,
+	809986056,
+	883294891,
+	963201521,
+	1050299747,
+	1145236814,
+	1248718217,
+	1361512946,
+	1484459201,
+	1618470619,
+	1764543065,
+	1923762030,
+	2097310703,
+	2286478756,
+	2492671933,
+	2717422497,
+	2962400612,
+	3229426756,
+	3520485254,
+	3837739017,
+	9999999999
+};
 
 StateCode GetStateCode(unsigned int nKey) {
 	for (int n = 0; n < (sizeof(StateCodes) / sizeof(StateCodes[0])); n++) {

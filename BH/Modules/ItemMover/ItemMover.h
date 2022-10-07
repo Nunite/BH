@@ -9,23 +9,23 @@
 #include "../../MPQInit.h"
 #include "../../Task.h"
 
-extern int INVENTORY_WIDTH;
-extern int INVENTORY_HEIGHT;
-extern int STASH_WIDTH;
-extern int LOD_STASH_HEIGHT;
-extern int CLASSIC_STASH_HEIGHT;
-extern int CUBE_WIDTH;
-extern int CUBE_HEIGHT;
-
-extern int INVENTORY_LEFT;
-extern int INVENTORY_TOP;
-extern int STASH_LEFT;
-extern int LOD_STASH_TOP;
-extern int CLASSIC_STASH_TOP;
-extern int CUBE_LEFT;
-extern int CUBE_TOP;
-extern int CELL_SIZE;
-
+//extern int INVENTORY_WIDTH;
+//extern int INVENTORY_HEIGHT;
+//extern int STASH_WIDTH;
+//extern int LOD_STASH_HEIGHT;
+//extern int CLASSIC_STASH_HEIGHT;
+//extern int CUBE_WIDTH;
+//extern int CUBE_HEIGHT;
+//
+//extern int INVENTORY_LEFT;
+//extern int INVENTORY_TOP;
+//extern int STASH_LEFT;
+//extern int LOD_STASH_TOP;
+//extern int CLASSIC_STASH_TOP;
+//extern int STASH_TOP;
+//extern int CUBE_LEFT;
+//extern int CUBE_TOP;
+//extern int CELL_SIZE;
 
 struct ItemPacketData {
 	unsigned int itemId;
@@ -39,13 +39,22 @@ struct ItemPacketData {
 class ItemMover : public Module {
 private:
 	bool FirstInit;
+	int* InventoryItemIds;
+	int* StashItemIds;
+	int* LODStashItemIds;
+	int* ClassicStashItemIds;
+	int* CubeItemIds;
 	bool AutoBackTown;  //自动回城的开关
-	UnitAny** InventoryItems;
-	UnitAny** StashItems;
-	UnitAny** CubeItems;
+	//UnitAny** InventoryItems;
+	//UnitAny** StashItems;
+	//UnitAny** CubeItems;
 	int tp_warn_quantity;
+	InventoryLayout* stashLayout;
+	InventoryLayout* inventoryLayout;
+	InventoryLayout* cubeLayout;
 	unsigned int TpKey;
 	unsigned int TpBackKey;
+	unsigned int ExitGameKey;
 	unsigned int HealKey;
 	unsigned int ManaKey;
 	unsigned int JuvKey;
@@ -59,28 +68,39 @@ public:
 	ItemMover() : Module("Item Mover"),
 		ActivePacket(),
 		FirstInit(false),
-		InventoryItems(NULL),
-		StashItems(NULL),
-		CubeItems(NULL),
+		InventoryItemIds(NULL),
+		StashItemIds(NULL),
+		LODStashItemIds(NULL),
+		ClassicStashItemIds(NULL),
+		CubeItemIds(NULL),
+		stashLayout(NULL),
+		inventoryLayout(NULL),
+		cubeLayout(NULL),
 		tp_warn_quantity(3) {
 
 		InitializeCriticalSection(&crit);
 	};
 
 	~ItemMover() {
-		if (InventoryItems) {
-			delete[] InventoryItems;
+		if (InventoryItemIds) {
+			delete[] InventoryItemIds;
 		}
-		if (StashItems) {
-			delete[] StashItems;
+		if (StashItemIds) {
+			delete[] StashItemIds;
 		}
-		if (CubeItems) {
-			delete[] CubeItems;
+		if (LODStashItemIds) {
+			delete[] LODStashItemIds;
+		}
+		if (ClassicStashItemIds) {
+			delete[] ClassicStashItemIds;
+		}
+		if (CubeItemIds) {
+			delete[] CubeItemIds;
 		}
 		DeleteCriticalSection(&crit);
 	};
 
-	void Init();
+	bool Init();
 
 	void Lock() { EnterCriticalSection(&crit); };
 	void Unlock() { LeaveCriticalSection(&crit); };
@@ -94,13 +114,14 @@ public:
 	void AutoToBelt();  //自动填充腰带
 
 	void LoadConfig();
-
 	void OnLoad();
 	void OnKey(bool up, BYTE key, LPARAM lParam, bool* block);
 	void OnLeftClick(bool up, int x, int y, bool* block);
 	void OnRightClick(bool up, int x, int y, bool* block);
 	void OnGamePacketRecv(BYTE* packet, bool* block);
 	void OnGameExit();
+
+	void OnLoop();
 };
 
 

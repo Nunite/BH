@@ -8,7 +8,7 @@
 class ChatColor : public Module {
 private:
 	bool inGame;
-	bool inGameOnce;  //要自己写一个是否进入游戏的选项
+	//bool inGameOnce;  //要自己写一个是否进入游戏的选项
 	std::map<string, unsigned int> whisperColors;
 public:
 	static std::map<std::string, Toggle> Toggles;
@@ -71,3 +71,4 @@ void ShowManaPatch_ASM();
 void DrawPetHeadPath_ASM();
 void DrawPartyHeadPath_ASM();
 
+void StrcatDefenseStringPatch_ASM();

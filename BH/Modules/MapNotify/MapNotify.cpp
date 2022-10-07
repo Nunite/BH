@@ -32,6 +32,10 @@ static BOOL fSkipMessageReq = 0;
 static DWORD mSkipMessageTimer = 0;
 static DWORD mSkipQuestMessage = 1;
 
+static map<DWORD, string> eventMap;   //地图事件相关
+static map<DWORD, POINT> tipCells;   //A2召唤者相关
+static map<string, DWORD> currLevelNo;   //角色当前所在场景
+
 DrawDirective automapDraw(true, 5);
 
 MapNotify::MapNotify() : Module("MapNotify") {
@@ -364,6 +368,45 @@ void MapNotify::OnLoop() {
 		RevealLevel(unit->pPath->pRoom1->pRoom2->pLevel);
 		break;
 	}
+
+	//这里看看能不能画线（还是提示一下先吧）
+	if (unit->pPath->pRoom1->pRoom2->pLevel->dwLevelNo == MAP_A2_ARCANE_SANCTUARY
+		&& currLevelNo["所在场景"]!= MAP_A2_ARCANE_SANCTUARY
+		) {  //A2的神秘庇护所
+		if (tipCells.find(357) == tipCells.end()) {
+			return;
+		}
+		POINT objPos = tipCells[357];   //日记的pos
+		//画不了，先用提示的吧
+				/*32697   25034  右下
+				31305   24362  左上
+				32673   24350  右上
+				31313   25030  左下*/
+		int diffX = 32000;
+		int diffY = 24500;
+		string strPos = "哪里";
+		if ((&objPos)->x < diffX)  //左边
+		{
+			if ((&objPos)->y < diffY)  //上
+			{
+				strPos = "左上";
+			}
+			else { //下
+				strPos = "左下";
+			}
+		}
+		else {   //右边
+			if ((&objPos)->y < diffY)  //上
+			{
+				strPos = "右上";
+			}
+			else { //下
+				strPos = "右下";
+			}
+		}
+		PrintText(White, "召唤者：我在\377c2%s\377c0，有本事来打我啊！", strPos.c_str());
+	}
+	currLevelNo["所在场景"] = unit->pPath->pRoom1->pRoom2->pLevel->dwLevelNo;
 }
 
 bool IsObjectChest(ObjectTxt* obj)
@@ -440,7 +483,9 @@ void MapNotify::OnDraw() {
 										}
 									}
 									PrintText(ItemColorFromQuality(unit->pItemData->dwQuality), "%s", itemName.c_str());
-
+									if (!IsTown(GetPlayerArea())) {  //run tracker相关,只要有提示的都记录一下试试看
+										ScreenInfo::AddDrop(unit);
+									}
 								}
 							}
 							unit->dwFlags |= UNITFLAG_REVEALED;
@@ -591,7 +636,7 @@ void MapNotify::OnAutomapDraw() {
 						color = automapSuperUniqueColors[unit->pMonsterData->wUniqueNo];
 						
 					}
-
+					
 					//显示特殊怪的名字(MonStats.txt文件中的hcIdx,NameStr列对应的tbl文件里面的key)
 					string superUniqName;
 					MonsterDataHM* mdhm = (MonsterDataHM*)unit->pMonsterData;  //转成HM的结构才是正常的
@@ -600,14 +645,21 @@ void MapNotify::OnAutomapDraw() {
 						|| unit->dwTxtFileNo == 944   //944 Butcher屠夫
 						|| unit->dwTxtFileNo == 921   //921 Dark Wanderer 黑暗流浪者
 						|| unit->dwTxtFileNo == 922   //922 Shadow of Mendeln
+						|| unit->dwTxtFileNo == 993   //993 憎恨之影
+						|| unit->dwTxtFileNo == 994   //994 恐惧之影，995已经显示了
+						|| unit->dwTxtFileNo == 734   //734 女伯爵
+						|| unit->dwTxtFileNo == 526   //526 尼拉塞克
+						|| (unit->dwTxtFileNo == 391 && mdhm->fBoss==1 && mdhm->fUnique)   //391 母牛之王
 						) {
 						if ((unit->dwTxtFileNo>=546&& unit->dwTxtFileNo<=550)   //xx污秽者=>不显示
 							|| (unit->dwTxtFileNo >= 880 && unit->dwTxtFileNo <= 881)   //血蛆幼生、血蛆之蛋=>不显示
 							|| (unit->dwTxtFileNo >= 790 && unit->dwTxtFileNo <= 794)   //被困的灵魂(大黑毛旁边的)=>不显示
 							|| (unit->dwTxtFileNo == 754)   //血石魔=>不显示
 							|| (unit->dwTxtFileNo == 965)   //T3市场图boss旁的沉沦魔=>不显示
-							|| (unit->dwTxtFileNo == 966)   //rathma第一个boss旁边的远古尖塔=>不显示
+							|| (unit->dwTxtFileNo == 966)   //rathma第一个boss旁边的远古尖塔=>不显示，这个直接去掉了 by zyl 220801
 							|| (unit->dwTxtFileNo >= 937 && unit->dwTxtFileNo <= 939)   ///rathma相关的=>不显示
+							|| (unit->dwTxtFileNo == 1001)   //S5 T4的斯泰吉亚兽不显示名字
+							|| (unit->dwTxtFileNo == 734 && mdhm->fBoss == 0)  //734 女伯爵旁边的小兵特殊处理一下
 							) {  
 							//这里过滤一些不想要显示名字的怪物
 						}
@@ -621,6 +673,20 @@ void MapNotify::OnAutomapDraw() {
 								}
 								else {
 									break;
+								}
+							}
+
+							//这里尝试做一下事件怪提醒
+							if (superUniqName.length() > 0 && 
+								(unit->dwTxtFileNo == 919   //919 Horazon
+									|| unit->dwTxtFileNo == 921   //921 Dark Wanderer 黑暗流浪者
+									|| unit->dwTxtFileNo == 922   //922 Shadow of Mendeln
+									|| unit->dwTxtFileNo == 945   //945 财富使者
+									//|| unit->dwTxtFileNo == 922   //TaintedSunMapEventAltar 黑暗尖塔 Objects.txt还要找一下是怎么样的
+									)) {
+								if (eventMap.find(unit->dwUnitId) == eventMap.end()) {
+									eventMap[unit->dwUnitId] = superUniqName;
+									PrintText(White, "哟~ \377c1%s\377c0 出现了！！！", superUniqName.c_str());
 								}
 							}
 						}
@@ -641,11 +707,28 @@ void MapNotify::OnAutomapDraw() {
 							Drawing::Texthook::Draw(automapLoc.x+ (9 * enchantText.length() / 4) + ((enchantText.length() / 4 - 1) * 2), automapLoc.y - 20, Drawing::Center, 6, White, enchantText);
 						//Drawing::Texthook::Draw(automapLoc.x, automapLoc.y - 14, Drawing::Center, 6, White, enchantText);
 						if (superUniqName.length() > 0) {
-							Drawing::Texthook::Draw(automapLoc.x, automapLoc.y-12, Drawing::Center, 6, Red, superUniqName);
+							Drawing::Texthook::Draw(automapLoc.x, automapLoc.y-12, Drawing::Center, 6, Red, superUniqName.c_str());
 						}
 						Drawing::Crosshook::Draw(automapLoc.x, automapLoc.y, color);
 						if (lineColor != -1) {
 							Drawing::Linehook::Draw(MyPos.x, MyPos.y, automapLoc.x, automapLoc.y, lineColor);
+						}
+						});
+				}
+				else if (unit->dwType == UNIT_OBJECT && unit->dwTxtFileNo == 593){
+					//这个是 暗黑尖塔事件
+					string superUniqName="黑暗尖塔";
+					if (eventMap.find(unit->dwUnitId) == eventMap.end()) {
+						eventMap[unit->dwUnitId] = superUniqName;
+						PrintText(White, "哟~ \377c1%s\377c0 出现了！！！", superUniqName.c_str()); //string需要转成cstr，不然一些buffer的地方会报错
+					}
+					xPos = unit->pObjectPath->dwPosX;
+					yPos = unit->pObjectPath->dwPosY;
+					automapBuffer.push([superUniqName,xPos, yPos]()->void {
+						POINT automapLoc;
+						Drawing::Hook::ScreenToAutomap(&automapLoc, xPos, yPos);
+						if (superUniqName.length() > 0) {
+							Drawing::Texthook::Draw(automapLoc.x, automapLoc.y - 12, Drawing::Center, 6, Red, superUniqName.c_str());
 						}
 						});
 				}
@@ -771,6 +854,8 @@ void MapNotify::OnGameJoin() {
 	//if (!D2CLIENT_GetUIState(UI_CHAT_CONSOLE)) {  //这句是我补的，不加这句，打字会有点卡
 		ResetRevealed();
 		automapLevels.clear();
+		eventMap.clear();  //清空一下map
+		tipCells.clear();  //清空一下cell提示
 		//*p_D2CLIENT_AutomapOn = Toggles["Show Automap On Join"].state;   //这句是消失的主要一句，但是上面这2句也有冲突，会访问冲突
 	//}
 }
@@ -940,6 +1025,11 @@ void MapNotify::RevealLevel(Level* level) {
 	if (!level || level->dwLevelNo < 0 || level->dwLevelNo > 255)
 		return;
 
+	if (level && level->dwLevelNo <= 163 && level->dwLevelNo >= 161) {
+		//拉斯玛地图自动禁用地图全开,不然会报错。
+		return;
+	}
+
 	// Check if the level has been previous revealed.
 	if (revealedLevel[level->dwLevelNo])
 		return;
@@ -975,6 +1065,7 @@ void MapNotify::RevealLevel(Level* level) {
 }
 
 void MapNotify::RevealRoom(Room2* room) {
+
 	//Grabs all the preset units in room.
 	for (PresetUnit* preset = room->pPreset; preset; preset = preset->pPresetNext)
 	{
@@ -1045,6 +1136,19 @@ void MapNotify::RevealRoom(Room2* room) {
 			cell->yPixel = (((y + x) * 8) / 10) - 3;
 
 			D2CLIENT_AddAutomapCell(cell, &((*p_D2CLIENT_AutomapLayer)->pObjects));
+
+			//这里画个线试试，不能画在这里
+			if (room->pLevel->dwLevelNo == MAP_A2_ARCANE_SANCTUARY
+				&& preset->dwType == UNIT_OBJECT
+				&& preset->dwTxtFileNo == 357     //这个是日记
+				) {
+				if (tipCells.find(preset->dwTxtFileNo) == tipCells.end()) {
+					POINT test;
+					(&test)->x = cell->xPixel;
+					(&test)->y = cell->yPixel;
+					tipCells[preset->dwTxtFileNo] = test;
+				}
+			}
 		}
 
 	}

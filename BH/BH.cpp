@@ -10,6 +10,7 @@
 #include "MPQInit.h"
 #include "TableReader.h"
 #include "Task.h"
+#include "D2Helpers.h"
 
 string BH::path;
 HINSTANCE BH::instance;
@@ -20,11 +21,14 @@ Drawing::UI* BH::settingsUI;
 Drawing::StatsDisplay* BH::statsDisplay;
 bool BH::initialized;
 bool BH::cGuardLoaded;
+unsigned int BH::stash_left_fix;  //箱子left的offset,写给群友云c
+bool BH::inGameOnce;
 WNDPROC BH::OldWNDPROC;
 //map<string, Toggle>* BH::MiscToggles;
 map<string, Toggle>* BH::MiscToggles2;
 map<string, bool>* BH::BnetBools;
 map<string, bool>* BH::GamefilterBools;
+map<size_t, string> BH::drops;
 
 Patch* patches[] = {
 	new Patch(Call, D2CLIENT, { 0x44230, 0x45280 }, (int)GameLoop_Interception, 7),
@@ -46,8 +50,47 @@ Patch* patches[] = {
 
 Patch* BH::oogDraw = new Patch(Call, D2WIN, { 0x18911, 0xEC61 }, (int)OOGDraw_Interception, 5);
 
+DWORD selectedLanguage = LNG_ENG;
+DWORD defaultLanguage = LNG_ENG;
+DWORD* ptCurrentLanguage;
+DWORD _stdcall languageManagement()
+{
+	//if (active_ChangeLanguage)
+		*ptCurrentLanguage = selectedLanguage;
+
+	//if (active_LanguageManagement)
+	//{
+		//if ((*ptCurrentLanguage >= LNG_DEF) || !((1 << *ptCurrentLanguage) & availableLanguages.all))
+		//	*ptCurrentLanguage = defaultLanguage;
+	//}
+
+	return *ptCurrentLanguage;
+}
+
+void  intToByte(int i, BYTE* bytes, int size = 4)
+
+{
+	//byte[] bytes = new byte[4];
+	memset(bytes, 0, sizeof(BYTE) * size);
+	bytes[0] = (BYTE)(0xff & i);
+	bytes[1] = (BYTE)((0xff00 & i) >> 8);
+	bytes[2] = (BYTE)((0xff0000 & i) >> 16);
+	bytes[3] = (BYTE)((0xff000000 & i) >> 24);
+	return;
+}
+
 unsigned int index = 0;
 bool BH::Startup(HINSTANCE instance, VOID* reserved) {
+
+	
+
+	//这一段是可以的，但是BH加载的时间段太后了。所以不生效，得参考PlugY.dll的加载方式才行（以后再说吧）by zyl 20220827
+	//BYTE patchBytesFunc[4] = {  };
+	//intToByte((int)languageManagement, patchBytesFunc);
+
+	//int patchAddr11 = (DWORD)D2LANG_GetLang + 0x3E;
+	//BYTE patchBytes11[5] = { 0xE8 ,patchBytesFunc[3],patchBytesFunc[2],patchBytesFunc[1],patchBytesFunc[0] };
+	//Patch::WriteBytes(patchAddr11, 5, patchBytes11);
 
 	BH::instance = instance;
 	if (reserved != NULL) {
@@ -121,13 +164,13 @@ void BH::Initialize()
 	// Do this asynchronously because D2GFX_GetHwnd() will be null if
 	// we inject on process start
 	Task::Enqueue([]() -> void {
-		std::chrono::milliseconds duration(200);
+		std::chrono::milliseconds duration(3000);  //这里改成3秒可以不会影响中文输入法(主要是PD2S5开始后有这样的情况)
 		while (!D2GFX_GetHwnd()) {
 			std::this_thread::sleep_for(duration);
 		}
 		BH::OldWNDPROC = (WNDPROC)GetWindowLong(D2GFX_GetHwnd(), GWL_WNDPROC);
 		SetWindowLong(D2GFX_GetHwnd(), GWL_WNDPROC, (LONG)GameWindowEvent);
-		});
+	});
 
 	settingsUI = new Drawing::UI(SETTINGS_TEXT, 400, 321);
 
@@ -138,7 +181,7 @@ void BH::Initialize()
 	Task::Enqueue([]() -> void {
 		LoadMPQData(NULL);
 		moduleManager->MpqLoaded();
-		});
+	});
 
 
 	new GameSettings();
@@ -148,7 +191,7 @@ void BH::Initialize()
 	new Item();
 	new Party();
 	new ItemMover();
-	//new StashExport();   //这个先不要吧
+	//new StashExport();   //这个先不要吧，跟交易Trade有关
 	new MapNotify();   //这个就是MapHack修改而来
 	new ChatColor();
 
@@ -201,8 +244,8 @@ bool BH::Shutdown() {
 bool BH::ReloadConfig() {
 	if (initialized) {
 		if (D2CLIENT_GetPlayerUnit()) {
-			PrintText(0, "Reloading config: %s", config->GetConfigName().c_str());
-			PrintText(0, "Reloading filter: %s", lootFilter->GetConfigName().c_str());
+			PrintText(0, "重新加载配置: %s", config->GetConfigName().c_str());
+			PrintText(0, "重新加载过滤: %s", lootFilter->GetConfigName().c_str());
 		}
 		config->Parse();
 		lootFilter->Parse();

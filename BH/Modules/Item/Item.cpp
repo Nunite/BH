@@ -215,12 +215,6 @@ void Item::DrawSettings() {
 	new Keyhook(settingsTab, GameSettings::KeyHookOffset, y + 2, &Toggles["Verbose Notifications"].toggle, "");
 	y += 15;
 
-	// 	new Keyhook(settingsTab, 4, y + 2, &showPlayer, "显示其它玩家鸡儿:                             ");
-	// y += 15;
-	// new Keyhook(settingsTab, 4, y + 2, &resyncKey, "同步(卡角色的时候按一下试试):         ");
-	// y += 15;
-	// new Keyhook(settingsTab, 4, y + 2, &advStatMenuKey, "玩家/雇佣兵高级属性:                        ");
-
 	colored_text = new Texthook(settingsTab, x, y + 2, "过滤等级:");
 	colored_text->SetColor(Gold);
 	// Just a default as this is called first time around, not used

@@ -1,10 +1,27 @@
 ﻿#pragma once
 
-#define BH_VERSION "PD2 0.1"
-#define SETTINGS_TEXT "设置"
+#define BH_VERSION "ZYLPD2 0.1"
+#define SETTINGS_TEXT "ZYLPD2设置"
 
 //#define CODE_PAGE 1252 // windows-1252	ANSI Latin 1; Western European (Windows)
 #define CODE_PAGE 936 // windows-1252	ANSI Latin 1; Western European (Windows)
+
+enum D2Lang  //by zyl from PlugY
+{
+	LNG_ENG = 0,// English
+	LNG_ESP,// Spanish
+	LNG_DEU,// German
+	LNG_FRA,// French
+	LNG_POR,// Portuguese
+	LNG_ITA,// Italian
+	LNG_JPN,// Japanese
+	LNG_KOR,// Korean
+	LNG_SIN,//
+	LNG_CHI,// Chinese
+	LNG_POL,// Polish
+	LNG_RUS,// Russian
+	LNG_DEF,// Default : English
+};
 
 enum TextColor {
 	Disabled = -1,

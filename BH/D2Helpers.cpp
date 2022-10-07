@@ -106,7 +106,8 @@ bool IsValidMonster(UnitAny* pUnit)
 						344,351,352,353,355,358,359,366,367,368,369,377,378,392,393,401,403,
 						404,405,406,408,410,411,412,413,414,415,416,432,433,434,435,511,512,
 						513,514,515,516,517,518,519,520,521,523,524,525,527,534,535,536,537,
-						538,539,543,545,556,559,567,568,569,574,738,739,740,786,787,788 };
+						538,539,543,545,556,559,567,568,569,574,738,739,740,786,787,788,789,   //789是PD2中的超级暗黑破坏神，不显示吧，Kboss好K一点
+						790,791,792,793,794,966 };
 	int badMonSize = sizeof(badMonIds) / sizeof(DWORD);
 
 	for (DWORD n = 0; n < badMonSize; n++)
@@ -376,6 +377,21 @@ DWORD GetPlayerArea() {
 	return player->pPath->pRoom1->pRoom2->pLevel->dwLevelNo;
 }
 
+
+void d2_assert(bool pCondition, char* pMessage, char* pLocation, int pLineNbr)
+{
+	if (pCondition)
+	{
+		LogMsg("\n"
+			"*-----------------------*\n"
+			"Assertion fail at line %d of %s :\n"
+			"%s\n"
+			"*-----------------------*\n",
+			pLineNbr, pLocation, pMessage);
+		MessageBox(NULL, pMessage, "Diablo 2 Custom Save Error", MB_OK | MB_ICONEXCLAMATION);
+		exit(1);
+	}
+}
 
 void LogMsg(const char* pFormat, ...)
 {

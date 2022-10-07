@@ -143,7 +143,7 @@ void UI::OnDraw() {
 		int yPos = GetMinimizedY() - (n * (TITLE_BAR_HEIGHT + 4));
 		int inPos = InPos((*p_D2CLIENT_MouseX), (*p_D2CLIENT_MouseY), GetMinimizedX(), yPos, xSize, TITLE_BAR_HEIGHT);
 		Framehook::Draw(GetMinimizedX(), yPos, xSize, TITLE_BAR_HEIGHT, 0, BTOneHalf);
-		Texthook::Draw(GetMinimizedX() + 4, yPos + 3, false, 0, (inPos?Silver:White), GetName());
+		Texthook::Draw(GetMinimizedX() + 4, yPos + 3, false, 0, (inPos? Gold :White), GetName());
 	} else {
 		if (IsDragged()) {
 			int newX = (*p_D2CLIENT_MouseX) - dragX;
@@ -168,7 +168,7 @@ void UI::OnDraw() {
 		}
 		Framehook::Draw(GetX(), GetY(), GetXSize(), GetYSize(), 0, (IsActive()?BTNormal:BTOneHalf));
 		Framehook::Draw(GetX(), GetY(), GetXSize(), TITLE_BAR_HEIGHT, 0, BTNormal);
-		Texthook::Draw(GetX() + 4, GetY () + 3, false, 0, InTitle((*p_D2CLIENT_MouseX), (*p_D2CLIENT_MouseY))?Silver:White, GetName());
+		Texthook::Draw(GetX() + 4, GetY () + 3, false, 0, InTitle((*p_D2CLIENT_MouseX), (*p_D2CLIENT_MouseY))?Gold:White, GetName()+"(右键点击此处关闭)");
 		for (list<UITab*>::iterator it = Tabs.begin(); it != Tabs.end(); it++)
 			(*it)->OnDraw();
 	}
@@ -209,6 +209,11 @@ void UI::SetMinimized(bool newState) {
 };
 
 bool UI::OnLeftClick(bool up, unsigned int mouseX, unsigned int mouseY) {
+	if (!BH::inGameOnce)
+	{
+		SetDragged(false);   //这个属性也比较重要
+		return false;  //这里主要是修理菜单界面有可能会点击不了的情况
+	}
 	if (IsMinimized()) {
 		int n = 0;
 		for (list<UI*>::iterator it = Minimized.begin(); it != Minimized.end(); it++, n++)

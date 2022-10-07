@@ -111,3 +111,91 @@ __declspec (naked) int __fastcall ITEMS_GetItemPropertiesString_STUB(int nStatFi
 		retn 32
 	}
 }
+
+__declspec (naked) DWORD __fastcall D2GameASM_D2LoadInventory_STUB(GameStruct* ptGame, UnitAnyHM* pChar, saveBitField* pdata, DWORD p2, DWORD maxSize, DWORD p4, DWORD* ptNbBytesRead)
+{
+	__asm
+	{
+		MOV EAX, DWORD PTR SS : [ESP + 4]
+		MOV DWORD PTR SS : [ESP + 4] , EDX
+		JMP D2GAME_D2LoadInventory
+	}
+}
+
+__declspec (naked) DWORD __fastcall D2GameASM_SendPacket_STUB(void* ptNetClient, LPVOID pData, DWORD size)
+{
+	__asm
+	{
+		POP EAX
+		PUSH EDX
+		PUSH EAX
+		MOV EAX, ECX
+		JMP D2GAME_SendPacket
+	}
+}
+
+__declspec (naked) UnitAnyHM* __fastcall D2GameASM_D2GetPlayerPet(UnitAnyHM* pPlayer, DWORD unk_7, DWORD unk_1, GameStruct* ptGame)
+{
+	__asm
+	{
+		//pushad
+		push ebp
+		push ebx
+		push edi
+		push esi
+		mov edi, [esp + 0x18]//第四个参数
+		mov ebx, [esp + 0x14]//第三个参数
+		mov esi, edx
+		mov eax, ecx
+		call D2GAME_GetPlayerPet
+		pop esi
+		pop edi
+		pop ebx
+		pop ebp
+		retn 8
+	}
+}
+
+__declspec (naked) void* __fastcall D2ClientASM_LoadImage_STUB(const char* filename, DWORD filetype)
+{
+	__asm
+	{
+		PUSH EDX
+		MOV EAX, ECX
+		CALL D2CLIENT_LoadImage
+		RETN
+	}
+}
+
+const char* D2FreeImage_FILE = __FILE__;
+__declspec (naked) void __fastcall D2ClientASM_FreeImage_STUB(void* image)
+{
+	__asm
+	{
+		PUSH ESI
+		MOV ESI, ECX
+		PUSH ESI
+		CALL D2CMP_10014
+		TEST ESI, ESI
+		JE END_D2Free
+		PUSH 0
+		PUSH __LINE__
+		MOV EDX, D2FreeImage_FILE;  ASCII "C:\projects\D2\head\Diablo2\Source\D2Client\CORE\ARCHIVE.CPP"
+		MOV ECX, ESI
+		CALL FOG_MemDeAlloc
+	END_D2Free :
+		POP ESI
+		RETN
+	}
+}
+
+__declspec (naked) UnitAnyHM* __fastcall D2GameASM_GetObject_STUB(GameStruct* ptGame, DWORD type, DWORD itemNum)
+{
+	__asm
+	{
+		MOV EAX, EDX
+		MOV EDX, DWORD PTR SS : [ESP + 4]
+		CALL D2GAME_GetObject
+		RETN 4
+	}
+}

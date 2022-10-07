@@ -53,6 +53,10 @@ bool Combohook::OnLeftClick(bool up, unsigned int x, unsigned int y) {
 
 void Combohook::OnDraw() {
 	Framehook::Draw(GetX(), GetY(), GetXSize(), GetYSize() + 4, 0, BTNormal);
+	int selectIndex = GetSelectedIndex();
+	if (selectIndex >= options.size()) {   //修复一下关闭过滤后，重新进游戏会导致数组越界的情况
+		SetSelectedIndex(options.size()-1);
+	}
 	Texthook::Draw(GetX() + 5, GetY() + 3, 0, GetFont(), Gold, options.at(GetSelectedIndex()));
 	//Framehook::Draw(GetX() + GetXSize() - 16, GetY(), 8, GetYSize() + 4, 0, BTNormal);
 	Texthook::Draw(GetX() + GetXSize() - 8, GetY() + 3, 0, GetFont(), InHook((*p_D2CLIENT_MouseX), (*p_D2CLIENT_MouseY))||active?Tan:Gold, "v");

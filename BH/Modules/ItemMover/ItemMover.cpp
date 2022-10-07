@@ -9,103 +9,64 @@
 using namespace Drawing;
 
 
+//用于检查分辨率有没有发生变化
+int my_screenWidth = -1;
+int my_screenHeight = -1;
 // This module was inspired by the RedVex plugin "Item Mover", written by kaiks.
 // Thanks to kaiks for sharing his code.
 
-int INVENTORY_WIDTH = 10;
-int INVENTORY_HEIGHT = 4;
-int STASH_WIDTH = 6;
-int LOD_STASH_HEIGHT = 8;
-int CLASSIC_STASH_HEIGHT = 4;
-int CUBE_WIDTH = 3;
-int CUBE_HEIGHT = 4;
+#define INVENTORY_WIDTH  inventoryLayout->SlotWidth
+#define INVENTORY_HEIGHT inventoryLayout->SlotHeight
+#define INVENTORY_LEFT   inventoryLayout->Left
+#define INVENTORY_RIGHT  inventoryLayout->Right
+#define INVENTORY_TOP    inventoryLayout->Top
+#define INVENTORY_BOTTOM inventoryLayout->Bottom
 
-// These are pixel positions
-int INVENTORY_LEFT = 417;
-int INVENTORY_TOP = 315;
-int STASH_LEFT = 153;
-int LOD_STASH_TOP = 143;
-int CLASSIC_STASH_TOP = 334;
-int CUBE_LEFT = 197;
-int CUBE_TOP = 199;
-int CELL_SIZE = 29;
+#define STASH_WIDTH  stashLayout->SlotWidth
+#define STASH_HEIGHT stashLayout->SlotHeight
+#define STASH_LEFT   stashLayout->Left
+#define STASH_RIGHT  stashLayout->Right
+#define STASH_TOP    stashLayout->Top
+#define STASH_BOTTOM stashLayout->Bottom
+
+#define CUBE_WIDTH  cubeLayout->SlotWidth
+#define CUBE_HEIGHT cubeLayout->SlotHeight
+#define CUBE_LEFT   cubeLayout->Left
+#define CUBE_RIGHT  cubeLayout->Right
+#define CUBE_TOP    cubeLayout->Top
+#define CUBE_BOTTOM cubeLayout->Bottom
+
+#define CELL_SIZE inventoryLayout->SlotPixelHeight
 
 std::string POTIONS[] = { "hp", "mp", "rv" , "yp"};
 
 DWORD idBookId;
 DWORD unidItemId;
 
-void ItemMover::Init() {
-	// We should be able to get the layout from *p_D2CLIENT_StashLayout and friends,
-	// but doesn't seem to be working at the moment so use the mpq data.
+bool ItemMover::Init() {
+	BnetData* pData = (*p_D2LAUNCH_BnData);
+	if (!pData) { return false; }
+	int xpac = pData->nCharFlags & PLAYER_TYPE_EXPANSION;
 
-	InventoryLayout* classicStashLayout;
-	InventoryLayout* lodStashLayout;
-	InventoryLayout* inventoryLayout;
-	InventoryLayout* cubeLayout;
-
-	// Pull screen sizing info from the mpq data
-	int screenWidth = *p_D2CLIENT_ScreenSizeX;
-	int screenHeight = *p_D2CLIENT_ScreenSizeY;
-	//PrintText(1, "Got screensize %d, %d", screenWidth, screenHeight);
-
-	if (screenWidth != 800 || screenHeight != 600) {
-		classicStashLayout = InventoryLayoutMap["Bank Page 1"];
-		lodStashLayout = InventoryLayoutMap["Big Bank Page 1"];
-		inventoryLayout = InventoryLayoutMap["Amazon"];  // all character types have the same layout
-		cubeLayout = InventoryLayoutMap["Transmogrify Box Page 1"];
-
-		INVENTORY_LEFT = ((inventoryLayout->Left - 320) + (*p_D2CLIENT_ScreenSizeX / 2));
-		INVENTORY_TOP = ((*p_D2CLIENT_ScreenSizeY / 2) - 240) + inventoryLayout->Top;
-		STASH_LEFT = ((*p_D2CLIENT_ScreenSizeX / 2) - 320) + lodStashLayout->Left;
-		if (((WORD)lodStashLayout->Top >> 15) == 1) {
-			LOD_STASH_TOP = ((*p_D2CLIENT_ScreenSizeY / 2) - 240) + ((WORD)lodStashLayout->Top - 0x10000);
-		}
-		else {
-			LOD_STASH_TOP = ((*p_D2CLIENT_ScreenSizeY / 2) - 240) + (WORD)lodStashLayout->Top;
-		}
-		if (((WORD)classicStashLayout->Top >> 15) == 1) {
-			CLASSIC_STASH_TOP = ((*p_D2CLIENT_ScreenSizeY / 2) - 240) + ((WORD)classicStashLayout->Top - 0x10000);
-		}
-		else {
-			CLASSIC_STASH_TOP = ((*p_D2CLIENT_ScreenSizeY / 2) - 240) + classicStashLayout->Top;
-		}
-		CUBE_LEFT = ((*p_D2CLIENT_ScreenSizeX / 2) - 320) + cubeLayout->Left;
-		CUBE_TOP = ((*p_D2CLIENT_ScreenSizeY / 2) - 240) + cubeLayout->Top;
+	if (xpac) {
+		stashLayout = p_D2CLIENT_StashLayout;
+		StashItemIds = LODStashItemIds;
 	}
 	else {
-		classicStashLayout = InventoryLayoutMap["Bank Page2"];
-		lodStashLayout = InventoryLayoutMap["Big Bank Page2"];
-		inventoryLayout = InventoryLayoutMap["Amazon2"];  // all character types have the same layout
-		cubeLayout = InventoryLayoutMap["Transmogrify Box2"];
-
-		INVENTORY_LEFT = inventoryLayout->Left;
-		INVENTORY_TOP = inventoryLayout->Top;
-		STASH_LEFT = lodStashLayout->Left;
-		LOD_STASH_TOP = lodStashLayout->Top;
-		CLASSIC_STASH_TOP = classicStashLayout->Top;
-		CUBE_LEFT = cubeLayout->Left;
-		CUBE_TOP = cubeLayout->Top;
+		stashLayout = p_D2CLIENT_ClassicStashLayout;
+		StashItemIds = ClassicStashItemIds;
 	}
+	inventoryLayout = p_D2CLIENT_InventoryLayout;
+	cubeLayout = p_D2CLIENT_CubeLayout;
 
-	CELL_SIZE = inventoryLayout->SlotPixelHeight;
-
-	INVENTORY_WIDTH = inventoryLayout->SlotWidth;
-	INVENTORY_HEIGHT = inventoryLayout->SlotHeight;
-	STASH_WIDTH = lodStashLayout->SlotWidth;
-	LOD_STASH_HEIGHT = lodStashLayout->SlotHeight;
-	CLASSIC_STASH_HEIGHT = classicStashLayout->SlotHeight;
-	CUBE_WIDTH = cubeLayout->SlotWidth;
-	CUBE_HEIGHT = cubeLayout->SlotHeight;
-
-	if (!InventoryItems) {
-		InventoryItems = new UnitAny * [INVENTORY_WIDTH * INVENTORY_HEIGHT];
+	if (!InventoryItemIds) {
+		InventoryItemIds = new int[INVENTORY_WIDTH * INVENTORY_HEIGHT];
 	}
-	if (!StashItems) {
-		StashItems = new UnitAny * [STASH_WIDTH * LOD_STASH_HEIGHT];
+	if (!StashItemIds) {
+		StashItemIds = new int[STASH_WIDTH * STASH_HEIGHT];
 	}
-	if (!CubeItems) {
-		CubeItems = new UnitAny * [CUBE_WIDTH * CUBE_HEIGHT];
+	if (!CubeItemIds) {
+		CubeItemIds = new int[CUBE_WIDTH * CUBE_HEIGHT];
 	}
 
 	//PrintText(1, "Got positions: %d, %d, %d, %d, %d, %d, %d, %d, %d, %d, %d, %d, %d, %d, %d",
@@ -125,40 +86,41 @@ void ItemMover::Init() {
 	//	CUBE_TOP,
 	//	CELL_SIZE
 	//);
+	return true;
 }
 
 bool ItemMover::LoadInventory(UnitAny* unit, int xpac, int source, int sourceX, int sourceY, bool shiftState, bool ctrlState, int stashUI, int invUI) {
 	bool returnValue = false;
 
-	memset(InventoryItems, 0, INVENTORY_WIDTH * INVENTORY_HEIGHT * sizeof(int));
-	memset(StashItems, 0, STASH_WIDTH * LOD_STASH_HEIGHT * sizeof(int));
-	memset(CubeItems, 0, CUBE_WIDTH * CUBE_HEIGHT * sizeof(int));
+	memset(InventoryItemIds, 0, INVENTORY_WIDTH * INVENTORY_HEIGHT * sizeof(int));
+	memset(StashItemIds, 0, STASH_WIDTH * STASH_HEIGHT * sizeof(int));
+	memset(CubeItemIds, 0, CUBE_WIDTH * CUBE_HEIGHT * sizeof(int));
 
-	if (!xpac) {
-		for (int x = 0; x < STASH_WIDTH; x++) {
-			for (int y = CLASSIC_STASH_HEIGHT; y < LOD_STASH_HEIGHT; y++) {
-				StashItems[y * STASH_WIDTH + x] = (UnitAny*)NULL;
-			}
-		}
-	}
+	//if (!xpac) {
+	//	for (int x = 0; x < STASH_WIDTH; x++) {
+	//		for (int y = CLASSIC_STASH_HEIGHT; y < LOD_STASH_HEIGHT; y++) {
+	//			StashItems[y * STASH_WIDTH + x] = (UnitAny*)NULL;
+	//		}
+	//	}
+	//}
 
 	unsigned int itemId = 0;
 	BYTE itemXSize, itemYSize;
 	bool cubeInInventory = false, cubeAnywhere = false;
 	UnitAny* pTargetItem = NULL;
 	for (UnitAny* pItem = unit->pInventory->pFirstItem; pItem; pItem = pItem->pItemData->pNextInvItem) {
-		UnitAny** p;
+		int* p;
 		int width;
 		if (pItem->pItemData->ItemLocation == STORAGE_INVENTORY) {
-			p = InventoryItems;
+			p = InventoryItemIds;
 			width = INVENTORY_WIDTH;
 		}
 		else if (pItem->pItemData->ItemLocation == STORAGE_STASH) {
-			p = StashItems;
+			p = StashItemIds;
 			width = STASH_WIDTH;
 		}
 		else if (pItem->pItemData->ItemLocation == STORAGE_CUBE) {
-			p = CubeItems;
+			p = CubeItemIds;
 			width = CUBE_WIDTH;
 		}
 		else {
@@ -185,7 +147,12 @@ bool ItemMover::LoadInventory(UnitAny* unit, int xpac, int source, int sourceX, 
 		BYTE ySize = pItemText->binvheight;
 		for (int x = xStart; x < xStart + xSize; x++) {
 			for (int y = yStart; y < yStart + ySize; y++) {
-				p[y * width + x] = pItem;
+				p[y * width + x] = pItem->dwUnitId;
+				if (pItem->pItemData->ItemLocation == STORAGE_CUBE) {
+					char info[MAX_PATH] = "";
+					sprintf(info, "zyl CUBE: %d\r\n", p[y * width + x]);
+					OutputDebugString(info);
+				}
 
 				// If you click to move the cube into itself, your character ends up in
 				// the amusing (and apparently permanent) state where he has no visible
@@ -232,20 +199,20 @@ bool ItemMover::LoadInventory(UnitAny* unit, int xpac, int source, int sourceX, 
 }
 
 bool ItemMover::FindDestination(UnitAny* unit, UnitAny* pItem, int xpac, int destination, unsigned int itemId, BYTE xSize, BYTE ySize) {
-	UnitAny** p;
+	int* p;
 	int width = 0, height = 0;
 	if (destination == STORAGE_INVENTORY) {
-		p = InventoryItems;
+		p = InventoryItemIds;
 		width = INVENTORY_WIDTH;
 		height = INVENTORY_HEIGHT;
 	}
 	else if (destination == STORAGE_STASH) {
-		p = StashItems;
+		p = StashItemIds;
 		width = STASH_WIDTH;
-		height = xpac ? LOD_STASH_HEIGHT : CLASSIC_STASH_HEIGHT;
+		height = STASH_HEIGHT;
 	}
 	else if (destination == STORAGE_CUBE) {
-		p = CubeItems;
+		p = CubeItemIds;
 		width = CUBE_WIDTH;
 		height = CUBE_HEIGHT;
 	}
@@ -285,6 +252,9 @@ bool ItemMover::FindDestination(UnitAny* unit, UnitAny* pItem, int xpac, int des
 
 		if (!found)
 		{
+			//bool found = false;
+			//int destX = 0, destY = 0;
+			//bool first_y = true;
 			for (int x = 0; x < width; x++) {
 				for (int y = 0; y < height; y++) {
 					bool abort = false;
@@ -435,11 +405,12 @@ void ItemMover::OnLeftClick(bool up, int x, int y, bool* block) {
 	UnitAny* unit = D2CLIENT_GetPlayerUnit();
 	bool shiftState = ((GetKeyState(VK_LSHIFT) & 0x80) || (GetKeyState(VK_RSHIFT) & 0x80));
 
-	if (up || !pData || !unit || !shiftState || D2CLIENT_GetCursorItem() > 0 || (!D2CLIENT_GetUIState(UI_INVENTORY) && !D2CLIENT_GetUIState(UI_STASH) && !D2CLIENT_GetUIState(UI_CUBE) && !D2CLIENT_GetUIState(UI_NPCSHOP))) {
+	if (up || !pData || !unit || !shiftState || D2CLIENT_GetCursorItem() > 0 || (!D2CLIENT_GetUIState(UI_INVENTORY) && !D2CLIENT_GetUIState(UI_STASH) && !D2CLIENT_GetUIState(UI_CUBE) && !D2CLIENT_GetUIState(UI_NPCSHOP)) ||
+		!Init()) {
 		return;
 	}
 
-	Init();
+	//Init();
 
 	unidItemId = 0;
 	idBookId = 0;
@@ -461,12 +432,7 @@ void ItemMover::OnLeftClick(bool up, int x, int y, bool* block) {
 			}
 			else if (pItem->pItemData->ItemLocation == STORAGE_STASH) {
 				mouseX = (*p_D2CLIENT_MouseX - STASH_LEFT) / CELL_SIZE;
-				if (xpac) {
-					mouseY = (*p_D2CLIENT_MouseY - LOD_STASH_TOP) / CELL_SIZE;
-				}
-				else {
-					mouseY = (*p_D2CLIENT_MouseY - CLASSIC_STASH_TOP) / CELL_SIZE;
-				}
+				mouseY = (*p_D2CLIENT_MouseY - STASH_TOP) / CELL_SIZE;
 			}
 			else if (pItem->pItemData->ItemLocation == STORAGE_CUBE) {
 				mouseX = (*p_D2CLIENT_MouseX - CUBE_LEFT) / CELL_SIZE;
@@ -507,38 +473,39 @@ void ItemMover::OnRightClick(bool up, int x, int y, bool* block) {
 	UnitAny* unit = D2CLIENT_GetPlayerUnit();
 	bool shiftState = ((GetKeyState(VK_LSHIFT) & 0x80) || (GetKeyState(VK_RSHIFT) & 0x80));
 	bool ctrlState = ((GetKeyState(VK_LCONTROL) & 0x80) || (GetKeyState(VK_RCONTROL) & 0x80));
-	if (up || !pData || !unit || !(shiftState || ctrlState)) {
+	if (up || !pData || !unit || !(shiftState || ctrlState) ||
+		!Init()) {
 		return;
 	}
 
-	Init();
+	//Init();
 
-	int xpac = pData->nCharFlags & PLAYER_TYPE_EXPANSION;
+	//int xpac = pData->nCharFlags & PLAYER_TYPE_EXPANSION;
 
-	int inventoryRight = INVENTORY_LEFT + (CELL_SIZE * INVENTORY_WIDTH);
-	int inventoryBottom = INVENTORY_TOP + (CELL_SIZE * INVENTORY_HEIGHT);
-	int stashRight = STASH_LEFT + (CELL_SIZE * STASH_WIDTH);
-	int stashTop = xpac ? LOD_STASH_TOP : CLASSIC_STASH_TOP;
-	int stashHeight = xpac ? LOD_STASH_HEIGHT : CLASSIC_STASH_HEIGHT;
-	int stashBottom = stashTop + (CELL_SIZE * stashHeight);
-	int cubeRight = CUBE_LEFT + (CELL_SIZE * CUBE_WIDTH);
-	int cubeBottom = CUBE_TOP + (CELL_SIZE * CUBE_HEIGHT);
+	//int inventoryRight = INVENTORY_LEFT + (CELL_SIZE * INVENTORY_WIDTH);
+	//int inventoryBottom = INVENTORY_TOP + (CELL_SIZE * INVENTORY_HEIGHT);
+	//int stashRight = STASH_LEFT + (CELL_SIZE * STASH_WIDTH);
+	//int stashTop = xpac ? LOD_STASH_TOP : CLASSIC_STASH_TOP;
+	//int stashHeight = xpac ? LOD_STASH_HEIGHT : CLASSIC_STASH_HEIGHT;
+	//int stashBottom = stashTop + (CELL_SIZE * stashHeight);
+	//int cubeRight = CUBE_LEFT + (CELL_SIZE * CUBE_WIDTH);
+	//int cubeBottom = CUBE_TOP + (CELL_SIZE * CUBE_HEIGHT);
 
 	int source, sourceX, sourceY;
 	int invUI = D2CLIENT_GetUIState(UI_INVENTORY);
 	int stashUI = D2CLIENT_GetUIState(UI_STASH);
 	int cubeUI = D2CLIENT_GetUIState(UI_CUBE);
-	if ((invUI || stashUI || cubeUI) && x >= INVENTORY_LEFT && x <= inventoryRight && y >= INVENTORY_TOP && y <= inventoryBottom) {
+	if ((invUI || stashUI || cubeUI) && x >= INVENTORY_LEFT && x <= INVENTORY_RIGHT && y >= INVENTORY_TOP && y <= INVENTORY_BOTTOM) {
 		source = STORAGE_INVENTORY;
 		sourceX = (x - INVENTORY_LEFT) / CELL_SIZE;
 		sourceY = (y - INVENTORY_TOP) / CELL_SIZE;
 	}
-	else if (stashUI && x >= STASH_LEFT && x <= stashRight && y >= stashTop && y <= stashBottom) {
+	else if (stashUI && x >= STASH_LEFT && x <= STASH_RIGHT && y >= STASH_TOP && y <= STASH_BOTTOM) {
 		source = STORAGE_STASH;
 		sourceX = (x - STASH_LEFT) / CELL_SIZE;
-		sourceY = (y - stashTop) / CELL_SIZE;
+		sourceY = (y - STASH_TOP) / CELL_SIZE;
 	}
-	else if (cubeUI && x >= CUBE_LEFT && x <= cubeRight && y >= CUBE_TOP && y <= cubeBottom) {
+	else if (cubeUI && x >= CUBE_LEFT && x <= CUBE_RIGHT && y >= CUBE_TOP && y <= CUBE_BOTTOM) {
 		source = STORAGE_CUBE;
 		sourceX = (x - CUBE_LEFT) / CELL_SIZE;
 		sourceY = (y - CUBE_TOP) / CELL_SIZE;
@@ -547,7 +514,7 @@ void ItemMover::OnRightClick(bool up, int x, int y, bool* block) {
 		return;
 	}
 
-	bool moveItem = LoadInventory(unit, xpac, source, sourceX, sourceY, shiftState, ctrlState, stashUI, invUI);
+	bool moveItem = LoadInventory(unit, 0, source, sourceX, sourceY, shiftState, ctrlState, stashUI, invUI);
 	if (moveItem) {
 		PickUpItem();
 	}
@@ -557,6 +524,7 @@ void ItemMover::OnRightClick(bool up, int x, int y, bool* block) {
 void ItemMover::LoadConfig() {
 	BH::config->ReadKey("Use TP Tome", "VK_N", TpKey);
 	BH::config->ReadKey("Use TP Tome Back", "VK_BACK", TpBackKey);
+	BH::config->ReadKey("Use Exit Game", "VK_NUMPADSUBTRACT", ExitGameKey);
 	BH::config->ReadKey("Use Healing Potion", "VK_1", HealKey);
 	BH::config->ReadKey("Use Mana Potion", "VK_2", ManaKey);
 	BH::config->ReadKey("Use Rejuv Potion", "VK_3", JuvKey);
@@ -568,6 +536,7 @@ void ItemMover::LoadConfig() {
 	// BH::config->ReadToggle("Skill Bar", "None", false, ScreenInfo::Toggles["Skill Bar"]);
 	// BH::config->ReadToggle("Skill Bar Disable", "None", false, ScreenInfo::Toggles["Skill Bar Disable"]);
 	// BH::config->ReadToggle("Buff Timers", "None", false, ScreenInfo::Toggles["Buff Timers"]);
+	//BH::config->ReadInt("StashLeftFix", BH::stash_left_fix,0);
 }
 
 void ItemMover::OnLoad() {
@@ -582,6 +551,7 @@ void ItemMover::OnLoad() {
 	new Drawing::Texthook(settingsTab, x, y, "鼠标点击可自定义快捷键 (按esc清除快捷键)");
 	new Drawing::Keyhook(settingsTab, x, (y += 15), &TpKey, "快速开门:       ");
 	new Drawing::Keyhook(settingsTab, x, (y += 15), &TpBackKey, "快速回城:       ");
+	new Drawing::Keyhook(settingsTab, x, (y += 15), &ExitGameKey, "快速退出:       ");
 	new Drawing::Keyhook(settingsTab, x, (y += 15), &HealKey, "使用红药:       ");
 	new Drawing::Keyhook(settingsTab, x, (y += 15), &ManaKey, "使用蓝药:       ");
 	new Drawing::Keyhook(settingsTab, x, (y += 15), &JuvKey, "使用紫药:       ");
@@ -592,6 +562,12 @@ void ItemMover::OnLoad() {
 	new Keyhook(settingsTab, keyhook_x, (y + 2), &ChatColor::Toggles["Merc Protect"].toggle, "");
 	new Checkhook(settingsTab, 4, (y += 15), &ChatColor::Toggles["Merc Boring"].state, "佣兵吐槽");
 	new Keyhook(settingsTab, keyhook_x, (y + 2), &ChatColor::Toggles["Merc Boring"].toggle, "");
+	new Checkhook(settingsTab, 4, (y += 15), &ChatColor::Toggles["Rune Number"].state, "符文数字显示");
+	new Keyhook(settingsTab, keyhook_x, (y + 2), &ChatColor::Toggles["Rune Number"].toggle, "");
+	new Checkhook(settingsTab, 4, (y += 15), &ChatColor::Toggles["Show Money"].state, "贪婪模式");
+	new Keyhook(settingsTab, keyhook_x, (y + 2), &ChatColor::Toggles["Show Money"].toggle, "");
+	new Checkhook(settingsTab, 4, (y += 15), &ChatColor::Toggles["Death Back"].state, "死亡立即回城");
+	new Keyhook(settingsTab, keyhook_x, (y + 2), &ChatColor::Toggles["Death Back"].toggle, "");
 	// y += 15;
 	// new Drawing::Checkhook(settingsTab, 4, y, &ScreenInfo::Toggles["Quick Cast"].state, "Quick Cast");
 	// new Drawing::Keyhook(settingsTab, keyhook_x, y + 2, &ScreenInfo::Toggles["Quick Cast"].toggle, "");
@@ -649,13 +625,14 @@ void ItemMover::OnKey(bool up, BYTE key, LPARAM lParam, bool* block) {
 		bool isBelt = false;
 		for (UnitAny* pItem = unit->pInventory->pFirstItem; pItem; pItem = pItem->pItemData->pNextInvItem) {
 			if (
-				pItem->pItemData->ItemLocation == STORAGE_INVENTORY ||
-				pItem->pItemData->ItemLocation == STORAGE_NULL && pItem->pItemData->NodePage == NODEPAGE_BELTSLOTS) {
+				(!shiftState && pItem->pItemData->ItemLocation == STORAGE_INVENTORY) ||
+				(pItem->pItemData->ItemLocation == STORAGE_NULL && pItem->pItemData->NodePage == NODEPAGE_BELTSLOTS)) {
 				char* code = D2COMMON_GetItemText(pItem->dwTxtFileNo)->szCode;
 				if (code[0] == startChars[0] && code[1] == startChars[1] && code[2] < minPotion) {
 					minPotion = code[2];
 					minItemId = pItem->dwUnitId;
 					isBelt = pItem->pItemData->NodePage == NODEPAGE_BELTSLOTS;
+					break;
 				}
 				//else if (code[0] == 'y'&& code[1] == 'p'&& code[2] == 's') {  //解毒药
 				//	minItemId = pItem->dwUnitId;
@@ -676,8 +653,11 @@ void ItemMover::OnKey(bool up, BYTE key, LPARAM lParam, bool* block) {
 			if (isBelt) {
 				BYTE PacketData[13] = { 0x26, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0 };
 				*reinterpret_cast<int*>(PacketData + 1) = minItemId;
-				if(shiftState)   //按shift
+				if (shiftState) {   //按shift
+					if (ChatColor::Toggles["Merc Boring"].state)
+						PrintText(White, "佣兵：听我说谢谢你~");
 					*reinterpret_cast<int*>(PacketData + 5) = 1;  //是否给佣兵吃药,1是给，0是不给
+				}
 				D2NET_SendPacket(13, 0, PacketData);
 			}
 			else {
@@ -696,40 +676,48 @@ void ItemMover::OnKey(bool up, BYTE key, LPARAM lParam, bool* block) {
 		});
 		*block = true;  //设置了喝药快捷键，如果没有蓝就不喝红。
 	}
-	if (!up && (key == TpKey || key == TpBackKey)) {
-		AutoBackTown = false;
-		if (key == TpBackKey) {
-			AutoBackTown = true;
-		}
-		DWORD tpId = 0;
-		int tp_quantity = 0;
-		for (UnitAny* pItem = unit->pInventory->pFirstItem; pItem; pItem = pItem->pItemData->pNextInvItem) {
-			if (pItem->pItemData->ItemLocation == STORAGE_INVENTORY) {
-				char* code = D2COMMON_GetItemText(pItem->dwTxtFileNo)->szCode;
-				if (code[0] == 't' && code[1] == 'b' && code[2] == 'k') {
-					tp_quantity = D2COMMON_GetUnitStat(pItem, STAT_AMMOQUANTITY, 0);
-					if (tp_quantity > 0) {
+	else if (!up && (key == TpKey || key == TpBackKey)) {
+			AutoBackTown = false;
+			if (key == TpBackKey) {
+				AutoBackTown = true;
+			}
+			DWORD tpId = 0;
+			int tp_quantity = 0;
+			for (UnitAny* pItem = unit->pInventory->pFirstItem; pItem; pItem = pItem->pItemData->pNextInvItem) {
+				if (pItem->pItemData->ItemLocation == STORAGE_INVENTORY) {
+					char* code = D2COMMON_GetItemText(pItem->dwTxtFileNo)->szCode;
+					if (code[0] == 'r' && code[1] == 't' && code[2] == 'p') {
 						tpId = pItem->dwUnitId;
 						break;
+					}else if ((code[0] == 't' && code[1] == 'b' && code[2] == 'k')) {
+						tp_quantity = D2COMMON_GetUnitStat(pItem, STAT_AMMOQUANTITY, 0);
+						if (tp_quantity > 0) {
+							tpId = pItem->dwUnitId;
+							break;
+						}
 					}
 				}
 			}
-		}
-		if (tpId > 0) {
-			BYTE PacketData[13] = { 0x20, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0 };
-			*reinterpret_cast<int*>(PacketData + 1) = tpId;
-			*reinterpret_cast<WORD*>(PacketData + 5) = (WORD)unit->pPath->xPos;
-			*reinterpret_cast<WORD*>(PacketData + 9) = (WORD)unit->pPath->yPos;
-			if (tp_quantity < tp_warn_quantity) {
-				PrintText(Red, "TP tome is running low!");
+			if (tpId > 0) {
+				BYTE PacketData[13] = { 0x20, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0 };
+				*reinterpret_cast<int*>(PacketData + 1) = tpId;
+				*reinterpret_cast<WORD*>(PacketData + 5) = (WORD)unit->pPath->xPos;
+				*reinterpret_cast<WORD*>(PacketData + 9) = (WORD)unit->pPath->yPos;
+				if (tp_quantity < tp_warn_quantity) {
+					PrintText(Red, "TP tome is running low!");
+				}
+				D2NET_SendPacket(13, 0, PacketData);
+				*block = true;
 			}
-			D2NET_SendPacket(13, 0, PacketData);
-			*block = true;
-		}
 	}
-	if (!up && key == BeltKey) {  //自动填充腰带
-		AutoToBelt();
-		//*block = true;   //不让它继续向下触发按键事件
+	else if (!up && key == BeltKey) {  //自动填充腰带
+			AutoToBelt();
+			//*block = true;   //不让它继续向下触发按键事件
+	}
+	else if (!up && key == ExitGameKey) {  //快速退出游戏
+		*p_D2CLIENT_ExitAppFlag = 0;
+		SendMessage(D2GFX_GetHwnd(), WM_CLOSE, 0, 0);
+		*block = true;   //不让它继续向下触发按键事件
 	}
 }
 
@@ -796,6 +784,9 @@ void ItemMover::OnGamePacketRecv(BYTE* packet, bool* block) {
 				}
 				//PrintText(1, "Item on ground: %s, %s, %s, %X", item.name.c_str(), item.code, item.attrs->category.c_str(), item.attrs->flags);
 				if (showOnMap && !(*BH::MiscToggles2)["Item Detailed Notifications"].state) {
+					if (!IsTown(GetPlayerArea())) {  //run tracker相关,只要有提示的都记录一下试试看
+						ScreenInfo::AddDrop(item.name.c_str(), item.x, item.y);
+					}
 					if (color == UNDEFINED_COLOR) {
 						color = ItemColorFromQuality(item.quality);
 					}
@@ -904,6 +895,24 @@ void ItemMover::OnGameExit() {
 	ActivePacket.startTicks = 0;
 	ActivePacket.destination = 0;
 }
+
+void ItemMover::OnLoop()
+{
+	//分辩率有发生变化的话
+	if (my_screenWidth!=*p_D2CLIENT_ScreenSizeX|| my_screenHeight != *p_D2CLIENT_ScreenSizeY)
+	{
+		//if (my_screenWidth != -1 && my_screenHeight != -1) {
+			//对"ZYLPD2设置"按钮做一个位置调整(X暂不调整)			
+			BH::settingsUI->SetMinimizedY(*p_D2CLIENT_ScreenSizeY - TITLE_BAR_HEIGHT);
+		//}
+		//Init();  //初始化一次
+		my_screenWidth = *p_D2CLIENT_ScreenSizeX;
+		my_screenHeight = *p_D2CLIENT_ScreenSizeY;
+		//BH::settingsUI->SetMinimizedX(1);
+		//BH::settingsUI->SetMinimizedY();
+	}
+}
+
 
 // Code for reading the 0x9c bitstream (borrowed from heroin_glands)
 void ParseItem(const unsigned char* data, ItemInfo* item, bool* success) {

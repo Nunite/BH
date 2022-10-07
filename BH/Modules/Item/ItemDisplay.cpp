@@ -1,5 +1,6 @@
 ﻿#include "ItemDisplay.h"
 #include "Item.h"
+#include "../ChatColor/ChatColor.h"
 #include "../../Drawing/Stats/StatsDisplay.h"
 #include <cctype>
 #include <vector>
@@ -1638,7 +1639,13 @@ bool GoldCondition::EvaluateInternalFromPacket(ItemInfo* info,
 	Condition* arg1,
 	Condition* arg2)
 {
-	if (info->code[0] == 'g' && info->code[1] == 'l' && info->code[2] == 'd') { return IntegerCompare(info->amount, operation, goldAmount); }
+	if (!ChatColor::Toggles["Show Money"].state) {  //贪婪模式
+		if (info->code[0] == 'g' && info->code[1] == 'l' && info->code[2] == 'd') {
+			//return false;  //这个是全部显示
+			return IntegerCompare(info->amount, operation, goldAmount);
+		}
+	}
+
 	return false;
 }
 

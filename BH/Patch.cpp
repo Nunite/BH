@@ -1,5 +1,6 @@
 #include "Patch.h"
 #include "D2Version.h"
+#include "D2Ptrs.h"
 std::vector<Patch*> Patch::Patches;
 
 Patch::Patch(PatchType type, Dll dll, Offsets offsets, int function, int length) 
@@ -12,7 +13,7 @@ Patch::Patch(PatchType type, Dll dll, Offsets offsets, int function, int length)
 int Patch::GetDllOffset(Dll dll, int offset) {
 	const char* szDlls[] = {"D2CLIENT.dll", "D2COMMON.dll", "D2GFX.dll", "D2LANG.dll",
 							"D2WIN.dll", "D2NET.dll", "D2GAME.dll", "D2LAUNCH.dll",
-							"FOG.dll", "BNCLIENT.dll", "STORM.dll", "D2CMP.dll", "D2MULTI.dll", "D2MCPCLIENT.dll", "D2CMP.dll"};
+							"FOG.dll", "BNCLIENT.dll", "STORM.dll", "D2CMP.dll", "D2MULTI.dll", "D2MCPCLIENT.dll","d2server.dll","ProjectDiablo.dll"};
 	//Attempt to get the module of the given DLL
 	HMODULE hModule = GetModuleHandle(szDlls[dll]);
 
@@ -41,6 +42,19 @@ bool Patch::WriteBytes(int address, int len, BYTE* bytes) {
 
 	::memcpy((void*)address, bytes, len);
 	return !!VirtualProtect((void*)address, len, dwOld, &dwOld);
+}
+
+//判断是否执行在服务端
+bool Patch::isServer()
+{
+	HMODULE hModule = GetModuleHandle("d2server.dll");
+	if (!hModule)
+		return false;
+	return true;
+}
+
+GameStructInfo* Patch::GameInfo() {
+	return (*p_D2CLIENT_GameInfo);
 }
 
 bool Patch::Install() {

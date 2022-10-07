@@ -1357,6 +1357,63 @@ struct SkillDescTxt
 
 #pragma pack(pop)
 
+//from HM
+struct ItemTxt {				//size = 0x1A8
+	char szFlippyfile[32];		//+00
+	char szInvfile[96];			//+20 ==>three names 32*3
+	union {
+		DWORD dwCode[5];
+		char szCode[20];
+	};							//+80
+	BYTE nPotionflag;			//+94 //potion cube ,book 
+	BYTE _1[39];				//+95  have 2byte only misc have ,and heal potion is diff
+	char szMisc1[4];			//+BC
+	char szWeap1[8];			//+C0
+	char szMisc2[4];			//+C8
+	int dwMinDef;				//+CC
+	int dwMaxDef;				//+D0
+	DWORD dwGambleCost;			//+D4
+	int  dwSpeed;				//+D8
+	int  dwBitfield1;			//+DC
+	DWORD dwCost;				//+E0
+	DWORD _2[2];				//+E4
+	BYTE nContainerType;		//+EC
+	BYTE _3[7];					//+ED
+	WORD wLocaleTxtNo;			//+F4
+	BYTE nVersion;				//+F6
+	BYTE _4[5];					//+F7
+	BYTE nRarity;				//+FC
+	BYTE nQLevel;				//+FD
+	BYTE nMindam;				//+FE one hand
+	BYTE nMaxdam;				//+FF
+	BYTE _5[2];					//+100
+	BYTE nMindam2;				//+102 two hand
+	BYTE nMaxdam2;				//+103
+	BYTE nRangeAdder;			//+104
+	BYTE _6;					//+105
+	WORD wStrBonus;				//+106
+	WORD wDexBonus;				//+108
+	WORD wReqstr;				//+10A
+	WORD wReqDex;				//+10C
+	BYTE nAbsorbs;				//+10E
+	BYTE nInvwidth;				//+10F
+	BYTE nInvheight;			//+110
+	BYTE _8;					//+111
+	BYTE nDurability;			//+112
+	BYTE _8a[2];				//+113
+	BYTE nComponent;			//+115
+	BYTE _8b[8];				//+116
+	BYTE nType;					//+11E
+	BYTE _3a[11];				//+11F
+	BYTE fQuest;				//+12A
+	BYTE fDiffCheck;			//+12B
+	BYTE _9[12];				//+12C
+	BYTE nSocket;				//+138
+	BYTE _10[6];				//+139
+	BYTE nLevelReq;				//+13F
+	BYTE nMagicLvl;				//+140
+};
+
 struct ItemsTxt //size = 0x1A8, Valid for Weapons, Armors, Misc.txts
 {
 	char	szflippyfile[32];		//0x00

@@ -90,6 +90,11 @@ bool ModuleManager::UserInput(wchar_t* module, wchar_t* msg, bool fromGame) {
 		Print("\377c4BH:\377c0 Successfully saved configuration.");
 	}
 
+	//if (name.compare("pp") == 0) {  //目前只适用单机，以后再说吧
+	//	D2GAME_D2SetNbPlayers(0x8);
+	//	Print("\377c4BH:\377c0 游戏难度设置为PP8！");
+	//}
+
 	for (map<string, Module*>::iterator it = moduleList.begin(); it != moduleList.end(); ++it) {
 		if (name.compare((*it).first) == 0) {
 			__raise it->second->UserInput(msg, fromGame, &block);

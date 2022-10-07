@@ -34,4 +34,5 @@ bool IsGameReady();
 DWORD GetPlayerArea();
 int ItemColorFromQuality(unsigned int quality);
 
+void d2_assert(bool pCondition, char* pMessage, char* pLocation, int pLineNbr);
 void LogMsg(const char* pFormat, ...);

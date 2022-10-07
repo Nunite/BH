@@ -99,6 +99,36 @@
     </ClCompile>
     <ClCompile Include="Modules\GameSettings\GameSettings.cpp">
       <Filter>Modules\GameSettings</Filter>
+	</ClCompile>
+    <ClCompile Include="Modules\MultiStash\MultiStash.cpp">
+      <Filter>Modules\MultiStash</Filter>
+    </ClCompile>
+    <ClCompile Include="Modules\MultiStash\SavePlayerData.cpp">
+      <Filter>Modules\MultiStash</Filter>
+    </ClCompile>
+    <ClCompile Include="Modules\MultiStash\ExtendedSaveFile.cpp">
+      <Filter>Modules\MultiStash</Filter>
+    </ClCompile>
+    <ClCompile Include="Modules\MultiStash\InfinityStash.cpp">
+      <Filter>Modules\MultiStash</Filter>
+    </ClCompile>
+    <ClCompile Include="Modules\MultiStash\LoadPlayerData.cpp">
+      <Filter>Modules\MultiStash</Filter>
+    </ClCompile>
+    <ClCompile Include="Modules\MultiStash\PlayerCustomData.cpp">
+      <Filter>Modules\MultiStash</Filter>
+    </ClCompile>
+    <ClCompile Include="Modules\MultiStash\UpdateClient.cpp">
+      <Filter>Modules\MultiStash</Filter>
+    </ClCompile>
+    <ClCompile Include="Modules\MultiStash\Interface_Stash.cpp">
+      <Filter>Modules\MultiStash</Filter>
+    </ClCompile>
+    <ClCompile Include="Modules\MultiStash\UpdateServer.cpp">
+      <Filter>Modules\MultiStash</Filter>
+    </ClCompile>
+    <ClCompile Include="Modules\MultiStash\PlugYFiles.cpp">
+      <Filter>Modules\MultiStash</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>
@@ -208,6 +238,37 @@
     </ClInclude>
     <ClInclude Include="Modules\GameSettings\GameSettings.h">
       <Filter>Modules\GameSettings</Filter>
+	</ClInclude>
+    <ClInclude Include="resource.h" />
+    <ClInclude Include="Modules\MultiStash\MultiStash.h">
+      <Filter>Modules\MultiStash</Filter>
+    </ClInclude>
+    <ClInclude Include="Modules\MultiStash\ExtendedSaveFile.h">
+      <Filter>Modules\MultiStash</Filter>
+    </ClInclude>
+    <ClInclude Include="Modules\MultiStash\SavePlayerData.h">
+      <Filter>Modules\MultiStash</Filter>
+    </ClInclude>
+    <ClInclude Include="Modules\MultiStash\InfinityStash.h">
+      <Filter>Modules\MultiStash</Filter>
+    </ClInclude>
+    <ClInclude Include="Modules\MultiStash\LoadPlayerData.h">
+      <Filter>Modules\MultiStash</Filter>
+    </ClInclude>
+    <ClInclude Include="Modules\MultiStash\PlayerCustomData.h">
+      <Filter>Modules\MultiStash</Filter>
+    </ClInclude>
+    <ClInclude Include="Modules\MultiStash\UpdateClient.h">
+      <Filter>Modules\MultiStash</Filter>
+    </ClInclude>
+    <ClInclude Include="Modules\MultiStash\Interface_Stash.h">
+      <Filter>Modules\MultiStash</Filter>
+    </ClInclude>
+    <ClInclude Include="Modules\MultiStash\UpdateServer.h">
+      <Filter>Modules\MultiStash</Filter>
+    </ClInclude>
+    <ClInclude Include="Modules\MultiStash\PlugYFiles.h">
+      <Filter>Modules\MultiStash</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>
@@ -289,5 +350,11 @@
     <Filter Include="Modules\GameSettings">
       <UniqueIdentifier>{804cabda-3e31-4dee-bcf5-07cd55094c08}</UniqueIdentifier>
     </Filter>
+    <Filter Include="Modules\MultiStash">
+      <UniqueIdentifier>{d5915309-ecc3-49fa-b3d2-c44b4a34865c}</UniqueIdentifier>
+    </Filter>
+  </ItemGroup>
+  <ItemGroup>
+    <ResourceCompile Include="BH.rc" />
   </ItemGroup>
 </Project>

@@ -5,7 +5,33 @@
 #include "../../D2Stubs.h"
 #include "../../D2Intercepts.h"
 #include "../../D2Helpers.h"
+#include "../ItemMover/ItemMover.h"
+#include "../Item/Item.h"
 
+
+#define INVENTORY_WIDTH  p_D2CLIENT_InventoryLayout->SlotWidth
+#define INVENTORY_HEIGHT p_D2CLIENT_InventoryLayout->SlotHeight
+#define INVENTORY_LEFT   p_D2CLIENT_InventoryLayout->Left
+#define INVENTORY_RIGHT  p_D2CLIENT_InventoryLayout->Right
+#define INVENTORY_TOP    p_D2CLIENT_InventoryLayout->Top
+#define INVENTORY_BOTTOM p_D2CLIENT_InventoryLayout->Bottom
+
+//这里先不管非资料片的stash
+#define STASH_WIDTH  p_D2CLIENT_StashLayout->SlotWidth
+#define STASH_HEIGHT p_D2CLIENT_StashLayout->SlotHeight
+#define STASH_LEFT   p_D2CLIENT_StashLayout->Left
+#define STASH_RIGHT  p_D2CLIENT_StashLayout->Right
+#define STASH_TOP    p_D2CLIENT_StashLayout->Top
+#define STASH_BOTTOM p_D2CLIENT_StashLayout->Bottom
+
+#define CUBE_WIDTH  p_D2CLIENT_CubeLayout->SlotWidth
+#define CUBE_HEIGHT p_D2CLIENT_CubeLayout->SlotHeight
+#define CUBE_LEFT   p_D2CLIENT_CubeLayout->Left
+#define CUBE_RIGHT  p_D2CLIENT_CubeLayout->Right
+#define CUBE_TOP    p_D2CLIENT_CubeLayout->Top
+#define CUBE_BOTTOM p_D2CLIENT_CubeLayout->Bottom
+
+#define CELL_SIZE p_D2CLIENT_InventoryLayout->SlotPixelHeight
 
 using namespace Drawing;  //这个是Hook的namespace
  
@@ -44,9 +70,12 @@ Patch* petHead = new Patch(Call, D2CLIENT, { 0x5B582, 0xB254C }, (DWORD)DrawPetH
 //{PatchCALL, DLLOFFSET2(D2CLIENT, 0x6FB0B582, 0x6FB39662), (DWORD)DrawPetHeadPath_ASM, 7, & fDefault},
 Patch* partyHead = new Patch(Call, D2CLIENT, { 0x5BBE0, 0xB254C }, (DWORD)DrawPartyHeadPath_ASM, 6);
 //{ PatchCALL,   DLLOFFSET2(D2CLIENT, 0x6FB0BBE0, 0x6FB39F90),    (DWORD)DrawPartyHeadPath_ASM,          6 ,   &fDefault },
+// 从HM移植防具基础值
+Patch* DBase = new Patch(Call, D2CLIENT, { 0x8FDAD, 0x8FDAD }, (DWORD)StrcatDefenseStringPatch_ASM, 6);
+//{PatchCALL, DLLOFFSET2(D2CLIENT, 0x6FB3FDAD, 0x6FB422FD), (DWORD)StrcatDefenseStringPatch_ASM, 6, & fDefault},//拼防御值字符串
 
 void ChatColor::Init() {
-	inGameOnce = false;
+	BH::inGameOnce = false;
 }
 
 void Print(DWORD color, char* format, ...) {
@@ -81,6 +110,7 @@ void Print(DWORD color, char* format, ...) {
 DWORD gameTimer;
 DWORD startExperience;
 int startLevel;
+unsigned int MercProtectSec;  //佣兵保护间隔
 
 void ChatColor::OnGameJoin() {
 	inGame = true;
@@ -108,6 +138,7 @@ void ChatColor::OnLoad() {
 	showLifeMana2->Install();
 	petHead->Install();
 	partyHead->Install();
+	DBase->Install();
 	LoadConfig();
 	//状态写在这里吧
 	DWORD statNo[] = {   //状态id
@@ -117,7 +148,7 @@ void ChatColor::OnLoad() {
 		131,132,133,134,135,136,137,139,140,144,
 		145,153,157,158,159,177,8,14,33,34,
 		37,40,41,42,45,48,49,148,149,151,
-		161,162
+		161,162,3
 	};
 	DWORD color[] = {
 		1,1,1,1,1,1,1,1,1,1,
@@ -126,7 +157,7 @@ void ChatColor::OnLoad() {
 		3,3,3,3,3,3,3,3,3,3,
 		3,3,3,3,3,3,3,3,3,3,
 		3,3,3,3,3,3,3,3,3,3,
-		3,3
+		3,3,3
 	};
 	LPCSTR desc[] = {
 		"冻结","中毒","伤害加深","冰减速","虚弱","眩晕","审判光环","攻击反噬","生命偷取","衰老",
@@ -135,9 +166,12 @@ void ChatColor::OnLoad() {
 		"火焰神殿","冰冷神殿","毒素神殿","技能神殿","法力神殿","耐力神殿","经验神殿","狼人形态","熊人形态","暴风",
 		"毁天灭地","魔影斗篷","速度爆发","刀刃之盾","能量消解","变身娃娃","救助","白骨装甲","力量光环","祈祷",
 		"反抗光环","祝福瞄准","活力","专注光环","淨化","冥思","狂热光环","狼獾之心","橡木智者","飓风装甲",
-		"橡木智者","狼獾之心"
+		"橡木智者","狼獾之心","抵抗火焰"
 	};
-	for (DWORD n = 0; n < 62; n++) {
+
+	int statNoSize = sizeof(statNo) / sizeof(DWORD);  //动态数组大小
+
+	for (DWORD n = 0; n < statNoSize; n++) {
 		ChatColor::sMonitorStr[n].dwStatNo = statNo[n];
 		ChatColor::sMonitorStr[n].dwColor = color[n];
 		//ChatColor::sMonitorStr[0].fCountDown = TRUE;  //倒计时,这个暂时不行，持续时间的参数还不知道哪里
@@ -164,6 +198,7 @@ void ChatColor::OnUnload()
 	showLifeMana2->Remove();
 	petHead->Remove();
 	partyHead->Remove();
+	DBase->Remove();
 }
 
 void ChatColor::LoadConfig() {
@@ -173,6 +208,11 @@ void ChatColor::LoadConfig() {
 
 	BH::config->ReadToggle("Merc Protect", "None", true, Toggles["Merc Protect"]);  //佣兵保护
 	BH::config->ReadToggle("Merc Boring", "None", true, Toggles["Merc Boring"]);  //佣兵吐槽
+	BH::config->ReadToggle("Rune Number", "None", true, Toggles["Rune Number"]);  //符文数字
+	BH::config->ReadToggle("Show Money", "None", false, Toggles["Show Money"]);  //贪婪模式,默认关闭
+	BH::config->ReadToggle("Death Back", "None", false, Toggles["Death Back"]);  //死亡立即回城,默认关闭
+
+	BH::config->ReadInt("Merc Protect Sec", MercProtectSec, 3);   //默认3秒
 }
 
 void ChatColor::OnChatPacketRecv(BYTE* packet, bool* block) {
@@ -219,13 +259,16 @@ void ChatColor::OnLoop()
 		*p_D2WIN_FocusedControl = NULL;
 	}
 	CheckD2WinEditBox();
-	if (inGameOnce == false) {
-		inGameOnce = true;
+
+
+	if (BH::inGameOnce == false) {
+		BH::inGameOnce = true;
 		//*p_D2CLIENT_AutomapOn = TRUE;  //自动开启地图
 		D2CLIENT_ShowMap();  //自动开启地图,这个才是真正的自动开启地图
 		(*p_D2CLIENT_AutomapPos).x += 32;  //地图中心点偏移...
 		//(*p_D2CLIENT_AutomapPos).y += 0;
 		dwPlayerId = D2CLIENT_GetPlayerUnit()->dwUnitId;
+
 	}
 }
 
@@ -242,7 +285,7 @@ void ResetMonitor() {
 
 void ChatColor::OnEnd() 
 {
-	inGameOnce = false;
+	BH::inGameOnce = false;
 	ResetMonitor();  //重置状态
 }
 
@@ -619,6 +662,8 @@ void DrawMonitorInfo() {
 
 	//if (tStateMonitorToggle.isOn == 0) return;  //默认开启
 	UnitAny* pUnit = D2CLIENT_GetPlayerUnit();
+	if (!pUnit) return;
+
 	wchar_t wszTemp[512];
 	memset(wszTemp, 0, sizeof(wszTemp));
 
@@ -632,6 +677,12 @@ void DrawMonitorInfo() {
 		if ((int)(ChatColor::sMonitorStr[i].dwStatNo) <= 0)break;
 
 		if (ChatColor::sMonitorStr[i].fEnable) {
+
+			//SkillsTxt* test1 = &(*p_D2COMMON_sgptDataTable)->pSkillsTxt[146];
+			//SkillsTxt* test2 = &(*p_D2COMMON_sgptDataTable)->pSkillsTxt[147];
+			//SkillsTxt* test3 = &(*p_D2COMMON_sgptDataTable)->pSkillsTxt[155];
+			//SkillsTxt* test4 = &(*p_D2COMMON_sgptDataTable)->pSkillsTxt[149];
+			//SkillDescTxt* test1 =  &(*p_D2COMMON_sgptDataTable)->pSkillDescTxt[155];
 
 			DWORD secs = (dwTimer - ChatColor::sMonitorStr[i].dwTimer) / 1000;
 			if (ChatColor::sMonitorStr[i].fCountDown) {
@@ -648,7 +699,6 @@ void DrawMonitorInfo() {
 
 	}
 	D2WIN_SetTextFont(dwOldFone);
-
 }
 
 
@@ -776,112 +826,114 @@ wchar_t* __cdecl wsprintfW2(wchar_t* dest, char* fmt, ...)
 	return dest;
 }
 
-long long ExpByLevel[] = {
-	0,
-	500,
-	1500,
-	3750,
-	7875,
-	14175,
-	22680,
-	32886,
-	44396,
-	57715,
-	72144,
-	90180,
-	112725,
-	140906,
-	176132,
-	220165,
-	275207,
-	344008,
-	430010,
-	537513,
-	671891,
-	839864,
-	1049830,
-	1312287,
-	1640359,
-	2050449,
-	2563061,
-	3203826,
-	3902260,
-	4663553,
-	5493363,
-	6397855,
-	7383752,
-	8458379,
-	9629723,
-	10906488,
-	12298162,
-	13815086,
-	15468534,
-	17270791,
-	19235252,
-	21376515,
-	23710491,
-	26254525,
-	29027522,
-	32050088,
-	35344686,
-	38935798,
-	42850109,
-	47116709,
-	51767302,
-	56836449,
-	62361819,
-	68384473,
-	74949165,
-	82104680,
-	89904191,
-	98405658,
-	107672256,
-	117772849,
-	128782495,
-	140783010,
-	153863570,
-	168121381,
-	183662396,
-	200602101,
-	219066380,
-	239192444,
-	261129853,
-	285041630,
-	311105466,
-	339515048,
-	370481492,
-	404234916,
-	441026148,
-	481128591,
-	524840254,
-	572485967,
-	624419793,
-	681027665,
-	742730244,
-	809986056,
-	883294891,
-	963201521,
-	1050299747,
-	1145236814,
-	1248718217,
-	1361512946,
-	1484459201,
-	1618470619,
-	1764543065,
-	1923762030,
-	2097310703,
-	2286478756,
-	2492671933,
-	2717422497,
-	2962400612,
-	3229426756,
-	3520485254,
-	3837739017,
-	9999999999
-};
+//long long ExpByLevel[] = {
+//	0,
+//	500,
+//	1500,
+//	3750,
+//	7875,
+//	14175,
+//	22680,
+//	32886,
+//	44396,
+//	57715,
+//	72144,
+//	90180,
+//	112725,
+//	140906,
+//	176132,
+//	220165,
+//	275207,
+//	344008,
+//	430010,
+//	537513,
+//	671891,
+//	839864,
+//	1049830,
+//	1312287,
+//	1640359,
+//	2050449,
+//	2563061,
+//	3203826,
+//	3902260,
+//	4663553,
+//	5493363,
+//	6397855,
+//	7383752,
+//	8458379,
+//	9629723,
+//	10906488,
+//	12298162,
+//	13815086,
+//	15468534,
+//	17270791,
+//	19235252,
+//	21376515,
+//	23710491,
+//	26254525,
+//	29027522,
+//	32050088,
+//	35344686,
+//	38935798,
+//	42850109,
+//	47116709,
+//	51767302,
+//	56836449,
+//	62361819,
+//	68384473,
+//	74949165,
+//	82104680,
+//	89904191,
+//	98405658,
+//	107672256,
+//	117772849,
+//	128782495,
+//	140783010,
+//	153863570,
+//	168121381,
+//	183662396,
+//	200602101,
+//	219066380,
+//	239192444,
+//	261129853,
+//	285041630,
+//	311105466,
+//	339515048,
+//	370481492,
+//	404234916,
+//	441026148,
+//	481128591,
+//	524840254,
+//	572485967,
+//	624419793,
+//	681027665,
+//	742730244,
+//	809986056,
+//	883294891,
+//	963201521,
+//	1050299747,
+//	1145236814,
+//	1248718217,
+//	1361512946,
+//	1484459201,
+//	1618470619,
+//	1764543065,
+//	1923762030,
+//	2097310703,
+//	2286478756,
+//	2492671933,
+//	2717422497,
+//	2962400612,
+//	3229426756,
+//	3520485254,
+//	3837739017,
+//	9999999999
+//};
 
 void drawExperienceInfo() {
 	UnitAny* pUnit = D2CLIENT_GetPlayerUnit();
+	if (!pUnit) return;
+
 	int nTime = ((GetTickCount() - gameTimer) / 1000);
 	DWORD cExp = (DWORD)D2COMMON_GetUnitStat(pUnit, STAT_EXP, 0);
 	if (startExperience == 0) { startExperience = cExp; }
@@ -916,6 +968,46 @@ void drawExperienceInfo() {
 	Texthook::Draw((*p_D2CLIENT_ScreenSizeX / 2) - 200, *p_D2CLIENT_ScreenSizeY - 60, Center, 6, White, "%s", sExp);
 }
 
+void drawRuneNum() {
+	//尝试给符文画一个数字
+	UnitAny* pUnit = D2CLIENT_GetPlayerUnit();
+	if (!pUnit) return;
+	
+	if (Item::viewingUnit) return;   //如果是查看其它玩家鸡儿的时候就不显示符文数字 
+
+	if (!(D2CLIENT_GetUIState(UI_INVENTORY) || D2CLIENT_GetUIState(UI_STASH) || D2CLIENT_GetUIState(UI_CUBE) || D2CLIENT_GetUIState(UI_NPCSHOP)))
+		return;
+
+	for (UnitAny* pItem = pUnit->pInventory->pFirstItem; pItem; pItem = pItem->pItemData->pNextInvItem) {
+		char* code = D2COMMON_GetItemText(pItem->dwTxtFileNo)->szCode;
+		int left = 0;
+		int top = 0;
+		if (pItem->pItemData->ItemLocation == STORAGE_INVENTORY) {
+			left = INVENTORY_LEFT;
+			top = INVENTORY_TOP;
+			//角色背包都显示
+			//if (!D2CLIENT_GetUIState(UI_INVENTORY)&& !D2CLIENT_GetUIState(UI_STASH)) continue;
+		}
+		else if (pItem->pItemData->ItemLocation == STORAGE_STASH) {
+			left = STASH_LEFT;
+			top = STASH_TOP;
+			if (!D2CLIENT_GetUIState(UI_STASH)) continue;
+		}
+		else if (pItem->pItemData->ItemLocation == STORAGE_CUBE) {
+			left = CUBE_LEFT;
+			top = CUBE_TOP;
+			if (!D2CLIENT_GetUIState(UI_CUBE)) continue;
+		}
+
+		if (code[0] == 'r' && code[1] >= '0' && code[1] <= '3' && code[2] >= '0' && code[2] <= '9') {
+			char numCode[2];
+			numCode[0] = code[1];
+			numCode[1] = code[2];
+			Texthook::Draw(left + 1 + CELL_SIZE * pItem->pObjectPath->dwPosX, top + 20 + CELL_SIZE * pItem->pObjectPath->dwPosY, None, 6, White, "%d", stoi(numCode));
+		}
+	}
+}
+
 
 void DrawDefaultFontText(wchar_t* wStr, int xpos, int ypos, DWORD dwColor, int div, DWORD dwAlign)
 {
@@ -925,6 +1017,12 @@ void DrawDefaultFontText(wchar_t* wStr, int xpos, int ypos, DWORD dwColor, int d
 char* szOrbPattern = "%d/%d (%d%%)";
 DWORD __stdcall ShowLifeWithMyPattern(DWORD callBack, int min, int max) {
 
+	if (ChatColor::Toggles["Death Back"].state&&min<=0)   //这里写个死亡后立即回城,主要是解决去尸体后又会复活的bug。
+	{
+		PrintText(Red, "回城之歌：我送你离开~千里之外~~");
+		SendMessage(D2GFX_GetHwnd(), WM_KEYDOWN, VK_ESCAPE, 0);
+		Sleep(100);  //这个可以防止多次发送
+	}
 	wchar_t wszTemp[64];
 	int iPercent = 100 * min / max;
 	wsprintfW2(wszTemp, szOrbPattern, min, max, iPercent);
@@ -982,6 +1080,10 @@ DWORD __stdcall ShowManaWithMyPattern(DWORD callBack, int min, int max) {
 	if (ScreenInfo::Toggles["Experience Meter"].state) {
 		drawExperienceInfo();
 	}
+
+	//显示符文数字，再加个开关
+	if(ChatColor::Toggles["Rune Number"].state)
+		drawRuneNum();
 
 	return callBack;
 
@@ -1063,35 +1165,44 @@ void AutoMercDrink(double perHP) {
 	//"hp", "mp", "rv"
 		//循环查找背包里面的药
 	DWORD itemId = 0;
+	DWORD itemId_hp = 0;   //红药
+	DWORD itemId_rv = 0;   //紫药
 	char* code = "NULL";
 	for (UnitAny* pItem = unit->pInventory->pFirstItem; pItem; pItem = pItem->pItemData->pNextInvItem) {
 		if (pItem->pItemData->ItemLocation == STORAGE_NULL && pItem->pItemData->NodePage == NODEPAGE_BELTSLOTS) {   //只能用腰带里的
 			code = D2COMMON_GetItemText(pItem->dwTxtFileNo)->szCode;
 			if (code[0] == 'h' && code[1] == 'p') {
-				if (perHP <= 65) {  //吃红药
-					itemId = pItem->dwUnitId;  //红药
-				}
+				itemId_hp = pItem->dwUnitId; //红药
 			}
 			if (code[0] == 'r' && code[1] == 'v') {
-				if (perHP <= 35) {  //吃紫药
-					itemId = pItem->dwUnitId;  //紫药
-				}
+				itemId_rv = pItem->dwUnitId; //紫药
 			}
-			if(itemId!=0) break;  //找到了就直接中断循环
+			if(itemId_hp !=0 && itemId_rv !=0) break;  //都找到了就直接中断循环
 		}
 	}
-	if (itemId == 0 && perHP <= 35) {
+	if (itemId_hp == 0 && itemId_rv==0 && perHP <= 35) {
 		if (ChatColor::Toggles["Merc Boring"].state)
 			PrintText(Yellow, "你都没药啦，还不带我回家？：%.0f%%", perHP);
 	}
 	else {
-		if (code[0] == 'h' && code[1] == 'p') {
-			if (ChatColor::Toggles["Merc Boring"].state)
-				PrintText(Red, "佣兵少血啦,红喝起来,干杯！：%.0f%%", perHP);
+		if (perHP > 35 && perHP <= 65) {
+			if (itemId_hp == 0 && itemId_rv!=0) {
+				itemId = itemId_rv;
+				if (ChatColor::Toggles["Merc Boring"].state)
+					PrintText(Purple, "佣兵少血啦,紫喝起来,干杯！：%.0f%%", perHP);
+			}
+			else if(itemId_hp != 0){
+				itemId = itemId_hp;
+				if (ChatColor::Toggles["Merc Boring"].state)
+					PrintText(Red, "佣兵少血啦,红喝起来,干杯！：%.0f%%", perHP);
+			}
 		}
-		else if (code[0] == 'r' && code[1] == 'v') {
-			if (ChatColor::Toggles["Merc Boring"].state)
-				PrintText(Purple, "佣兵少血啦,紫喝起来,干杯！：%.0f%%", perHP);
+		else if (perHP <= 35) {
+			if (itemId_rv != 0) {
+				itemId = itemId_rv;
+				if (ChatColor::Toggles["Merc Boring"].state)
+					PrintText(Purple, "佣兵少血啦,紫喝起来,干杯！：%.0f%%", perHP);
+			}
 		}
 	}
 	if (itemId == 0) return;  //没药了或不用喝直接跳过
@@ -1129,7 +1240,7 @@ void __fastcall DrawPetHeadPath(int xpos, UnitAny* pUnit) {
 			double hp = (double)(mHP >> 8);
 			double perHP = (hp / maxhp) * 100.0;
 			if (perHP > 100) perHP = 100;  //这里喝药的时候有可能会有超出100的情况
-			if ((GetTickCount() - mercLastTime) < 3000) {  //这里先固定3秒吧
+			if ((GetTickCount() - mercLastTime) < (MercProtectSec*1000)) {  //这里先固定3秒吧
 				//PrintText(White, "上次刚喝过药，先不喝");
 				return;  //上次喝药时间少于3秒先不喝
 			}
@@ -1203,6 +1314,75 @@ void __declspec(naked) DrawPartyHeadPath_ASM()
 
 		mov ecx, dword ptr[ebx]
 		mov edx, dword ptr[esp + 0xC]
+		ret
+	}
+}
+
+wchar_t* wcsrcat(wchar_t* dest, wchar_t* src)
+{
+	memmove(dest + wcslen(src), dest, (wcslen(dest) + 1) * sizeof(wchar_t));
+	memcpy(dest, src, wcslen(src) * sizeof(wchar_t));
+	return dest;
+}
+
+wchar_t* __fastcall StrcatDefenseStringPatch(wchar_t* wszStr) {
+
+	//拼防御字符串的地方,下一步代码拼接回车
+	//对于ETH物品 Bug打孔，如果bug出来比正常的非bug最大值还小，则认为是非bug
+	//if (tShowItemVariableProp.isOn) {
+
+		UnitAny* pUnit = *p_D2CLIENT_SelectedInvItem;
+		if (pUnit) {
+
+			ItemTxt* pItemTxt = (ItemTxt*)D2COMMON_GetItemText(pUnit->dwTxtFileNo);
+			if (pItemTxt && pItemTxt->dwMinDef > 0) {
+
+				int mDef = D2COMMON_GetBaseStatSigned(pUnit, 31, 0);
+				int mMinDef = pItemTxt->dwMinDef;
+				int mMaxDef = pItemTxt->dwMaxDef;
+				wchar_t wszPrep[256] = { L"\0" };
+				wchar_t wszTemp[512] = { L"\0" };
+
+				if (D2COMMON_CheckItemFlag(pUnit, ITEM_ETHEREAL, 0, "?")) {
+					mMinDef = (int)(mMinDef * 1.5);
+					mMaxDef = (int)(mMaxDef * 1.5);
+
+					if (mDef > mMaxDef && pUnit->pItemData->dwQuality == 2 && D2COMMON_CheckItemFlag(pUnit, ITEM_HASSOCKETS, 0, "?")) {
+						//普通物品 ,带孔，防御比最大防御还大，则为ETH BUG
+						mMinDef = (int)(mMinDef * 1.5);
+						mMaxDef = (int)(mMaxDef * 1.5);
+						wcscpy(wszPrep, L"(Bug)");
+					}
+
+				}
+
+				if (mDef > mMaxDef) {//超过最大防御，说明天生带ED，防御自动max+1
+					wsprintfW(wszTemp, L"%s(最小: %d, 最大: %d, 现在: %d+%d)\n", wszPrep, mMinDef, mMaxDef, mMaxDef, mDef - mMaxDef);
+				}
+				else {
+					wsprintfW(wszTemp, L"%s(最小: %d, 最大: %d, 现在: %d)\n", wszPrep, mMinDef, mMaxDef, mDef);
+				}
+				wcsrcat(wszStr, wszTemp);
+			}
+
+		}
+
+	//}
+	return wszStr;
+}
+
+void __declspec(naked) StrcatDefenseStringPatch_ASM()
+{
+	__asm {
+		push ebx
+
+		mov ecx, edi
+		call StrcatDefenseStringPatch
+
+		pop ebx
+
+		mov edx, dword ptr[esp + 0x1C]
+		mov ecx, eax
 		ret
 	}
 }

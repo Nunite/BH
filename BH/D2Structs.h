@@ -71,6 +71,26 @@ struct DrlgRoom2;
 struct DrlgRoom1;
 struct GameStruct;
 
+
+
+/*=================================================================*/
+/*   Data Structure to Update Client                               */
+/*=================================================================*/
+struct DataPacket
+{
+	BYTE mType;			// +00 Packet Type
+	BYTE mFunc;			// +02 Function to Call
+	BYTE mSize;			// +04 Size of the Packet
+	DWORD mReserved;	// +06 Used with items
+	BYTE mUnitType;		// +0A Always '0'
+	DWORD mPlayerID;	// +0C The Player ID (ptUnit + 08h)
+	DWORD mItemID;		// +10 The Item ID
+	DWORD mMod1_ID;		// +14 The Stat/Mod ID
+	DWORD mParam1;		// +18 3 Paramters
+	DWORD mParam2;		// +1C
+	DWORD mParam3;		// +20
+};
+
 struct InventoryInfo {
 	int nLocation;
 	int nMaxXCells;
@@ -152,6 +172,18 @@ struct LevelText {
 	wchar_t wEntranceText[40];		//0x1BE
 	BYTE nObjGroup[8];				//0x196
 	BYTE nObjPrb[8];				//0x19E
+};
+
+struct sDrawImageInfo//size = 0x48
+{
+	DWORD uk1;
+	DWORD uk2;
+	void* image;
+	DWORD uk3;
+	DWORD uk4;
+	void* reserved;
+	DWORD uk5[0xB];
+	DWORD frame;
 };
 
 struct ControlPreferences
@@ -303,6 +335,19 @@ struct D2EditBox {
 
 #pragma pack(push)
 #pragma pack(1)
+
+struct sWinMessage
+{
+	DWORD	msg;
+	DWORD	type;
+	DWORD	key;
+	WORD	x;
+	WORD	y;
+	DWORD	uk3;
+	DWORD	uk4;
+	DWORD	managed;
+	DWORD	unmanaged;
+};
 
 struct RoomTile {
 	Room2* pRoom2;				//0x00

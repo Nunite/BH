@@ -165,9 +165,13 @@ FUNCPTR(D2CLIENT, GetLevelName_I, wchar_t* __fastcall, (DWORD levelId), 0xBE240,
 
 FUNCPTR(D2GFX, DrawAutomapCell, void __stdcall, (CellContext* context, DWORD xpos, DWORD ypos, RECT* cliprect, DWORD bright), -10079, -10060)
 ASMPTR(D2CLIENT, OverrideShrinePatch_ORIG, 0x1155B8, 0x101B08)//Updated 1.13c
+ASMPTR(D2CLIENT, LoadImage, 0x2B420, 0xA9480)  //加载自定义.dc6图片
+FUNCPTR(D2CLIENT, ClickOnStashButton, void __fastcall, (DWORD x, DWORD y), 0x8CD00, 0x90C10)
 
 FUNCPTR(D2CLIENT, ShowMap, void __fastcall, (), 0x3B8B0, 0x3B8B0) // by zyl from HM 1.13D先不管
 //D2FUNCPTR2(D2CLIENT, 0x6FAEB8B0, 0x6FAED660, ShowMap, void __fastcall, ())
+
+FUNCPTR(D2CLIENT, LoadBuySelBtn, void* __stdcall, (), 0xBEAF0, 0xBEAF0)
 
 ////////////////////////////////////////////////////////////////////////////////////////////////
 // D2Client Globals
@@ -187,6 +191,8 @@ VARPTR(D2CLIENT, MouseOffsetX, int, 0x119960, 0x106844)
 
 VARPTR(D2CLIENT, AutomapPos, POINT, 0x11C1E8, 0x11C1E8)  //1.13d的先不管了
 //D2VARPTR2(D2CLIENT, 0x6FBCC1E8, 0x6FBCCF4C, AutomapPos, D2_POINT)
+VARPTR(D2CLIENT, ExitAppFlag, DWORD, 0xF8C9C, 0xF8C9C)
+//D2VARPTR2(D2CLIENT, 0x6FBA8C9C, 0x6FBA79E0, ExitAppFlag, DWORD)
 VARPTR(D2CLIENT, AutomapOn, DWORD, 0xFADA8, 0x11C8B8)
 VARPTR(D2CLIENT, AutomapMode, int, 0xF16B0, 0xF34F8)
 VARPTR(D2CLIENT, Offset, POINT, 0x11C1F8, 0x11CF5C)
@@ -203,12 +209,13 @@ VARPTR(D2CLIENT, GoldDialogAmount, DWORD, 0x11BBB0, 0x11D568)
 VARPTR(D2CLIENT, NPCMenu, NPCMenu*, 0xF3BA0, 0xF1A90)
 VARPTR(D2CLIENT, NPCMenuAmount, DWORD, 0xF42F0, 0xF21E0)
 
-VARPTR(D2CLIENT, TradeLayout, InventoryLayout*, 0x10B288, 0x101598)
-VARPTR(D2CLIENT, StashLayout, InventoryLayout*, 0x10B2D0, 0x1015E0)
-VARPTR(D2CLIENT, StoreLayout, InventoryLayout*, 0x10B3B0, 0x1016C0)
-VARPTR(D2CLIENT, CubeLayout, InventoryLayout*, 0x10B3C8, 0x1016D8)
-VARPTR(D2CLIENT, InventoryLayout, InventoryLayout*, 0x10B3E0, 0x1016F0)
-VARPTR(D2CLIENT, MercLayout, InventoryLayout*, 0x11BD94, 0x11CC84)
+VARPTR(D2CLIENT, TradeLayout, InventoryLayout, 0x10B288, 0x101598)
+VARPTR(D2CLIENT, StashLayout, InventoryLayout, 0x10B2D0, 0x1015E0)
+VARPTR(D2CLIENT, ClassicStashLayout, InventoryLayout, 0x10B398, 0x1016A8)
+VARPTR(D2CLIENT, StoreLayout, InventoryLayout, 0x10B3B0, 0x1016C0)
+VARPTR(D2CLIENT, CubeLayout, InventoryLayout, 0x10B3C8, 0x1016D8)
+VARPTR(D2CLIENT, InventoryLayout, InventoryLayout, 0x10B3E0, 0x1016F0)
+VARPTR(D2CLIENT, MercLayout, InventoryLayout, 0x11BD94, 0x11CC84)
 ASMPTR(D2CLIENT, clickParty_I, 0x9E180, 0xA2250)
 
 VARPTR(D2CLIENT, PanelOffsetX, int, 0x11B9A0, 0x11D354);
@@ -398,6 +405,8 @@ FUNCPTR(D2COMMON, ITEMS_GetRunesTxtRecordFromItem, RunesTxt* __stdcall, (UnitAny
 FUNCPTR(D2COMMON, GetItemFromInventoryHM, UnitAnyHM* __stdcall, (UnitInventory* inv), -10460, -11132)
 FUNCPTR(D2COMMON, GetNextItemFromInventoryHM, UnitAnyHM* __stdcall, (UnitAnyHM* pItem), -10464, -10879)
 FUNCPTR(D2COMMON, GetItemPage, BYTE __stdcall, (UnitAnyHM* ptUnit), -10020, -10020);  //by zyl from MxCen113
+FUNCPTR(D2COMMON, GetRealItem, UnitAnyHM* __stdcall, (UnitAnyHM* ptUnit), -11147, -10897);  //by zyl from PlugY,一个是113c,一个是113d
+FUNCPTR(D2COMMON, SaveItem, DWORD __stdcall, (UnitAnyHM* ptItem, saveBitField* data, DWORD startSize, DWORD p4, DWORD p5, DWORD p6), -10987, -10665);  //by zyl from PlugY,一个是113c,一个是113d
 FUNCPTR(D2COMMON, InvRemoveItem, UnitAnyHM* __stdcall, (UnitInventory* ptInventory, UnitAnyHM* ptItem), -10646, -10646);  //by zyl from MxCen113
 FUNCPTR(D2COMMON, InvAddItem, DWORD __stdcall, (UnitInventory* ptInventory, UnitAnyHM* ptItem, DWORD posX, DWORD posY, DWORD vValueC, DWORD bIsClient, BYTE page), -11107, -11107);  //by zyl from MxCen113
 
@@ -405,6 +414,10 @@ FUNCPTR(D2COMMON, GetUnitPosX, DWORD __stdcall, (DynamicPath* pPath), 0x34B80, 0
 //D2FUNCPTR2(D2COMMON, 0x6FD84B80, 0x6FDC7670, GetUnitPosX, DWORD __stdcall, (DynamicPath* pPath)) //(Players, Monsters, Missiles) #10750
 FUNCPTR(D2COMMON, GetUnitPosY, DWORD __stdcall, (DynamicPath* pPath), 0x34BB0, 0x34BB0)  //by zyl from HM
 //D2FUNCPTR2(D2COMMON, 0x6FD84BB0, 0x6FDC76A0, GetUnitPosY, DWORD __stdcall, (DynamicPath* pPath)) //(Players, Monsters, Missiles)  #10867
+FUNCPTR(D2COMMON, CheckItemFlag, BOOL __stdcall, (UnitAny* pItem, DWORD dwFlagMask, DWORD dwLineno, char* filename), 0x23940, 0x23940)  //by zyl from HM
+//D2FUNCPTR2(D2COMMON, 0x6FD73940, 0x6FD92200, CheckItemFlag, BOOL __stdcall, (UnitAny* pItem, DWORD dwFlagMask, DWORD dwLineno, char* filename)) //#10202
+
+FUNCPTR(STORM, FreeWinMessage, void __stdcall, (sWinMessage* msg), -511, -511)
 
 ////////////////////////////////////////////////////////////////////////////////////////////////
 // D2Common Globals
@@ -436,6 +449,11 @@ FUNCPTR(D2NET, ReceivePacket_I, void __stdcall, (BYTE* aPacket, DWORD aLen), -10
 //FUNCPTR(D2NET, ReceivePacket_II, void __fastcall, (DWORD* pExpectedSize, void *_1, BYTE *aPacket, DWORD aLen), 0x6BD0)
 //FUNCPTR(D2NET, ReceivePacket_III, BOOL __fastcall, (DWORD* pExpectedSize, BYTE *aPacket, DWORD aLen), 0x63C0)
 
+//对应PlugY的F8,发送数据到客户端？
+FUNCPTR(D2NET, SendToClient, DWORD __stdcall, (DWORD zero, DWORD clientID, void* data, DWORD size), -10002, -10012)
+//对应PlugY的F8,发送数据到服务端？
+FUNCPTR(D2NET, SendToServer, DWORD __stdcall, (DWORD size, DWORD one, void* data), -10024, -10015)
+
 ////////////////////////////////////////////////////////////////////////////////////////////////
 // D2Net Globals
 ////////////////////////////////////////////////////////////////////////////////////////////////
@@ -455,6 +473,8 @@ FUNCPTR(D2GFX, DrawCellContextEx, void __stdcall, (CellContext* context, int Xpo
 FUNCPTR(D2GFX, GetScreenSize, DWORD __stdcall, (void), -10031, -10012)
 
 FUNCPTR(D2GFX, GetHwnd, HWND __stdcall, (void), -10048, -10007)
+
+FUNCPTR(D2GFX, PrintImage, void __stdcall, (sDrawImageInfo* data, DWORD x, DWORD y, DWORD p4, DWORD p5, DWORD p6), -10041, -10042)  //From PlugY
 
 
 ////////////////////////////////////////////////////////////////////////////////////////////////
@@ -492,13 +512,15 @@ ASMPTR(D2MULTI, ChannelInput_I, 0xD5B0, 0x11B80)
 FUNCPTR(D2CMP, InitCellFile, void __stdcall, (void* cellfile, CellFile** outptr, char* srcfile, DWORD lineno, DWORD filever, char* filename), -10006, -10008)
 FUNCPTR(D2CMP, DeleteCellFile, void __stdcall, (CellFile* cellfile), -10106, -10084)
 
+FUNCPTR(D2CMP, 10014, DWORD __stdcall, (void* image), 0x10065, 0x10020) //from PlugY
+
 
 ////////////////////////////////////////////////////////////////////////////////////////////////
 // D2Lang Ordinals
 ////////////////////////////////////////////////////////////////////////////////////////////////
 
 FUNCPTR(D2LANG, GetLocaleText, wchar_t* __fastcall, (WORD nLocaleTxtNo), -10003, -10004)
-
+FUNCPTR(D2LANG, GetLang, DWORD __stdcall, (), -10009, -10009)   //参考自PlugY，先只弄1.13c
 
 ////////////////////////////////////////////////////////////////////////////////////////////////
 // D2Lang Stubs
@@ -521,6 +543,9 @@ VARPTR(D2LAUNCH, BnData, BnetData*, 0x25ABC, 0x25B30)
 FUNCPTR(D2WIN, DrawSprites, void __fastcall, (void), 0x18750, 0xEAA0)
 FUNCPTR(D2WIN, LoadCellFile, CellFile* __fastcall, (const char* szFile, int Type), -10111, -10023)
 FUNCPTR(D2WIN, DrawCellFile, void __fastcall, (CellFile* pCellFile, int xPos, int yPos, int div, int trans, int Color), -10138, -10172)
+
+FUNCPTR(D2WIN, PrintPopup, void __fastcall, (LPWSTR s, DWORD x, DWORD y, DWORD color, DWORD center), -10085, -10137) //from PlugY
+FUNCPTR(D2WIN, GetPixelLen, DWORD __fastcall, (LPWSTR s), -10028, -10150) //from PlugY
 
 
 ////////////////////////////////////////////////////////////////////////////////////////////////
@@ -578,10 +603,39 @@ VARPTR(D2WIN, FocusedControlHM, D2EditBox*, 0x214B0, 0x8DB44) // unused, but we 
 ////////////////////////////////////////////////////////////////////////////////////////////////
 // D2Game Functions
 ////////////////////////////////////////////////////////////////////////////////////////////////
-
+FUNCPTR(D2GAME, D2SetNbPlayers, void __fastcall, (DWORD nbPlayers), -10049, -10049)  //设置pp难度
 //FUNCPTR(D2GAME, Rand, DWORD __fastcall, (DWORD* seed), 0x1160)
+ASMPTR(D2GAME, D2LoadInventory, 0x54810)
+ASMPTR(D2GAME, GetPlayerPet, 0x96A40)
+//FUNCPTR(D2GAME, GetPlayerFromPet, UnitAnyHM* __fastcall, (GameStruct* ptGame, UnitAnyHM* pMonsterBeHitted, UnitAnyHM* pCheckMonster), 0xDB5E0, 0xDB5E0)
+////服务端的pp难度入口
+//FUNCPTR(D2GAME, DropTreasureClass, BOOL __fastcall, (GameStruct* pGame, UnitAnyHM* pSource, UnitAnyHM* pKiller, DWORD pTC_D2TCExShortStrc, DWORD nQuality, DWORD nIlvl, DWORD dwZero, DWORD dwZero2, DWORD dwZero3, DWORD dwZero4), 0x12D60, 0x12D60)
+////服务端向客户端发送数据包
+////FUNCPTR(D2GAME, SendPacketToClient, void __fastcall, (NetClient* pClient, void* pPacket, size_t nSize), 0x8A3E0, 0x8A3E0)
+//ASMPTR(D2GAME, SendPacketToClient, 0x8A3E0)
+//
+//FUNCPTR(D2MCPCLIENT, ParseGameListPacket, VOID __fastcall, (BYTE* pPacket), 0x6E30, 0x6640)
+//单机保存入口点,1.13c和1.13d，目前bh就是支持这2个版本，对应PlugY的A8(A8一般可能是对应ASMPTR，但是这个方法貌似不对)
+FUNCPTR(D2GAME, SaveSPChar, void __fastcall, (GameStruct* ptGame, UnitAnyHM* ptChar, char* name, DWORD arg, DWORD secondPass), 0x53F10, 0x39810)
 
-FUNCPTR(D2MCPCLIENT, ParseGameListPacket, VOID __fastcall, (BYTE* pPacket), 0x6E30, 0x6640)
+VARPTR(D2GAME, ClientTable, NetClient*, 0x1107B8, 0x1105E0)  //取客户端列表 from PlugY by zyl
+
+ASMPTR(D2GAME, SendPacket, 0x8A3E0)
+
+ASMPTR(D2GAME, GetObject, 0xE03A0)
+
+
+
+
+////////////////////////////////////////////////////////////////////////////////////////////////
+// D2Fog Functions
+////////////////////////////////////////////////////////////////////////////////////////////////
+FUNCPTR(FOG, Assert, void __fastcall, (const char* ptMessage, CHAR* pLocation, DWORD line), -10024, -10024)
+FUNCPTR(FOG, MemAlloc, void* __fastcall, (DWORD dwMemSize, LPCSTR lpszErrFile, DWORD ErrLine, DWORD Zero), -10042, -10042)
+FUNCPTR(FOG, MemDeAlloc, void* __fastcall, (void* ptMemLoc, LPCSTR lpszErrFile, DWORD ErrLine, DWORD Zero), -10043, -10043)
+FUNCPTR(FOG, AllocMem, void* __fastcall, (DWORD, DWORD dwMemSize, LPCSTR lpszErrFile, DWORD ErrLine, DWORD Zero), -10045, -10045)
+FUNCPTR(FOG, FreeMem, void* __fastcall, (DWORD, void* ptMemLoc, LPCSTR lpszErrFile, DWORD ErrLine, DWORD Zero), -10046, -10046)
+FUNCPTR(FOG, GetSavePath, void __fastcall, (char* ptPath, DWORD maxsize), -10115, -10115)
 
 #undef FUNCPTR
 #undef ASMPTR
