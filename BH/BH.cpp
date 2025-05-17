@@ -138,14 +138,14 @@ DWORD WINAPI LoadMPQData(VOID* lpvoid) {
 void BH::Initialize()
 {
 	moduleManager = new ModuleManager();
-	config = new Config("ProjectDiablo.cfg");
+	config = new Config("BH.cfg");
 	if (!config->Parse()) {
-		config->SetConfigName("ProjectDiablo_Default.cfg");
+		config->SetConfigName("BH_Default.cfg");
 		if (!config->Parse()) {
-			string msg = "Could not find ProjectDiablo config.\nAttempted to load " +
-				path + "ProjectDiablo.cfg (failed).\nAttempted to load " +
-				path + "ProjectDiablo_Default.cfg (failed).\n\nDefaults loaded.";
-			MessageBox(NULL, msg.c_str(), "Failed to load ProjectDiablo config", MB_OK);
+			string msg = "Could not find BH config.\nAttempted to load " +
+				path + "BH.cfg (failed).\nAttempted to load " +
+				path + "BH_Default.cfg (failed).\n\nDefaults loaded.";
+			MessageBox(NULL, msg.c_str(), "Failed to load BH config", MB_OK);
 		}
 	}
 
@@ -156,7 +156,7 @@ void BH::Initialize()
 			string msg = "Could not find default loot filter.\nAttempted to load " +
 				path + "loot.filter (failed).\nAttempted to load " +
 				path + "default.filter (failed).\n\nDefaults loaded.";
-			MessageBox(NULL, msg.c_str(), "Failed to load ProjectDiablo lootFilter", MB_OK);
+			MessageBox(NULL, msg.c_str(), "Failed to load BH lootFilter", MB_OK);
 		}
 	}
 
@@ -190,7 +190,7 @@ void BH::Initialize()
 	new Bnet();
 	new Item();
 	new Party();
-	new ItemMover();
+	//new ItemMover(); //关闭增强功能
 	//new StashExport();   //这个先不要吧，跟交易Trade有关
 	new MapNotify();   //这个就是MapHack修改而来
 	new ChatColor();

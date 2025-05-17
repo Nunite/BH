@@ -44,15 +44,15 @@ void GameSettings::LoadGeneralTab() {
 	// General
 	new Drawing::Texthook(generalTab, x, (y), "通用");
 
-	y += 15;
-	colored_text = new Drawing::Texthook(generalTab, x, (y), "显示其它玩家鸡儿");
-	colored_text->SetColor(Gold);
-	new Drawing::Keyhook(generalTab, GameSettings::KeyHookOffset, y + 2, &showPlayer, "");
+	// y += 15;
+	// colored_text = new Drawing::Texthook(generalTab, x, (y), "显示其它玩家鸡儿");
+	// colored_text->SetColor(Gold);
+	// new Drawing::Keyhook(generalTab, GameSettings::KeyHookOffset, y + 2, &showPlayer, "");
 
-	y += 15;
-	colored_text = new Drawing::Texthook(generalTab, x, (y), "同步(卡角色的时候按一下)");
-	colored_text->SetColor(Gold);
-	new Drawing::Keyhook(generalTab, GameSettings::KeyHookOffset, y + 2, &resyncKey, "");
+	// y += 15;
+	// colored_text = new Drawing::Texthook(generalTab, x, (y), "同步(卡角色的时候按一下)");
+	// colored_text->SetColor(Gold);
+	// new Drawing::Keyhook(generalTab, GameSettings::KeyHookOffset, y + 2, &resyncKey, "");
 
 	y += 15;
 	colored_text = new Drawing::Texthook(generalTab, x, (y), "显示玩家/雇佣兵高级属性");
@@ -63,25 +63,25 @@ void GameSettings::LoadGeneralTab() {
 	new Drawing::Checkhook(generalTab, x, y, &ScreenInfo::Toggles["Experience Meter"].state, "显示经验条");
 	new Drawing::Keyhook(generalTab, GameSettings::KeyHookOffset, y + 2, &ScreenInfo::Toggles["Experience Meter"].toggle, "");
 
-	// Quick Cast
-	y += 20;
-	new Drawing::Texthook(generalTab, x, (y), "快速施法");
+	// // Quick Cast
+	// y += 20;
+	// new Drawing::Texthook(generalTab, x, (y), "快速施法");
 
-	y += 15;
-	new Drawing::Checkhook(generalTab, x, y, &GameSettings::Toggles["Quick Cast"].state, "快速施法");
-	new Drawing::Keyhook(generalTab, GameSettings::KeyHookOffset, y + 2, &GameSettings::Toggles["Quick Cast"].toggle, "");
+	// y += 15;
+	// new Drawing::Checkhook(generalTab, x, y, &GameSettings::Toggles["Quick Cast"].state, "快速施法");
+	// new Drawing::Keyhook(generalTab, GameSettings::KeyHookOffset, y + 2, &GameSettings::Toggles["Quick Cast"].toggle, "");
 
-	y += 15;
-	new Drawing::Checkhook(generalTab, x, y, &GameSettings::Toggles["Skill Bar"].state, "技能栏");
-	new Drawing::Keyhook(generalTab, GameSettings::KeyHookOffset, y + 2, &GameSettings::Toggles["Skill Bar"].toggle, "");
+	// y += 15;
+	// new Drawing::Checkhook(generalTab, x, y, &GameSettings::Toggles["Skill Bar"].state, "技能栏");
+	// new Drawing::Keyhook(generalTab, GameSettings::KeyHookOffset, y + 2, &GameSettings::Toggles["Skill Bar"].toggle, "");
 
-	y += 15;
-	new Drawing::Checkhook(generalTab, x + x_tab, y, &GameSettings::Toggles["Skill Bar Disable"].state, "只启用快速施法，不显示技能栏");
-	new Drawing::Keyhook(generalTab, GameSettings::KeyHookOffset, y + 2, &GameSettings::Toggles["Skill Bar Disable"].toggle, "");
+	// y += 15;
+	// new Drawing::Checkhook(generalTab, x + x_tab, y, &GameSettings::Toggles["Skill Bar Disable"].state, "只启用快速施法，不显示技能栏");
+	// new Drawing::Keyhook(generalTab, GameSettings::KeyHookOffset, y + 2, &GameSettings::Toggles["Skill Bar Disable"].toggle, "");
 
-	y += 15;
-	new Drawing::Checkhook(generalTab, x, y, &GameSettings::Toggles["Buff Timers"].state, "总是显示状态计时器");
-	new Drawing::Keyhook(generalTab, GameSettings::KeyHookOffset, y + 2, &GameSettings::Toggles["Buff Timers"].toggle, "");
+	// y += 15;
+	// new Drawing::Checkhook(generalTab, x, y, &GameSettings::Toggles["Buff Timers"].state, "总是显示状态计时器");
+	// new Drawing::Keyhook(generalTab, GameSettings::KeyHookOffset, y + 2, &GameSettings::Toggles["Buff Timers"].toggle, "");
 
 }
 
@@ -130,55 +130,55 @@ void GameSettings::LoadInteractionTab() {
 		"移动物品到关闭着的盒子");
 	colored_text->SetColor(Gold);
 
-	y += 15;
-	colored_text = new Drawing::Texthook(tab, x + indent, y,
-		"Ctrl+Shift+左键");
-	colored_text->SetColor(Gold);
-	colored_text = new Drawing::Texthook(tab, x + indent + offset, y,
-		"切换 堆叠/非堆叠");
-	colored_text->SetColor(Gold);
+	// y += 15;
+	// colored_text = new Drawing::Texthook(tab, x + indent, y,
+	// 	"Ctrl+Shift+左键");
+	// colored_text->SetColor(Gold);
+	// colored_text = new Drawing::Texthook(tab, x + indent + offset, y,
+	// 	"切换 堆叠/非堆叠");
+	// colored_text->SetColor(Gold);
 
-	y += 20;
-	colored_text = new Drawing::Texthook(tab, x, y,
-		"鼠标拿起物品时");
+	// y += 20;
+	// colored_text = new Drawing::Texthook(tab, x, y,
+	// 	"鼠标拿起物品时");
 
-	y += 15;
-	colored_text = new Drawing::Texthook(tab, x + indent, y,
-		"Ctrl+左键");
-	colored_text->SetColor(Gold);
-	colored_text = new Drawing::Texthook(tab, x + indent + offset, y,
-		"放置 1 个堆叠的物品");
-	colored_text->SetColor(Gold);
+	// y += 15;
+	// colored_text = new Drawing::Texthook(tab, x + indent, y,
+	// 	"Ctrl+左键");
+	// colored_text->SetColor(Gold);
+	// colored_text = new Drawing::Texthook(tab, x + indent + offset, y,
+	// 	"放置 1 个堆叠的物品");
+	// colored_text->SetColor(Gold);
 
-	y += 15;
-	colored_text = new Drawing::Texthook(tab, x + indent, y,
-		"Ctrl+Shift+左键");
-	colored_text->SetColor(Gold);
-	colored_text = new Drawing::Texthook(tab, x + indent + offset, y,
-		"放置 1 个非堆叠的物品");
-	colored_text->SetColor(Gold);
+	// y += 15;
+	// colored_text = new Drawing::Texthook(tab, x + indent, y,
+	// 	"Ctrl+Shift+左键");
+	// colored_text->SetColor(Gold);
+	// colored_text = new Drawing::Texthook(tab, x + indent + offset, y,
+	// 	"放置 1 个非堆叠的物品");
+	// colored_text->SetColor(Gold);
 
-	// Auras
-	y += 20;
-	new Drawing::Texthook(tab, x, (y), "荣誉光环 (仅限全服前3玩家)");
+	// // Auras
+	// y += 20;
+	// new Drawing::Texthook(tab, x, (y), "荣誉光环 (仅限全服前3玩家)");
 
-	y += 15;
-	new Drawing::Checkhook(tab, x, y, &GameSettings::Toggles["99 Aura"].state, "显示 99级 荣誉光环");
-	new Drawing::Keyhook(tab, GameSettings::KeyHookOffset, y + 2, &GameSettings::Toggles["99 Aura"].toggle, "");
+	// y += 15;
+	// new Drawing::Checkhook(tab, x, y, &GameSettings::Toggles["99 Aura"].state, "显示 99级 荣誉光环");
+	// new Drawing::Keyhook(tab, GameSettings::KeyHookOffset, y + 2, &GameSettings::Toggles["99 Aura"].toggle, "");
 
-	y += 15;
-	new Drawing::Checkhook(tab, x, y, &GameSettings::Toggles["Dclone Aura"].state, "显示 DC击杀 荣誉光环");
-	new Drawing::Keyhook(tab, GameSettings::KeyHookOffset, y + 2, &GameSettings::Toggles["Dclone Aura"].toggle, "");
+	// y += 15;
+	// new Drawing::Checkhook(tab, x, y, &GameSettings::Toggles["Dclone Aura"].state, "显示 DC击杀 荣誉光环");
+	// new Drawing::Keyhook(tab, GameSettings::KeyHookOffset, y + 2, &GameSettings::Toggles["Dclone Aura"].toggle, "");
 
-	y += 15;
-	new Drawing::Checkhook(tab, x, y, &GameSettings::Toggles["Rathma Aura"].state, "显示 拉斯玛击杀 荣誉光环");
-	new Drawing::Keyhook(tab, GameSettings::KeyHookOffset, y + 2, &GameSettings::Toggles["Rathma Aura"].toggle, "");
+	// y += 15;
+	// new Drawing::Checkhook(tab, x, y, &GameSettings::Toggles["Rathma Aura"].state, "显示 拉斯玛击杀 荣誉光环");
+	// new Drawing::Keyhook(tab, GameSettings::KeyHookOffset, y + 2, &GameSettings::Toggles["Rathma Aura"].toggle, "");
 
-	y += 20;
-	new Drawing::Texthook(tab, x, (y), "仅限开发者");
-	y += 15;
-	new Drawing::Checkhook(tab, x, y, &GameSettings::Toggles["Developer Aura"].state, "显示 开发者 荣誉光环");
-	new Drawing::Keyhook(tab, GameSettings::KeyHookOffset, y + 2, &GameSettings::Toggles["Developer Aura"].toggle, "");
+	// y += 20;
+	// new Drawing::Texthook(tab, x, (y), "仅限开发者");
+	// y += 15;
+	// new Drawing::Checkhook(tab, x, y, &GameSettings::Toggles["Developer Aura"].state, "显示 开发者 荣誉光环");
+	// new Drawing::Keyhook(tab, GameSettings::KeyHookOffset, y + 2, &GameSettings::Toggles["Developer Aura"].toggle, "");
 }
 
 void GameSettings::OnLoad() {

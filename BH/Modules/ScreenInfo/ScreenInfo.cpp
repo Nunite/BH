@@ -487,8 +487,8 @@ void ScreenInfo::drawExperienceInfo() {
 		unit = "K";
 	}
 
-	sprintf_s(sExp, "等级：%00d，经验：%00.2f%% (%s%00.2f%%) [%s%.2f%s/s]", cLevel, pExp, expGainPct >= 0 ? "+" : "", expGainPct, expPerSecond >= 0 ? "+" : "", expPerSecond, unit);
-
+	//sprintf_s(sExp, "等级：%00d，经验：%00.2f%% (%s%00.2f%%) [%s%.2f%s/s]", cLevel, pExp, expGainPct >= 0 ? "+" : "", expGainPct, expPerSecond >= 0 ? "+" : "", expPerSecond, unit);
+	sprintf_s(sExp, "%00.2f%% (%s%00.2f%%) [%s%.2f%s/s]", pExp, expGainPct >= 0 ? "+" : "", expGainPct, expPerSecond >= 0 ? "+" : "", expPerSecond, unit);
 	Texthook::Draw((*p_D2CLIENT_ScreenSizeX / 2) - 200, *p_D2CLIENT_ScreenSizeY - 60, Center, 6, White, "%s", sExp);
 }
 
