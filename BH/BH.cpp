@@ -192,7 +192,7 @@ void BH::Initialize()
 	new Party();
 	//new ItemMover(); //关闭增强功能
 	//new StashExport();   //这个先不要吧，跟交易Trade有关
-	new MapNotify();   //这个就是MapHack修改而来
+	//new MapNotify();   //这个就是MapHack修改而来
 	new ChatColor();
 
 	BnetBools = ((Bnet*)moduleManager->Get("bnet"))->GetBools();

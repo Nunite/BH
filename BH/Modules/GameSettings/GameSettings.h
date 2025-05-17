@@ -3,25 +3,30 @@
 #include "../Module.h"
 #include "../../Config.h"
 #include "../../Common.h"
+#include "../../Constants.h"
+#include <list>
 
 class GameSettings : public Module {
-private:
-	unsigned int showPlayer;
 public:
 	static unsigned int KeyHookOffset;
 	static map<std::string, Toggle> Toggles;
-	unsigned int resyncKey;
-	unsigned int advStatMenuKey;
+	
+	// 将这些变量改为public并改为unsigned int类型
+	static unsigned int showPlayer;
+	static unsigned int resyncKey;
+	static unsigned int advStatMenuKey;
 
 	GameSettings() : Module("GameSettings") {};
 	~GameSettings() {};
 
 	void Init();
-
-	void LoadConfig();
 	void OnLoad();
+	void OnLoop();
+	void OnUnload();
+	void OnKey(bool up, BYTE key, LPARAM lParam, bool* block);
+	void LoadConfig();
 	void LoadGeneralTab();
 	void LoadInteractionTab();
 
-	void OnKey(bool up, BYTE key, LPARAM lParam, bool* block);
+	static void ResetGamePatches();
 };

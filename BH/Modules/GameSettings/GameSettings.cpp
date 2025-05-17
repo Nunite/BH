@@ -6,6 +6,9 @@
 #include "../../BH.h"
 #include "../Item/Item.h"
 #include "../ScreenInfo/ScreenInfo.h"
+#include "../MapNotify/MapNotify.h"
+#include "../../D2Ptrs.h"
+#include "../../D2Intercepts.h"
 
 // This module was inspired by the RedVex plugin "Item Mover", written by kaiks.
 // Thanks to kaiks for sharing his code.
@@ -13,7 +16,34 @@
 map<std::string, Toggle> GameSettings::Toggles;
 unsigned int GameSettings::KeyHookOffset = 300;
 
+// 定义静态成员变量
+unsigned int GameSettings::showPlayer;
+unsigned int GameSettings::resyncKey;
+unsigned int GameSettings::advStatMenuKey;
+
+// 前向声明
+VOID __stdcall GS_Shake_Interception(LPDWORD lpX, LPDWORD lpY);
+
+// 添加两个功能使用的补丁 - 使用不同名称避免链接错误
+Patch* gs_shakePatch = new Patch(Call, D2CLIENT, { 0x442A2, 0x452F2 }, (int)GS_Shake_Interception, 5);
+Patch* gs_cpuPatch = new Patch(NOP, D2CLIENT, { 0x3CB7C, 0x2770C }, 0, 9);
+
 void GameSettings::Init() {
+}
+
+// 重置补丁函数
+void GameSettings::ResetGamePatches() {
+    // 地震效果补丁
+    if (Toggles["Remove Shake"].state)
+        gs_shakePatch->Install();
+    else
+        gs_shakePatch->Remove();
+
+    // CPU补丁
+    if (Toggles["Apply CPU Patch"].state)
+        gs_cpuPatch->Install();
+    else
+        gs_cpuPatch->Remove();
 }
 
 void GameSettings::LoadConfig() {
@@ -26,6 +56,10 @@ void GameSettings::LoadConfig() {
 	BH::config->ReadToggle("99 Aura", "None", true, GameSettings::Toggles["99 Aura"]);
 	BH::config->ReadToggle("Rathma Aura", "None", true, GameSettings::Toggles["Rathma Aura"]);
 	BH::config->ReadToggle("Dclone Aura", "None", true, GameSettings::Toggles["Dclone Aura"]);
+	
+	// 为地图功能添加Toggle
+	BH::config->ReadToggle("Remove Shake", "None", false, GameSettings::Toggles["Remove Shake"]);
+	BH::config->ReadToggle("Apply CPU Patch", "None", true, GameSettings::Toggles["Apply CPU Patch"]);
 
 	BH::config->ReadKey("Show Players Gear", "VK_0", showPlayer);
 	BH::config->ReadKey("Resync Hotkey", "VK_9", resyncKey);
@@ -62,6 +96,14 @@ void GameSettings::LoadGeneralTab() {
 	y += 15;
 	new Drawing::Checkhook(generalTab, x, y, &ScreenInfo::Toggles["Experience Meter"].state, "显示经验条");
 	new Drawing::Keyhook(generalTab, GameSettings::KeyHookOffset, y + 2, &ScreenInfo::Toggles["Experience Meter"].toggle, "");
+
+	y += 15;
+	new Drawing::Checkhook(generalTab, x, y, &GameSettings::Toggles["Remove Shake"].state, "移除地震效果");
+	new Drawing::Keyhook(generalTab, GameSettings::KeyHookOffset, y + 2, &GameSettings::Toggles["Remove Shake"].toggle, "");
+
+	y += 15;
+	new Drawing::Checkhook(generalTab, x, y, &GameSettings::Toggles["Apply CPU Patch"].state, "CPU 补丁");
+	new Drawing::Keyhook(generalTab, GameSettings::KeyHookOffset, y + 2, &GameSettings::Toggles["Apply CPU Patch"].toggle, "");
 
 	// // Quick Cast
 	// y += 20;
@@ -185,6 +227,17 @@ void GameSettings::OnLoad() {
 	LoadConfig();
 	LoadGeneralTab();
 	LoadInteractionTab();
+	ResetGamePatches(); // 加载时应用补丁
+}
+
+void GameSettings::OnLoop() {
+	ResetGamePatches(); // 持续检查和应用补丁
+}
+
+void GameSettings::OnUnload() {
+	// 卸载时移除补丁
+	gs_shakePatch->Remove();
+	gs_cpuPatch->Remove();
 }
 
 void GameSettings::OnKey(bool up, BYTE key, LPARAM lParam, bool* block) {
@@ -193,6 +246,12 @@ void GameSettings::OnKey(bool up, BYTE key, LPARAM lParam, bool* block) {
 			*block = true;
 			if (up) {
 				(*it).second.state = !(*it).second.state;
+				
+				// 如果是我们添加的功能，重新应用补丁
+				if (it->first == "Remove Shake" || it->first == "Apply CPU Patch") {
+					ResetGamePatches();
+				}
+				
 				BH::config->Write();
 			}
 			return;
@@ -215,4 +274,11 @@ void GameSettings::OnKey(bool up, BYTE key, LPARAM lParam, bool* block) {
 			return;
 		}
 	}
+}
+
+// 移除地震效果的拦截函数
+VOID __stdcall GS_Shake_Interception(LPDWORD lpX, LPDWORD lpY)
+{
+	*p_D2CLIENT_xShake = 0;
+	*p_D2CLIENT_yShake = 0;
 }
