@@ -1,4 +1,4 @@
-#include "ChatColor.h"
+ï»¿#include "ChatColor.h"
 #include "../ScreenInfo/ScreenInfo.h"
 #include "../../BH.h"
 #include "../../D2Ptrs.h"
@@ -16,7 +16,7 @@
 #define INVENTORY_TOP    p_D2CLIENT_InventoryLayout->Top
 #define INVENTORY_BOTTOM p_D2CLIENT_InventoryLayout->Bottom
 
-//ÕâÀïÏÈ²»¹Ü·Ç×ÊÁÏÆ¬µÄstash
+//ï¿½ï¿½ï¿½ï¿½ï¿½È²ï¿½ï¿½Ü·ï¿½ï¿½ï¿½ï¿½ï¿½Æ¬ï¿½ï¿½stash
 #define STASH_WIDTH  p_D2CLIENT_StashLayout->SlotWidth
 #define STASH_HEIGHT p_D2CLIENT_StashLayout->SlotHeight
 #define STASH_LEFT   p_D2CLIENT_StashLayout->Left
@@ -33,14 +33,14 @@
 
 #define CELL_SIZE p_D2CLIENT_InventoryLayout->SlotPixelHeight
 
-using namespace Drawing;  //Õâ¸öÊÇHookµÄnamespace
+using namespace Drawing;  //ï¿½ï¿½ï¿½ï¿½ï¿½Hookï¿½ï¿½namespace
  
 D2EditBox* ChatColor::pD2WinEditBox;
 DWORD ChatColor::dwPlayerId=0;
 StatMonitor ChatColor::sMonitorStr[200] = {L'\0'};
 std::map<std::string, Toggle> ChatColor::Toggles;
 
-//³¢ÊÔ×öÖÐÎÄÊäÈëµÄ²¹¶¡
+//ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½Ä²ï¿½ï¿½ï¿½
 Patch* InputLine1 = new Patch(Call, D2CLIENT, { 0x70C6C, 0xB254C }, (DWORD)InputLinePatch1_ASM, 5);
 //{PatchCALL, DLLOFFSET2(D2CLIENT, 0x6FB20C6C, 0x6FB6254C), (DWORD)InputLinePatch1_ASM, 5, & fDefault},
 Patch* InputLine2 = new Patch(Call, D2CLIENT, { 0x7037B, 0xB286B }, (DWORD)InputLinePatch2_ASM, 5);
@@ -50,29 +50,29 @@ Patch* UnicodeSupport1 = new Patch(Jump, D2LANG, { 0x82F0, 0x82B0 }, (DWORD)D2La
 Patch* UnicodeSupport2 = new Patch(Jump, D2LANG, { 0x8320, 0x82E0 }, (DWORD)D2Lang_Win2UnicodePatch, 5);
 //{PatchJMP,    DLLOFFSET2(D2LANG, 0x6FC08320, 0x6FC082E0),      (DWORD)D2Lang_Win2UnicodePatch,          5 ,   &fLocalizationSupport},
 Patch* UnicodeSupport3 = new Patch(Call, D2WIN, { 0x183A0, 0xE850 }, (DWORD)ChannelEnterCharPatch, 5);
-//{PatchCALL, DLLOFFSET2(D2WIN, 0x6F8F83A0, 0x6F8EE850), (DWORD)ChannelEnterCharPatch, 5, & fLocalizationSupport}, //×¢ÒâInputLinePatch1_ASM±ØÐë½áºÏÕâ¸ö£¬²»È»»áÒýÆð²¿·Ö¶ÑÕ»´íÎó(ËäÈ»²»Ó°ÏìÊ¹ÓÃ)
+//{PatchCALL, DLLOFFSET2(D2WIN, 0x6F8F83A0, 0x6F8EE850), (DWORD)ChannelEnterCharPatch, 5, & fLocalizationSupport}, //×¢ï¿½ï¿½InputLinePatch1_ASMï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½È»ï¿½ï¿½ï¿½ï¿½ï¿½ð²¿·Ö¶ï¿½Õ»ï¿½ï¿½ï¿½ï¿½(ï¿½ï¿½È»ï¿½ï¿½Ó°ï¿½ï¿½Ê¹ï¿½ï¿½)
 Patch* UnicodeSupport4 = new Patch(Call, BNCLIENT, { 0xFF5C, 0x1513C }, (DWORD)MultiByteFixPatch_ASM, 6);
 //{ PatchCALL,   DLLOFFSET2(BNCLIENT,0x6FF2FF5C, 0x6FF3513C),     (DWORD)MultiByteFixPatch_ASM,            6 ,   &fLocalizationSupport }, // for /w *acc msg text
-//³¢ÊÔ×ö¹â»·×´Ì¬£¬ÒÔºóÔÙ·Ö¿ªÀ´°É¡£ÏÈ¶¼Ð´ÔÚChatColor.cppÀïÃæ
+//ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½â»·×´Ì¬ï¿½ï¿½ï¿½Ôºï¿½ï¿½Ù·Ö¿ï¿½ï¿½ï¿½ï¿½É¡ï¿½ï¿½È¶ï¿½Ð´ï¿½ï¿½ChatColor.cppï¿½ï¿½ï¿½ï¿½
 Patch* Monitor1 = new Patch(Call, D2CLIENT, { 0xADEB1, 0xB254C }, (DWORD)RecvCommand_A7_Patch_ASM, 9);
-//{PatchCALL, DLLOFFSET2(D2CLIENT, 0x6FB5DEB1, 0x6FB34391), (DWORD)RecvCommand_A7_Patch_ASM, 9, & fDefault},//ÉèÖÃ×´Ì¬1
+//{PatchCALL, DLLOFFSET2(D2CLIENT, 0x6FB5DEB1, 0x6FB34391), (DWORD)RecvCommand_A7_Patch_ASM, 9, & fDefault},//ï¿½ï¿½ï¿½ï¿½×´Ì¬1
 Patch* Monitor2 = new Patch(Call, D2CLIENT, { 0xADD74, 0xB254C }, (DWORD)RecvCommand_A8_Patch_ASM, 9);
-//{ PatchCALL,   DLLOFFSET2(D2CLIENT , 0x6FB5DD74, 0x6FB34254),   (DWORD)RecvCommand_A8_Patch_ASM,        9 ,   &fDefault },//ÉèÖÃ×´Ì¬2
+//{ PatchCALL,   DLLOFFSET2(D2CLIENT , 0x6FB5DD74, 0x6FB34254),   (DWORD)RecvCommand_A8_Patch_ASM,        9 ,   &fDefault },//ï¿½ï¿½ï¿½ï¿½×´Ì¬2
 Patch* Monitor3 = new Patch(Call, D2CLIENT, { 0xADD31, 0xB254C }, (DWORD)RecvCommand_A9_Patch_ASM, 9);
-//{ PatchCALL,   DLLOFFSET2(D2CLIENT , 0x6FB5DD31, 0x6FB34211),   (DWORD)RecvCommand_A9_Patch_ASM,        9 ,   &fDefault },//½áÊø×´Ì¬
-//ÏÔÑªÏÔÀ¶
+//{ PatchCALL,   DLLOFFSET2(D2CLIENT , 0x6FB5DD31, 0x6FB34211),   (DWORD)RecvCommand_A9_Patch_ASM,        9 ,   &fDefault },//ï¿½ï¿½ï¿½ï¿½×´Ì¬
+//ï¿½ï¿½Ñªï¿½ï¿½ï¿½ï¿½
 Patch* showLifeMana1 = new Patch(Call, D2CLIENT, { 0x276B5, 0xB254C }, (DWORD)ShowLifePatch_ASM, 5);
 //{PatchCALL, DLLOFFSET2(D2CLIENT, 0x6FAD76B5, 0x6FB1D765), (DWORD)ShowLifePatch_ASM, 5, & fDefault},
 Patch* showLifeMana2 = new Patch(Call, D2CLIENT, { 0x27767, 0xB254C }, (DWORD)ShowManaPatch_ASM, 5);
 //{ PatchCALL,   DLLOFFSET2(D2CLIENT, 0x6FAD7767, 0x6FB1D817),    (DWORD)ShowManaPatch_ASM,           5 ,   &fDefault },
-//Ó¶±ø/ºÃÓÑÍ·ÏñµÈ¼¶ÏÔÊ¾£¬ÕÐ»½Îï¸öÊýÏÔÊ¾
+//Ó¶ï¿½ï¿½/ï¿½ï¿½ï¿½ï¿½Í·ï¿½ï¿½È¼ï¿½ï¿½ï¿½Ê¾ï¿½ï¿½ï¿½Ð»ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½Ê¾
 Patch* petHead = new Patch(Call, D2CLIENT, { 0x5B582, 0xB254C }, (DWORD)DrawPetHeadPath_ASM, 7);
 //{PatchCALL, DLLOFFSET2(D2CLIENT, 0x6FB0B582, 0x6FB39662), (DWORD)DrawPetHeadPath_ASM, 7, & fDefault},
 Patch* partyHead = new Patch(Call, D2CLIENT, { 0x5BBE0, 0xB254C }, (DWORD)DrawPartyHeadPath_ASM, 6);
 //{ PatchCALL,   DLLOFFSET2(D2CLIENT, 0x6FB0BBE0, 0x6FB39F90),    (DWORD)DrawPartyHeadPath_ASM,          6 ,   &fDefault },
-// ´ÓHMÒÆÖ²·À¾ß»ù´¡Öµ
+// ï¿½ï¿½HMï¿½ï¿½Ö²ï¿½ï¿½ï¿½ß»ï¿½ï¿½ï¿½Öµ
 Patch* DBase = new Patch(Call, D2CLIENT, { 0x8FDAD, 0x8FDAD }, (DWORD)StrcatDefenseStringPatch_ASM, 6);
-//{PatchCALL, DLLOFFSET2(D2CLIENT, 0x6FB3FDAD, 0x6FB422FD), (DWORD)StrcatDefenseStringPatch_ASM, 6, & fDefault},//Æ´·ÀÓùÖµ×Ö·û´®
+//{PatchCALL, DLLOFFSET2(D2CLIENT, 0x6FB3FDAD, 0x6FB422FD), (DWORD)StrcatDefenseStringPatch_ASM, 6, & fDefault},//Æ´ï¿½ï¿½ï¿½ï¿½Öµï¿½Ö·ï¿½ï¿½ï¿½
 
 void ChatColor::Init() {
 	BH::inGameOnce = false;
@@ -110,7 +110,7 @@ void Print(DWORD color, char* format, ...) {
 DWORD gameTimer;
 DWORD startExperience;
 int startLevel;
-unsigned int MercProtectSec;  //Ó¶±ø±£»¤¼ä¸ô
+unsigned int MercProtectSec;  //Ó¶ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½
 
 void ChatColor::OnGameJoin() {
 	inGame = true;
@@ -140,7 +140,7 @@ void ChatColor::OnLoad() {
 	partyHead->Install();
 	DBase->Install();
 	LoadConfig();
-	//×´Ì¬Ð´ÔÚÕâÀï°É
+	//×´Ì¬Ð´ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½
 	DWORD statNo[] = {   //×´Ì¬id
 		1,2,9,11,19,21,28,55,58,60,
 		62,95,61,10,16,20,26,30,31,32,
@@ -160,24 +160,24 @@ void ChatColor::OnLoad() {
 		3,3,3
 	};
 	LPCSTR desc[] = {
-		"¶³½á","ÖÐ¶¾","ÉËº¦¼ÓÉî","±ù¼õËÙ","ÐéÈõ","Ñ£ÔÎ","ÉóÅÐ¹â»·","¹¥»÷·´ÊÉ","ÉúÃüÍµÈ¡","Ë¥ÀÏ",
-		"ËºÁÑÉË¿Ú","¿ñÕ½Ê¿","½µµÍµÖ¿¹","±ù·â×°¼×","»ðÑæÇ¿»¯","º®±ù×°¼×","´ó½Ð","ÄÜÁ¿¶Ü","¶¾ÑÀ","Õ½¶·ÌåÖÆ",
-		"À×ÔÆ·ç±©","Õ½¶·Ö¸»Ó","Ëé±ù¼×","¿ñÂÒ","ÉñÊ¥Ö®¶Ü","×²´¸","Ò°ÐÔ¿ñ±©","×°¼×Éñµî","Õ½¶·Éñµî","ÉÁµçÉñµî",
-		"»ðÑæÉñµî","±ùÀäÉñµî","¶¾ËØÉñµî","¼¼ÄÜÉñµî","·¨Á¦Éñµî","ÄÍÁ¦Éñµî","¾­ÑéÉñµî","ÀÇÈËÐÎÌ¬","ÐÜÈËÐÎÌ¬","±©·ç",
-		"»ÙÌìÃðµØ","Ä§Ó°¶·Åñ","ËÙ¶È±¬·¢","µ¶ÈÐÖ®¶Ü","ÄÜÁ¿Ïû½â","±äÉíÍÞÍÞ","¾ÈÖú","°×¹Ç×°¼×","Á¦Á¿¹â»·","Æíµ»",
-		"·´¿¹¹â»·","×£¸£Ãé×¼","»îÁ¦","×¨×¢¹â»·","œQ»¯","Ú¤Ë¼","¿ñÈÈ¹â»·","ÀÇâµÖ®ÐÄ","ÏðÄ¾ÖÇÕß","ì«·ç×°¼×",
-		"ÏðÄ¾ÖÇÕß","ÀÇâµÖ®ÐÄ","µÖ¿¹»ðÑæ"
+		"ï¿½ï¿½ï¿½ï¿½","ï¿½Ð¶ï¿½","ï¿½Ëºï¿½ï¿½ï¿½ï¿½ï¿½","ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½","ï¿½ï¿½ï¿½ï¿½","Ñ£ï¿½ï¿½","ï¿½ï¿½ï¿½Ð¹â»·","ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½","ï¿½ï¿½ï¿½ï¿½ÍµÈ¡","Ë¥ï¿½ï¿½",
+		"Ëºï¿½ï¿½ï¿½Ë¿ï¿½","ï¿½ï¿½Õ½Ê¿","ï¿½ï¿½ï¿½ÍµÖ¿ï¿½","ï¿½ï¿½ï¿½ï¿½×°ï¿½ï¿½","ï¿½ï¿½ï¿½ï¿½Ç¿ï¿½ï¿½","ï¿½ï¿½ï¿½ï¿½×°ï¿½ï¿½","ï¿½ï¿½ï¿½","ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½","ï¿½ï¿½ï¿½ï¿½","Õ½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½",
+		"ï¿½ï¿½ï¿½Æ·ç±©","Õ½ï¿½ï¿½Ö¸ï¿½ï¿½","ï¿½ï¿½ï¿½ï¿½ï¿½","ï¿½ï¿½ï¿½ï¿½","ï¿½ï¿½Ê¥Ö®ï¿½ï¿½","×²ï¿½ï¿½","Ò°ï¿½Ô¿ï¿½","×°ï¿½ï¿½ï¿½ï¿½ï¿½","Õ½ï¿½ï¿½ï¿½ï¿½ï¿½","ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½",
+		"ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½","ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½","ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½","ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½","ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½","ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½","ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½","ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½Ì¬","ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½Ì¬","ï¿½ï¿½ï¿½ï¿½",
+		"ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½","Ä§Ó°ï¿½ï¿½ï¿½ï¿½","ï¿½Ù¶È±ï¿½ï¿½ï¿½","ï¿½ï¿½ï¿½ï¿½Ö®ï¿½ï¿½","ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½","ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½","ï¿½ï¿½ï¿½ï¿½","ï¿½×¹ï¿½×°ï¿½ï¿½","ï¿½ï¿½ï¿½ï¿½ï¿½â»·","ï¿½ï¿½ï¿½ï¿½",
+		"ï¿½ï¿½ï¿½ï¿½ï¿½â»·","×£ï¿½ï¿½ï¿½ï¿½×¼","ï¿½ï¿½ï¿½ï¿½","×¨×¢ï¿½â»·","ï¿½Qï¿½ï¿½","Ú¤Ë¼","ï¿½ï¿½ï¿½È¹â»·","ï¿½ï¿½ï¿½Ö®ï¿½ï¿½","ï¿½ï¿½Ä¾ï¿½ï¿½ï¿½ï¿½","ì«·ï¿½×°ï¿½ï¿½",
+		"ï¿½ï¿½Ä¾ï¿½ï¿½ï¿½ï¿½","ï¿½ï¿½ï¿½Ö®ï¿½ï¿½","ï¿½Ö¿ï¿½ï¿½ï¿½ï¿½ï¿½"
 	};
 
-	int statNoSize = sizeof(statNo) / sizeof(DWORD);  //¶¯Ì¬Êý×é´óÐ¡
+	int statNoSize = sizeof(statNo) / sizeof(DWORD);  //ï¿½ï¿½Ì¬ï¿½ï¿½ï¿½ï¿½ï¿½Ð¡
 
 	for (DWORD n = 0; n < statNoSize; n++) {
 		ChatColor::sMonitorStr[n].dwStatNo = statNo[n];
 		ChatColor::sMonitorStr[n].dwColor = color[n];
-		//ChatColor::sMonitorStr[0].fCountDown = TRUE;  //µ¹¼ÆÊ±,Õâ¸öÔÝÊ±²»ÐÐ£¬³ÖÐøÊ±¼äµÄ²ÎÊý»¹²»ÖªµÀÄÄÀï
+		//ChatColor::sMonitorStr[0].fCountDown = TRUE;  //ï¿½ï¿½ï¿½ï¿½Ê±,ï¿½ï¿½ï¿½ï¿½ï¿½Ê±ï¿½ï¿½ï¿½Ð£ï¿½ï¿½ï¿½ï¿½ï¿½Ê±ï¿½ï¿½Ä²ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½Öªï¿½ï¿½ï¿½ï¿½ï¿½ï¿½
 		MyMultiByteToWideChar(CP_ACP, 0, desc[n], -1, sMonitorStr[n].wszDesc[0], 30);
 	}
-	//ÓÀ¾ÃÏÔÊ¾ÑªÀ¶,×Ô¶¨Òå
+	//ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½Ê¾Ñªï¿½ï¿½,ï¿½Ô¶ï¿½ï¿½ï¿½
 	*p_D2CLIENT_ShowLifeStr = TRUE;
 	*p_D2CLIENT_ShowManaStr = TRUE;
 	gameTimer = GetTickCount();
@@ -206,13 +206,13 @@ void ChatColor::LoadConfig() {
 
 	BH::config->ReadAssoc("Whisper Color", whisperColors);
 
-	BH::config->ReadToggle("Merc Protect", "None", true, Toggles["Merc Protect"]);  //Ó¶±ø±£»¤
-	BH::config->ReadToggle("Merc Boring", "None", true, Toggles["Merc Boring"]);  //Ó¶±øÍÂ²Û
-	BH::config->ReadToggle("Rune Number", "None", true, Toggles["Rune Number"]);  //·ûÎÄÊý×Ö
-	BH::config->ReadToggle("Show Money", "None", false, Toggles["Show Money"]);  //Ì°À·Ä£Ê½,Ä¬ÈÏ¹Ø±Õ
-	BH::config->ReadToggle("Death Back", "None", false, Toggles["Death Back"]);  //ËÀÍöÁ¢¼´»Ø³Ç,Ä¬ÈÏ¹Ø±Õ
+	BH::config->ReadToggle("Merc Protect", "None", true, Toggles["Merc Protect"]);  //Ó¶ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½
+	BH::config->ReadToggle("Merc Boring", "None", true, Toggles["Merc Boring"]);  //Ó¶ï¿½ï¿½ï¿½Â²ï¿½
+	BH::config->ReadToggle("Rune Number", "None", true, Toggles["Rune Number"]);  //ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½
+	BH::config->ReadToggle("Show Money", "None", false, Toggles["Show Money"]);  //Ì°ï¿½ï¿½Ä£Ê½,Ä¬ï¿½Ï¹Ø±ï¿½
+	BH::config->ReadToggle("Death Back", "None", false, Toggles["Death Back"]);  //ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½Ø³ï¿½,Ä¬ï¿½Ï¹Ø±ï¿½
 
-	BH::config->ReadInt("Merc Protect Sec", MercProtectSec, 3);   //Ä¬ÈÏ3Ãë
+	BH::config->ReadInt("Merc Protect Sec", MercProtectSec, 3);   //Ä¬ï¿½ï¿½3ï¿½ï¿½
 }
 
 void ChatColor::OnChatPacketRecv(BYTE* packet, bool* block) {
@@ -263,9 +263,9 @@ void ChatColor::OnLoop()
 
 	if (BH::inGameOnce == false) {
 		BH::inGameOnce = true;
-		//*p_D2CLIENT_AutomapOn = TRUE;  //×Ô¶¯¿ªÆôµØÍ¼
-		D2CLIENT_ShowMap();  //×Ô¶¯¿ªÆôµØÍ¼,Õâ¸ö²ÅÊÇÕæÕýµÄ×Ô¶¯¿ªÆôµØÍ¼
-		(*p_D2CLIENT_AutomapPos).x += 32;  //µØÍ¼ÖÐÐÄµãÆ«ÒÆ...
+		//*p_D2CLIENT_AutomapOn = TRUE;  //ï¿½Ô¶ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½Í¼
+		D2CLIENT_ShowMap();  //ï¿½Ô¶ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½Í¼,ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½Ô¶ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½Í¼
+		(*p_D2CLIENT_AutomapPos).x += 32;  //ï¿½ï¿½Í¼ï¿½ï¿½ï¿½Äµï¿½Æ«ï¿½ï¿½...
 		//(*p_D2CLIENT_AutomapPos).y += 0;
 		dwPlayerId = D2CLIENT_GetPlayerUnit()->dwUnitId;
 
@@ -286,7 +286,7 @@ void ResetMonitor() {
 void ChatColor::OnEnd() 
 {
 	BH::inGameOnce = false;
-	ResetMonitor();  //ÖØÖÃ×´Ì¬
+	ResetMonitor();  //ï¿½ï¿½ï¿½ï¿½×´Ì¬
 }
 
 void CheckD2WinEditBox()
@@ -341,7 +341,7 @@ BOOL __cdecl InitD2EditBox()
 	//if (fMyChatOn) return FALSE;
 	if (!D2CLIENT_GetUIState(UI_CHAT_CONSOLE)) return FALSE;
 	if (!ChatColor::pD2WinEditBox) {
-		static DWORD dws[] = { 0x0D, 0 };//ËùÓÃ×ÖÌå
+		static DWORD dws[] = { 0x0D, 0 };//ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½
 		ChatColor::pD2WinEditBox = D2WIN_CreateEditBoxHM(0x83,
 			Hook::GetScreenHeight() - 58, Hook::GetScreenWidth() - 266,
 			0x2D,
@@ -349,7 +349,7 @@ BOOL __cdecl InitD2EditBox()
 			sizeof(dws), &dws
 		);
 		//FOCUSECONTROL = pD2WinEditBox;
-		*p_D2WIN_FocusedControlHM = ChatColor::pD2WinEditBox;  //Õâ¸ö±È½Ï¹Ø¼ü£¬²»È»»ñÈ¡²»µ½ÊäÈë½¹µã
+		*p_D2WIN_FocusedControlHM = ChatColor::pD2WinEditBox;  //ï¿½ï¿½ï¿½ï¿½È½Ï¹Ø¼ï¿½ï¿½ï¿½ï¿½ï¿½È»ï¿½ï¿½È¡ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ë½¹ï¿½ï¿½
 		if (ChatColor::pD2WinEditBox) {
 			D2WIN_SetEditBoxProcHM(ChatColor::pD2WinEditBox, &EditBoxCallBack);
 			D2WIN_SetEditBoxTextHM(ChatColor::pD2WinEditBox, p_D2CLIENT_LastChatMsg);
@@ -582,7 +582,7 @@ DWORD __fastcall ChannelEnterCharPatch(D2EditBox *hWnd, BYTE bKeyCode)
 
 void UnicodeToUTF_8(char* pOut, wchar_t* pText) {
 
-	// ×¢Òâ WCHAR¸ßµÍ×ÖµÄË³Ðò,µÍ×Ö½ÚÔÚÇ°£¬¸ß×Ö½ÚÔÚºó   
+	// ×¢ï¿½ï¿½ WCHARï¿½ßµï¿½ï¿½Öµï¿½Ë³ï¿½ï¿½,ï¿½ï¿½ï¿½Ö½ï¿½ï¿½ï¿½Ç°ï¿½ï¿½ï¿½ï¿½ï¿½Ö½ï¿½ï¿½Úºï¿½   
 	char* pchar = (char*)pText;
 	pOut[0] = (0xE0 | ((pchar[1] & 0xF0) >> 4));
 	pOut[1] = (0x80 | ((pchar[1] & 0x0F) << 2)) + ((pchar[0] & 0xC0) >> 6);
@@ -608,9 +608,9 @@ void __stdcall MultiByteFix(LPSTR str)
 	char* ptemp = szTemp;
 	char* p = pStr;
 
-	//ÏÈ»¹Ô­³Égb2312
+	//ï¿½È»ï¿½Ô­ï¿½ï¿½gb2312
 	while (*p) {
-		if (((*p) & 0xFC) == 0xC0) {//ºº×Ö
+		if (((*p) & 0xFC) == 0xC0) {//ï¿½ï¿½ï¿½ï¿½
 			*ptemp = ((p[0] & 0x03) << 6) + (p[1] & 0x3F);
 			p++;
 		}
@@ -622,7 +622,7 @@ void __stdcall MultiByteFix(LPSTR str)
 	}
 	*ptemp = '\0';
 
-	//ÖØÐÂ×ª»»utf8
+	//ï¿½ï¿½ï¿½ï¿½×ªï¿½ï¿½utf8
 	ptemp = szTemp;
 	char buf[4];
 	wchar_t pbuffer = L'\0';
@@ -656,11 +656,11 @@ void __declspec(naked) MultiByteFixPatch_ASM()
 }
 
 
-//ÒÔÏÂÊÇ×´Ì¬¼àÊÓÆ÷
+//ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½×´Ì¬ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½
 
 void DrawMonitorInfo() {
 
-	//if (tStateMonitorToggle.isOn == 0) return;  //Ä¬ÈÏ¿ªÆô
+	//if (tStateMonitorToggle.isOn == 0) return;  //Ä¬ï¿½Ï¿ï¿½ï¿½ï¿½
 	UnitAny* pUnit = D2CLIENT_GetPlayerUnit();
 	if (!pUnit) return;
 
@@ -686,12 +686,12 @@ void DrawMonitorInfo() {
 
 			DWORD secs = (dwTimer - ChatColor::sMonitorStr[i].dwTimer) / 1000;
 			if (ChatColor::sMonitorStr[i].fCountDown) {
-				secs = ChatColor::sMonitorStr[i].dwTimer - secs;  //µ¹¼ÆÊ±
+				secs = ChatColor::sMonitorStr[i].dwTimer - secs;  //ï¿½ï¿½ï¿½ï¿½Ê±
 			}
 			//wsprintfW(wszTemp, L"%s: %.2d:%.2d:%.2d", ChatColor::sMonitorStr[i].wszDesc[0], secs / 3600, (secs / 60) % 60, secs % 60);
 			wsprintfW(wszTemp, L"%s: %.2d:%.2d", ChatColor::sMonitorStr[i].wszDesc[0], (secs / 60) % 60, secs % 60);
 			DWORD width, fileNo;
-			D2WIN_GetTextWidthFileNo(wszTemp, &width, &fileNo);  //Õâ¸öÊÇBHµÄÈ¡×ÖÌå¿íµÄ·½·¨,¸úHMÓÐµã²»Ò»Ñù
+			D2WIN_GetTextWidthFileNo(wszTemp, &width, &fileNo);  //ï¿½ï¿½ï¿½ï¿½ï¿½BHï¿½ï¿½È¡ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½Ä·ï¿½ï¿½ï¿½,ï¿½ï¿½HMï¿½Ðµã²»Ò»ï¿½ï¿½
 			D2WIN_DrawText(wszTemp, xpos - width, ypos, ChatColor::sMonitorStr[i].dwColor, 0);
 			ypos = ypos - 15;
 
@@ -963,17 +963,17 @@ void drawExperienceInfo() {
 		unit = "K";
 	}
 
-	sprintf_s(sExp, "µÈ¼¶£º%00d£¬¾­Ñé£º%00.2f%% (%s%00.2f%%) [%s%.2f%s/s]", cLevel, pExp, expGainPct >= 0 ? "+" : "", expGainPct, expPerSecond >= 0 ? "+" : "", expPerSecond, unit);
+	sprintf_s(sExp, "%00.2f%% (%s%00.2f%%) [%s%.2f%s/s]", pExp, expGainPct >= 0 ? "+" : "", expGainPct, expPerSecond >= 0 ? "+" : "", expPerSecond, unit);
 
 	Texthook::Draw((*p_D2CLIENT_ScreenSizeX / 2) - 200, *p_D2CLIENT_ScreenSizeY - 60, Center, 6, White, "%s", sExp);
 }
 
 void drawRuneNum() {
-	//³¢ÊÔ¸ø·ûÎÄ»­Ò»¸öÊý×Ö
+	//ï¿½ï¿½ï¿½Ô¸ï¿½ï¿½ï¿½ï¿½Ä»ï¿½Ò»ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½
 	UnitAny* pUnit = D2CLIENT_GetPlayerUnit();
 	if (!pUnit) return;
 	
-	if (Item::viewingUnit) return;   //Èç¹ûÊÇ²é¿´ÆäËüÍæ¼Ò¼¦¶ùµÄÊ±ºò¾Í²»ÏÔÊ¾·ûÎÄÊý×Ö 
+	if (Item::viewingUnit) return;   //ï¿½ï¿½ï¿½ï¿½Ç²é¿´ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½Ò¼ï¿½ï¿½ï¿½ï¿½ï¿½Ê±ï¿½ï¿½Í²ï¿½ï¿½ï¿½Ê¾ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ 
 
 	if (!(D2CLIENT_GetUIState(UI_INVENTORY) || D2CLIENT_GetUIState(UI_STASH) || D2CLIENT_GetUIState(UI_CUBE) || D2CLIENT_GetUIState(UI_NPCSHOP)))
 		return;
@@ -985,7 +985,7 @@ void drawRuneNum() {
 		if (pItem->pItemData->ItemLocation == STORAGE_INVENTORY) {
 			left = INVENTORY_LEFT;
 			top = INVENTORY_TOP;
-			//½ÇÉ«±³°ü¶¼ÏÔÊ¾
+			//ï¿½ï¿½É«ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½Ê¾
 			//if (!D2CLIENT_GetUIState(UI_INVENTORY)&& !D2CLIENT_GetUIState(UI_STASH)) continue;
 		}
 		else if (pItem->pItemData->ItemLocation == STORAGE_STASH) {
@@ -1011,17 +1011,17 @@ void drawRuneNum() {
 
 void DrawDefaultFontText(wchar_t* wStr, int xpos, int ypos, DWORD dwColor, int div, DWORD dwAlign)
 {
-	D2WIN_DrawText(wStr, xpos - (D2WIN_GetTextPixelLen(wStr) >> div), ypos, dwColor, dwAlign);//dwAlign:¶àÐÐÊ±¶ÔÆëÓÐÓÃ 1¾ÓÖÐ 0 ¿¿×ó
+	D2WIN_DrawText(wStr, xpos - (D2WIN_GetTextPixelLen(wStr) >> div), ypos, dwColor, dwAlign);//dwAlign:ï¿½ï¿½ï¿½ï¿½Ê±ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ 1ï¿½ï¿½ï¿½ï¿½ 0 ï¿½ï¿½ï¿½ï¿½
 }
 
 char* szOrbPattern = "%d/%d (%d%%)";
 DWORD __stdcall ShowLifeWithMyPattern(DWORD callBack, int min, int max) {
 
-	if (ChatColor::Toggles["Death Back"].state&&min<=0)   //ÕâÀïÐ´¸öËÀÍöºóÁ¢¼´»Ø³Ç,Ö÷ÒªÊÇ½â¾öÈ¥Ê¬ÌåºóÓÖ»á¸´»îµÄbug¡£
+	if (ChatColor::Toggles["Death Back"].state&&min<=0)   //ï¿½ï¿½ï¿½ï¿½Ð´ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½Ø³ï¿½,ï¿½ï¿½Òªï¿½Ç½ï¿½ï¿½È¥Ê¬ï¿½ï¿½ï¿½ï¿½Ö»á¸´ï¿½ï¿½ï¿½bugï¿½ï¿½
 	{
-		PrintText(Red, "»Ø³ÇÖ®¸è£ºÎÒËÍÄãÀë¿ª~Ç§ÀïÖ®Íâ~~");
+		PrintText(Red, "ï¿½Ø³ï¿½Ö®ï¿½è£ºï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ë¿ª~Ç§ï¿½ï¿½Ö®ï¿½ï¿½~~");
 		SendMessage(D2GFX_GetHwnd(), WM_KEYDOWN, VK_ESCAPE, 0);
-		Sleep(100);  //Õâ¸ö¿ÉÒÔ·ÀÖ¹¶à´Î·¢ËÍ
+		Sleep(100);  //ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½Ô·ï¿½Ö¹ï¿½ï¿½Î·ï¿½ï¿½ï¿½
 	}
 	wchar_t wszTemp[64];
 	int iPercent = 100 * min / max;
@@ -1038,8 +1038,8 @@ DWORD __stdcall ShowManaWithMyPattern(DWORD callBack, int min, int max) {
 	wsprintfW2(wszTemp, szOrbPattern, min, max, iPercent);
 	DrawDefaultFontText(wszTemp, Hook::GetScreenWidth() - 65, Hook::GetScreenHeight() - 95, 0);
 
-	//Õâ¶Î´úÂëÐ´ÔÚÕâÀï£¬Ö÷ÒªÊÇ²»»á°ÑÎïÆ·µÄÊôÐÔ¸øµ²×¡£¨Ä¿Ç°»¹²»ÖªµÀD2µÄDrawµÄÓÅÏÈ¼¶ÎÊÌâ£©
-	//ÕâÀï¿ªÊ¼¼ÆËãÑü´øÊ£ÓàÊýÁ¿
+	//ï¿½ï¿½Î´ï¿½ï¿½ï¿½Ð´ï¿½ï¿½ï¿½ï¿½ï¿½ï£¬ï¿½ï¿½Òªï¿½Ç²ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½Æ·ï¿½ï¿½ï¿½ï¿½ï¿½Ô¸ï¿½ï¿½ï¿½×¡ï¿½ï¿½Ä¿Ç°ï¿½ï¿½ï¿½ï¿½Öªï¿½ï¿½D2ï¿½ï¿½Drawï¿½ï¿½ï¿½ï¿½ï¿½È¼ï¿½ï¿½ï¿½ï¿½â£©
+	//ï¿½ï¿½ï¿½ï¿ªÊ¼ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½Ê£ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½
 	UnitAny* pUnit = D2CLIENT_GetPlayerUnit();
 	if (!pUnit) return callBack;
 
@@ -1047,7 +1047,7 @@ DWORD __stdcall ShowManaWithMyPattern(DWORD callBack, int min, int max) {
 	DWORD col2 = 0;
 	DWORD col3 = 0;
 	DWORD col4 = 0;
-	//Ñü´øÎïÆ·Î»ÖÃ,16½øÖÆ,pObjectPath.x
+	//ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½Æ·Î»ï¿½ï¿½,16ï¿½ï¿½ï¿½ï¿½,pObjectPath.x
 	//12,13,14,15
 	//8,9,10,11
 	//4,5,6,7
@@ -1069,26 +1069,26 @@ DWORD __stdcall ShowManaWithMyPattern(DWORD callBack, int min, int max) {
 			}
 		}
 	}
-	//¿ªÊ¼»­Ñü´øÊ£ÓàÊýÁ¿
+	//ï¿½ï¿½Ê¼ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½Ê£ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½
 	DWORD beltOffsetX = 31;
 	Texthook::Draw(*p_D2CLIENT_ScreenSizeX / 2 + 40, *p_D2CLIENT_ScreenSizeY - 33, None, 0, White, "%d", col1);
 	Texthook::Draw(*p_D2CLIENT_ScreenSizeX / 2 + 40 + beltOffsetX, *p_D2CLIENT_ScreenSizeY - 33, None, 0, White, "%d", col2);
 	Texthook::Draw(*p_D2CLIENT_ScreenSizeX / 2 + 40 + beltOffsetX * 2, *p_D2CLIENT_ScreenSizeY - 33, None, 0, White, "%d", col3);
 	Texthook::Draw(*p_D2CLIENT_ScreenSizeX / 2 + 40 + beltOffsetX * 3, *p_D2CLIENT_ScreenSizeY - 33, None, 0, White, "%d", col4);
 
-	//µÈ¼¶¾­ÑéÏÔÊ¾ÒÆµ½ÕâÀï
+	//ï¿½È¼ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½Ê¾ï¿½Æµï¿½ï¿½ï¿½ï¿½ï¿½
 	if (ScreenInfo::Toggles["Experience Meter"].state) {
 		drawExperienceInfo();
 	}
 
-	//ÏÔÊ¾·ûÎÄÊý×Ö£¬ÔÙ¼Ó¸ö¿ª¹Ø
+	//ï¿½ï¿½Ê¾ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½Ö£ï¿½ï¿½Ù¼Ó¸ï¿½ï¿½ï¿½ï¿½ï¿½
 	if(ChatColor::Toggles["Rune Number"].state)
 		drawRuneNum();
 
 	return callBack;
 
 }
-BYTE showOrbs = 2;  //ÏÔÊ¾×Ô¼ºµÄ¸ñÊ½ 
+BYTE showOrbs = 2;  //ï¿½ï¿½Ê¾ï¿½Ô¼ï¿½ï¿½Ä¸ï¿½Ê½ 
 void __declspec(naked) ShowLifePatch_ASM()
 {
 	__asm {
@@ -1119,7 +1119,7 @@ void __declspec(naked) ShowManaPatch_ASM()
 	}
 }
 
-//ÕâÀïÔÝÊ±ÏÈ²»¸´ÓÃ´úÂë£¬vc++²»Ì«Êì^^
+//ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½Ê±ï¿½È²ï¿½ï¿½ï¿½ï¿½Ã´ï¿½ï¿½ë£¬vc++ï¿½ï¿½Ì«ï¿½ï¿½^^
 void AutoToBelt()
 {
 	UnitAny* unit = D2CLIENT_GetPlayerUnit();
@@ -1127,27 +1127,27 @@ void AutoToBelt()
 		return;
 
 	//"hp", "mp", "rv"
-		//Ñ­»·²éÕÒ±³°üÀïÃæµÄÒ©
+		//Ñ­ï¿½ï¿½ï¿½ï¿½ï¿½Ò±ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½Ò©
 	for (UnitAny* pItem = unit->pInventory->pFirstItem; pItem; pItem = pItem->pItemData->pNextInvItem) {
-		if (pItem->pItemData->ItemLocation == STORAGE_INVENTORY || pItem->pItemData->ItemLocation == STORAGE_CUBE) {   //Ö»È¡±³°üºÍºÐ×ÓÀïÃæµÄ
+		if (pItem->pItemData->ItemLocation == STORAGE_INVENTORY || pItem->pItemData->ItemLocation == STORAGE_CUBE) {   //Ö»È¡ï¿½ï¿½ï¿½ï¿½ï¿½Íºï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½
 			char* code = D2COMMON_GetItemText(pItem->dwTxtFileNo)->szCode;
 			if (code[0] == 'h' && code[1] == 'p') {
-				DWORD itemId = pItem->dwUnitId;  //ºìÒ©
-				//ÊÔÒ»ÏÂÕâ¸ö²»ÖªµÀÊÇ²»ÊÇÌî³äµÄÊý¾Ý°ü
+				DWORD itemId = pItem->dwUnitId;  //ï¿½ï¿½Ò©
+				//ï¿½ï¿½Ò»ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½Öªï¿½ï¿½ï¿½Ç²ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½Ý°ï¿½
 				BYTE PacketData[5] = { 0x63, 0, 0, 0, 0 };
 				*reinterpret_cast<int*>(PacketData + 1) = itemId;
 				D2NET_SendPacket(5, 0, PacketData);
 			}
 			if (code[0] == 'm' && code[1] == 'p') {
-				DWORD itemId = pItem->dwUnitId;  //À¶Ò©
-				//ÊÔÒ»ÏÂÕâ¸ö²»ÖªµÀÊÇ²»ÊÇÌî³äµÄÊý¾Ý°ü
+				DWORD itemId = pItem->dwUnitId;  //ï¿½ï¿½Ò©
+				//ï¿½ï¿½Ò»ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½Öªï¿½ï¿½ï¿½Ç²ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½Ý°ï¿½
 				BYTE PacketData[5] = { 0x63, 0, 0, 0, 0 };
 				*reinterpret_cast<int*>(PacketData + 1) = itemId;
 				D2NET_SendPacket(5, 0, PacketData);
 			}
 			if (code[0] == 'r' && code[1] == 'v') {
-				DWORD itemId = pItem->dwUnitId;  //×ÏÒ©
-				//ÊÔÒ»ÏÂÕâ¸ö²»ÖªµÀÊÇ²»ÊÇÌî³äµÄÊý¾Ý°ü
+				DWORD itemId = pItem->dwUnitId;  //ï¿½ï¿½Ò©
+				//ï¿½ï¿½Ò»ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½Öªï¿½ï¿½ï¿½Ç²ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½Ý°ï¿½
 				BYTE PacketData[5] = { 0x63, 0, 0, 0, 0 };
 				*reinterpret_cast<int*>(PacketData + 1) = itemId;
 				D2NET_SendPacket(5, 0, PacketData);
@@ -1156,100 +1156,100 @@ void AutoToBelt()
 	}
 }
 
-//Ó¶±ø×Ô¶¯ºÈÒ©,Ö»Ö§³ÖÑü´øÉÏµÄÒ©
+//Ó¶ï¿½ï¿½ï¿½Ô¶ï¿½ï¿½ï¿½Ò©,Ö»Ö§ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½Ïµï¿½Ò©
 void AutoMercDrink(double perHP) {
 	UnitAny* unit = D2CLIENT_GetPlayerUnit();
 	if (!unit)
 		return;
-	if (perHP > 65) return;  //´óÓÚ65µÄãÐÖµÒ²Ö±½ÓÌø¹ýËãÁË
+	if (perHP > 65) return;  //ï¿½ï¿½ï¿½ï¿½65ï¿½ï¿½ï¿½ï¿½ÖµÒ²Ö±ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½
 	//"hp", "mp", "rv"
-		//Ñ­»·²éÕÒ±³°üÀïÃæµÄÒ©
+		//Ñ­ï¿½ï¿½ï¿½ï¿½ï¿½Ò±ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½Ò©
 	DWORD itemId = 0;
-	DWORD itemId_hp = 0;   //ºìÒ©
-	DWORD itemId_rv = 0;   //×ÏÒ©
+	DWORD itemId_hp = 0;   //ï¿½ï¿½Ò©
+	DWORD itemId_rv = 0;   //ï¿½ï¿½Ò©
 	char* code = "NULL";
 	for (UnitAny* pItem = unit->pInventory->pFirstItem; pItem; pItem = pItem->pItemData->pNextInvItem) {
-		if (pItem->pItemData->ItemLocation == STORAGE_NULL && pItem->pItemData->NodePage == NODEPAGE_BELTSLOTS) {   //Ö»ÄÜÓÃÑü´øÀïµÄ
+		if (pItem->pItemData->ItemLocation == STORAGE_NULL && pItem->pItemData->NodePage == NODEPAGE_BELTSLOTS) {   //Ö»ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½
 			code = D2COMMON_GetItemText(pItem->dwTxtFileNo)->szCode;
 			if (code[0] == 'h' && code[1] == 'p') {
-				itemId_hp = pItem->dwUnitId; //ºìÒ©
+				itemId_hp = pItem->dwUnitId; //ï¿½ï¿½Ò©
 			}
 			if (code[0] == 'r' && code[1] == 'v') {
-				itemId_rv = pItem->dwUnitId; //×ÏÒ©
+				itemId_rv = pItem->dwUnitId; //ï¿½ï¿½Ò©
 			}
-			if(itemId_hp !=0 && itemId_rv !=0) break;  //¶¼ÕÒµ½ÁË¾ÍÖ±½ÓÖÐ¶ÏÑ­»·
+			if(itemId_hp !=0 && itemId_rv !=0) break;  //ï¿½ï¿½ï¿½Òµï¿½ï¿½Ë¾ï¿½Ö±ï¿½ï¿½ï¿½Ð¶ï¿½Ñ­ï¿½ï¿½
 		}
 	}
 	if (itemId_hp == 0 && itemId_rv==0 && perHP <= 35) {
 		if (ChatColor::Toggles["Merc Boring"].state)
-			PrintText(Yellow, "Äã¶¼Ã»Ò©À²£¬»¹²»´øÎÒ»Ø¼Ò£¿£º%.0f%%", perHP);
+			PrintText(Yellow, "ï¿½ã¶¼Ã»Ò©ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½Ò»Ø¼Ò£ï¿½ï¿½ï¿½%.0f%%", perHP);
 	}
 	else {
 		if (perHP > 35 && perHP <= 65) {
 			if (itemId_hp == 0 && itemId_rv!=0) {
 				itemId = itemId_rv;
 				if (ChatColor::Toggles["Merc Boring"].state)
-					PrintText(Purple, "Ó¶±øÉÙÑªÀ²,×ÏºÈÆðÀ´,¸É±­£¡£º%.0f%%", perHP);
+					PrintText(Purple, "Ó¶ï¿½ï¿½ï¿½ï¿½Ñªï¿½ï¿½,ï¿½Ïºï¿½ï¿½ï¿½ï¿½ï¿½,ï¿½É±ï¿½ï¿½ï¿½ï¿½ï¿½%.0f%%", perHP);
 			}
 			else if(itemId_hp != 0){
 				itemId = itemId_hp;
 				if (ChatColor::Toggles["Merc Boring"].state)
-					PrintText(Red, "Ó¶±øÉÙÑªÀ²,ºìºÈÆðÀ´,¸É±­£¡£º%.0f%%", perHP);
+					PrintText(Red, "Ó¶ï¿½ï¿½ï¿½ï¿½Ñªï¿½ï¿½,ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½,ï¿½É±ï¿½ï¿½ï¿½ï¿½ï¿½%.0f%%", perHP);
 			}
 		}
 		else if (perHP <= 35) {
 			if (itemId_rv != 0) {
 				itemId = itemId_rv;
 				if (ChatColor::Toggles["Merc Boring"].state)
-					PrintText(Purple, "Ó¶±øÉÙÑªÀ²,×ÏºÈÆðÀ´,¸É±­£¡£º%.0f%%", perHP);
+					PrintText(Purple, "Ó¶ï¿½ï¿½ï¿½ï¿½Ñªï¿½ï¿½,ï¿½Ïºï¿½ï¿½ï¿½ï¿½ï¿½,ï¿½É±ï¿½ï¿½ï¿½ï¿½ï¿½%.0f%%", perHP);
 			}
 		}
 	}
-	if (itemId == 0) return;  //Ã»Ò©ÁË»ò²»ÓÃºÈÖ±½ÓÌø¹ý
+	if (itemId == 0) return;  //Ã»Ò©ï¿½Ë»ï¿½ï¿½Ãºï¿½Ö±ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½
 	BYTE PacketData[13] = { 0x26, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0 };
 	*reinterpret_cast<int*>(PacketData + 1) = itemId;
-	*reinterpret_cast<int*>(PacketData + 5) = 1;  //ÊÇ·ñ¸øÓ¶±ø³ÔÒ©,1ÊÇ¸ø£¬0ÊÇ²»¸ø
+	*reinterpret_cast<int*>(PacketData + 5) = 1;  //ï¿½Ç·ï¿½ï¿½Ó¶ï¿½ï¿½ï¿½ï¿½Ò©,1ï¿½Ç¸ï¿½ï¿½ï¿½0ï¿½Ç²ï¿½ï¿½ï¿½
 	D2NET_SendPacket(13, 0, PacketData);
-	//ºÈÍê»¹ÒªÌî³ä»ØÈ¥
+	//ï¿½ï¿½ï¿½ê»¹Òªï¿½ï¿½ï¿½ï¿½È¥
 	Task::Enqueue([=]()->void {
-		Sleep(1000);  //Í£1ÃëÊÔÊÔ¿´
+		Sleep(1000);  //Í£1ï¿½ï¿½ï¿½ï¿½ï¿½Ô¿ï¿½
 		AutoToBelt();
 	});
 }
 
-//Í·ÏñÏà¹Ø
+//Í·ï¿½ï¿½ï¿½ï¿½ï¿½
 void __fastcall DrawPetHeadPath(int xpos, UnitAny* pUnit) {
 	
 	wchar_t wszTemp[512];
 	wsprintfW(wszTemp, L"%d", D2COMMON_GetUnitStat(pUnit, STAT_LEVEL, 0));
-	//swprintf(wszTemp, L"%d£¬%f/%f", D2COMMON_GetUnitStat(pUnit, STAT_LEVEL, 0), hp,maxhp);
+	//swprintf(wszTemp, L"%dï¿½ï¿½%f/%f", D2COMMON_GetUnitStat(pUnit, STAT_LEVEL, 0), hp,maxhp);
 		
 	//D2WIN_DrawText(1, wszTemp, xpos + 5, 57, 0);
-	DWORD dwOldFone = D2WIN_SetTextFont(1);   //ÉèÖÃ×ÖÌå
+	DWORD dwOldFone = D2WIN_SetTextFont(1);   //ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½
 	D2WIN_DrawText(wszTemp,xpos+5,57,White,0);
 	//D2WIN_DrawText(wszTemp, xpos + 700, 570, White, 0);
 	D2WIN_SetTextFont(dwOldFone);
 	bool test1 = ChatColor::Toggles["Merc Protect"].state;
 	if (test1) {
-		//ÏÂÃæÊÇÓ¶±ø×Ô¶¯ºÈÒ©
+		//ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½Ó¶ï¿½ï¿½ï¿½Ô¶ï¿½ï¿½ï¿½Ò©
 		DWORD mHP = D2COMMON_GetUnitStat(pUnit, STAT_HP, 0);
 		DWORD mMAXHP = D2COMMON_GetUnitStat(pUnit, STAT_MAXHP, 0);
-		//if (mHP > 0x8000) {  //Õâ¸öËµÃ÷mercµÄÑª·¢ÉúÁË±ä»¯,ÔÝÊ±ÏÈ²»ÓÃÕâ¸öÈ¥ÅÐ¶Ï by zyl 20220422
-			double maxhp = (double)(mMAXHP >> 8);  //Õâ¸öÓ¶±øÈ¡¹ýÀ´ÊÇ300£¬²»ÖªµÀÎªÊ²Ã´
-			if (maxhp > 128) maxhp = 128;   //ÕâÀïÏÈÏÞÖÆÎª128ÊÔÊÔ¿´ÁË¡£
+		//if (mHP > 0x8000) {  //ï¿½ï¿½ï¿½Ëµï¿½ï¿½mercï¿½ï¿½Ñªï¿½ï¿½ï¿½ï¿½ï¿½Ë±ä»¯,ï¿½ï¿½Ê±ï¿½È²ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½È¥ï¿½Ð¶ï¿½ by zyl 20220422
+			double maxhp = (double)(mMAXHP >> 8);  //ï¿½ï¿½ï¿½Ó¶ï¿½ï¿½È¡ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½300ï¿½ï¿½ï¿½ï¿½Öªï¿½ï¿½ÎªÊ²Ã´
+			if (maxhp > 128) maxhp = 128;   //ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½Îª128ï¿½ï¿½ï¿½Ô¿ï¿½ï¿½Ë¡ï¿½
 			double hp = (double)(mHP >> 8);
 			double perHP = (hp / maxhp) * 100.0;
-			if (perHP > 100) perHP = 100;  //ÕâÀïºÈÒ©µÄÊ±ºòÓÐ¿ÉÄÜ»áÓÐ³¬³ö100µÄÇé¿ö
-			if ((GetTickCount() - mercLastTime) < (MercProtectSec*1000)) {  //ÕâÀïÏÈ¹Ì¶¨3Ãë°É
-				//PrintText(White, "ÉÏ´Î¸ÕºÈ¹ýÒ©£¬ÏÈ²»ºÈ");
-				return;  //ÉÏ´ÎºÈÒ©Ê±¼äÉÙÓÚ3ÃëÏÈ²»ºÈ
+			if (perHP > 100) perHP = 100;  //ï¿½ï¿½ï¿½ï¿½ï¿½Ò©ï¿½ï¿½Ê±ï¿½ï¿½ï¿½Ð¿ï¿½ï¿½Ü»ï¿½ï¿½Ð³ï¿½ï¿½ï¿½100ï¿½ï¿½ï¿½ï¿½ï¿½
+			if ((GetTickCount() - mercLastTime) < (MercProtectSec*1000)) {  //ï¿½ï¿½ï¿½ï¿½ï¿½È¹Ì¶ï¿½3ï¿½ï¿½ï¿½
+				//PrintText(White, "ï¿½Ï´Î¸ÕºÈ¹ï¿½Ò©ï¿½ï¿½ï¿½È²ï¿½ï¿½ï¿½");
+				return;  //ï¿½Ï´Îºï¿½Ò©Ê±ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½3ï¿½ï¿½ï¿½È²ï¿½ï¿½ï¿½
 			}
 			if (perHP < mercLastHP)
 			{
-				//PrintText(White, "Ó¶±øÑª±äÉÙ£º%.0f%%£¬%.0f%%", perHP, mercLastHP);
-				//¿ªÊ¼ºÈÒ©
+				//PrintText(White, "Ó¶ï¿½ï¿½Ñªï¿½ï¿½ï¿½Ù£ï¿½%.0f%%ï¿½ï¿½%.0f%%", perHP, mercLastHP);
+				//ï¿½ï¿½Ê¼ï¿½ï¿½Ò©
 				AutoMercDrink(perHP);
-				mercLastTime = GetTickCount();  //¼ÇÂ¼Ò»ÏÂºÈÒ©µÄÊ±¼ä
+				mercLastTime = GetTickCount();  //ï¿½ï¿½Â¼Ò»ï¿½Âºï¿½Ò©ï¿½ï¿½Ê±ï¿½ï¿½
 			}
 			mercLastHP = perHP;
 		//}
@@ -1282,12 +1282,12 @@ void __fastcall DrawPartyHeadPath(int xpos, RosterUnit* pRosterUnit) {
 	//if (tShowPartyLevel.isOn) {
 		wsprintfW(wszTemp, L"%d", pRosterUnit->wLevel);
 		//DrawD2Text(1, wszTemp, xpos + 5, 57, 0);
-		DWORD dwOldFone = D2WIN_SetTextFont(1);   //ÉèÖÃ×ÖÌå
+		DWORD dwOldFone = D2WIN_SetTextFont(1);   //ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½
 		D2WIN_DrawText(wszTemp, xpos + 5, 57, White, 0);
 		D2WIN_SetTextFont(dwOldFone);
 	//}
 
-	//if (tShowPartyPosition.isOn) {  //³¡¾°ºÅ¿´²»¶®£¬ÏÈ²»¿ª
+	//if (tShowPartyPosition.isOn) {  //ï¿½ï¿½ï¿½ï¿½ï¿½Å¿ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½È²ï¿½ï¿½ï¿½
 	//	wsprintfW(wszTemp, L"%d", pRosterUnit->dwLevelNo);
 	//	DrawCenterText(1, wszTemp, xpos + 20, 15, 4, 1, 1);
 	//}
@@ -1327,8 +1327,8 @@ wchar_t* wcsrcat(wchar_t* dest, wchar_t* src)
 
 wchar_t* __fastcall StrcatDefenseStringPatch(wchar_t* wszStr) {
 
-	//Æ´·ÀÓù×Ö·û´®µÄµØ·½,ÏÂÒ»²½´úÂëÆ´½Ó»Ø³µ
-	//¶ÔÓÚETHÎïÆ· Bug´ò¿×£¬Èç¹ûbug³öÀ´±ÈÕý³£µÄ·Çbug×î´óÖµ»¹Ð¡£¬ÔòÈÏÎªÊÇ·Çbug
+	//Æ´ï¿½ï¿½ï¿½ï¿½ï¿½Ö·ï¿½ï¿½ï¿½ï¿½ÄµØ·ï¿½,ï¿½ï¿½Ò»ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½Æ´ï¿½Ó»Ø³ï¿½
+	//ï¿½ï¿½ï¿½ï¿½ETHï¿½ï¿½Æ· Bugï¿½ï¿½×£ï¿½ï¿½ï¿½ï¿½bugï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½Ä·ï¿½bugï¿½ï¿½ï¿½Öµï¿½ï¿½Ð¡ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½Îªï¿½Ç·ï¿½bug
 	//if (tShowItemVariableProp.isOn) {
 
 		UnitAny* pUnit = *p_D2CLIENT_SelectedInvItem;
@@ -1348,7 +1348,7 @@ wchar_t* __fastcall StrcatDefenseStringPatch(wchar_t* wszStr) {
 					mMaxDef = (int)(mMaxDef * 1.5);
 
 					if (mDef > mMaxDef && pUnit->pItemData->dwQuality == 2 && D2COMMON_CheckItemFlag(pUnit, ITEM_HASSOCKETS, 0, "?")) {
-						//ÆÕÍ¨ÎïÆ· ,´ø¿×£¬·ÀÓù±È×î´ó·ÀÓù»¹´ó£¬ÔòÎªETH BUG
+						//ï¿½ï¿½Í¨ï¿½ï¿½Æ· ,ï¿½ï¿½ï¿½×£ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ÎªETH BUG
 						mMinDef = (int)(mMinDef * 1.5);
 						mMaxDef = (int)(mMaxDef * 1.5);
 						wcscpy(wszPrep, L"(Bug)");
@@ -1356,11 +1356,11 @@ wchar_t* __fastcall StrcatDefenseStringPatch(wchar_t* wszStr) {
 
 				}
 
-				if (mDef > mMaxDef) {//³¬¹ý×î´ó·ÀÓù£¬ËµÃ÷ÌìÉú´øED£¬·ÀÓù×Ô¶¯max+1
-					wsprintfW(wszTemp, L"%s(×îÐ¡: %d, ×î´ó: %d, ÏÖÔÚ: %d+%d)\n", wszPrep, mMinDef, mMaxDef, mMaxDef, mDef - mMaxDef);
+				if (mDef > mMaxDef) {//ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½Ëµï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½EDï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½Ô¶ï¿½max+1
+					wsprintfW(wszTemp, L"%s(ï¿½ï¿½Ð¡: %d, ï¿½ï¿½ï¿½: %d, ï¿½ï¿½ï¿½ï¿½: %d+%d)\n", wszPrep, mMinDef, mMaxDef, mMaxDef, mDef - mMaxDef);
 				}
 				else {
-					wsprintfW(wszTemp, L"%s(×îÐ¡: %d, ×î´ó: %d, ÏÖÔÚ: %d)\n", wszPrep, mMinDef, mMaxDef, mDef);
+					wsprintfW(wszTemp, L"%s(ï¿½ï¿½Ð¡: %d, ï¿½ï¿½ï¿½: %d, ï¿½ï¿½ï¿½ï¿½: %d)\n", wszPrep, mMinDef, mMaxDef, mDef);
 				}
 				wcsrcat(wszStr, wszTemp);
 			}
