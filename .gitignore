@@ -28,7 +28,7 @@ source
 *.suo
 *.sdf
 *.opensdf
-
+Release
 *~
 *.swp
 Debug/

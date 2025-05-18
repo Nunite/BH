@@ -1,4 +1,4 @@
-#include "../Hook.h"
+ï»¿#include "../Hook.h"
 #include "../../D2Ptrs.h"
 #include "UITab.h"
 #include "../../BH.h"
@@ -168,7 +168,7 @@ void UI::OnDraw() {
 		}
 		Framehook::Draw(GetX(), GetY(), GetXSize(), GetYSize(), 0, (IsActive()?BTNormal:BTOneHalf));
 		Framehook::Draw(GetX(), GetY(), GetXSize(), TITLE_BAR_HEIGHT, 0, BTNormal);
-		Texthook::Draw(GetX() + 4, GetY () + 3, false, 0, InTitle((*p_D2CLIENT_MouseX), (*p_D2CLIENT_MouseY))?Gold:White, GetName()+"(ÓÒ¼üµã»÷´Ë´¦¹Ø±Õ)");
+		Texthook::Draw(GetX() + 4, GetY () + 3, false, 0, InTitle((*p_D2CLIENT_MouseX), (*p_D2CLIENT_MouseY))?Gold:White, GetName()+"(å³éµé—œé–‰)");
 		for (list<UITab*>::iterator it = Tabs.begin(); it != Tabs.end(); it++)
 			(*it)->OnDraw();
 	}
@@ -211,8 +211,8 @@ void UI::SetMinimized(bool newState) {
 bool UI::OnLeftClick(bool up, unsigned int mouseX, unsigned int mouseY) {
 	if (!BH::inGameOnce)
 	{
-		SetDragged(false);   //Õâ¸öÊôĞÔÒ²±È½ÏÖØÒª
-		return false;  //ÕâÀïÖ÷ÒªÊÇĞŞÀí²Ëµ¥½çÃæÓĞ¿ÉÄÜ»áµã»÷²»ÁËµÄÇé¿ö
+		SetDragged(false);   //ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½Ò²ï¿½È½ï¿½ï¿½ï¿½Òª
+		return false;  //ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½Òªï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½Ëµï¿½ï¿½ï¿½ï¿½ï¿½ï¿½Ğ¿ï¿½ï¿½Ü»ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½Ëµï¿½ï¿½ï¿½ï¿½
 	}
 	if (IsMinimized()) {
 		int n = 0;
@@ -243,8 +243,8 @@ bool UI::OnLeftClick(bool up, unsigned int mouseX, unsigned int mouseY) {
 			{
 				SetDragged(false, true);
 				if(!up) {
-					PrintText(7, "CTRL+×ó¼ü ´ò¿ªÉèÖÃ(Settings)" );
-					PrintText(7, "Shift°´×¡ ÒÆ¶¯Õâ¸öÉèÖÃ°´Å¥" );
+					PrintText(7, "CTRL+å·¦éµ æ‰“é–‹è¨­ç½®(Settings)" );
+					PrintText(7, "Shift+å·¦éµ ç§»å‹•æœ€å°åŒ–æŒ‰éˆ•" );
 				}
 			}
 			return true;
@@ -264,7 +264,7 @@ bool UI::OnLeftClick(bool up, unsigned int mouseX, unsigned int mouseY) {
 			SetDragged(false, true);
 			if( startX == mouseX && startY == mouseY && GetAsyncKeyState(VK_CONTROL) )
 			{
-				PrintText(135, "ÓÒ¼ü¹Ø±ÕÉèÖÃ(Settings)" );
+				PrintText(135, "è¨­ç½®(Settings)" );
 			}
 		}
 		SetActive(true);
