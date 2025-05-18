@@ -890,17 +890,23 @@ void ItemMover::OnLoop()
 	if (!ITEM_MOVER_ENABLED) return;
 	
 	//分辩率有发生变化的话
-	if (my_screenWidth!=*p_D2CLIENT_ScreenSizeX|| my_screenHeight != *p_D2CLIENT_ScreenSizeY)
+	if (my_screenWidth != *p_D2CLIENT_ScreenSizeX || my_screenHeight != *p_D2CLIENT_ScreenSizeY)
 	{
-		//if (my_screenWidth != -1 && my_screenHeight != -1) {
-			//对"ZYLPD2设置"按钮做一个位置调整(X暂不调整)			
+		// 只有当我们有有效的初始值时才更新
+		if (my_screenWidth != -1 && my_screenHeight != -1) {
+			// 对"设置"按钮做位置调整，更新Y坐标到屏幕底部
 			BH::settingsUI->SetMinimizedY(*p_D2CLIENT_ScreenSizeY - TITLE_BAR_HEIGHT);
-		//}
-		//Init();  //初始化一次
+			
+			// 确保X坐标也不会有问题，设置一个合理的默认值（避免左上角）
+			// 注意：不要设为1，那会导致按钮跑到左边
+			if (BH::settingsUI->GetMinimizedX() < 100) {
+				BH::settingsUI->SetMinimizedX(MINIMIZED_X_POS); // 使用默认值
+			}
+		}
+		
+		// 更新当前记录的分辨率
 		my_screenWidth = *p_D2CLIENT_ScreenSizeX;
 		my_screenHeight = *p_D2CLIENT_ScreenSizeY;
-		//BH::settingsUI->SetMinimizedX(1);
-		//BH::settingsUI->SetMinimizedY();
 	}
 }
 

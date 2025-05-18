@@ -10,11 +10,11 @@
 *.lai
 *.la
 *.a
-
+source
 
 *.exe
 *.bin
-*.dll
+
 *.obj
 *.pdb
 *.ipch
@@ -34,7 +34,6 @@
 Debug/
 Packaging/*
 BH/Release/*
-Release/*
 /.vs/BH/v15
 /BH.VC.db
 /.vs

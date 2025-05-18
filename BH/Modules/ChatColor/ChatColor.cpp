@@ -212,7 +212,7 @@ void ChatColor::LoadConfig() {
 	BH::config->ReadToggle("Show Money", "None", false, Toggles["Show Money"]);  //̰ģʽ,ĬϹر
 	BH::config->ReadToggle("Death Back", "None", false, Toggles["Death Back"]);  //س,ĬϹر
 
-	BH::config->ReadInt("Merc Protect Sec", MercProtectSec, 3);   //Ĭ3
+	//BH::config->ReadInt("Merc Protect Sec", MercProtectSec, 3);   //Ĭ3
 }
 
 void ChatColor::OnChatPacketRecv(BYTE* packet, bool* block) {
@@ -264,7 +264,7 @@ void ChatColor::OnLoop()
 	if (BH::inGameOnce == false) {
 		BH::inGameOnce = true;
 		//*p_D2CLIENT_AutomapOn = TRUE;  //�Զ�������ͼ
-		D2CLIENT_ShowMap();  //�Զ�������ͼ,��������������Զ�������ͼ
+		//D2CLIENT_ShowMap();  //Զͼ,��������������Զ�������ͼ
 		(*p_D2CLIENT_AutomapPos).x += 32;  //��ͼ���ĵ�ƫ��...
 		//(*p_D2CLIENT_AutomapPos).y += 0;
 		dwPlayerId = D2CLIENT_GetPlayerUnit()->dwUnitId;
