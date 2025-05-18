@@ -53,8 +53,11 @@ void ScreenInfo::LoadConfig() {
 
 	BH::config->ReadArray("AutomapInfo", automapInfo);
 
+	// 设置游戏次数统计功能的默认值为false
 	BH::config->ReadToggle("Run Details On Join", "None", false, Toggles["Run Details On Join"]);
 	BH::config->ReadToggle("Save Run Details", "None", false, Toggles["Save Run Details"]);
+	Toggles["Run Details On Join"].state = false;  // 强制设置为false
+	Toggles["Save Run Details"].state = false;     // 强制设置为false
 	BH::config->ReadString("Save Run Details Location", szSavePath);
 
 	runDetailsColumns.clear();
@@ -105,7 +108,7 @@ void ScreenInfo::OnGameJoin() {
 		}
 	}*/
 
-	//run tracker相关，翻译成“游戏统计”吧
+	//run tracker相关，翻译成"游戏统计"吧
 	if (bFailedToWrite) {
 		bFailedToWrite = false;
 		string path = ReplaceAutomapTokens(szSavePath);
@@ -183,6 +186,8 @@ void ScreenInfo::OnGameJoin() {
 	*/
 	runcounter[runname]++;
 
+	// 注释掉游戏次数统计显示部分
+	/*
 	if (!Toggles["Run Details On Join"].state) {
 		return;
 	}
@@ -198,6 +203,7 @@ void ScreenInfo::OnGameJoin() {
 		PrintText(Orange, "%d 次单人游戏数。", runcounter[runname]);
 		//PrintText(Orange, "%d single player games played on this character.", runs[runname], runname.c_str());
 	}
+	*/
 }
 
 int	ScreenInfo::GetPlayerCount() {
@@ -851,10 +857,13 @@ void ScreenInfo::OnGameExit() {
 	BaalBlocked = false;
 	ReceivedQuestPacket = false;
 
+	// 注释掉CSV文件保存功能
+	/*
 	//run tracker相关
 	if (Toggles["Save Run Details"].state) {
 		WriteRunTrackerData();
 	}
+	*/
 	/*
 	cRunData->Write();
 	delete cRunData;
