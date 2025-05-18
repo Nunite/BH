@@ -244,8 +244,8 @@ bool BH::Shutdown() {
 bool BH::ReloadConfig() {
 	if (initialized) {
 		if (D2CLIENT_GetPlayerUnit()) {
-			PrintText(0, "重新加載配置: %s", config->GetConfigName().c_str());
-			PrintText(0, "重新加載過濾: %s", lootFilter->GetConfigName().c_str());
+			PrintText(0, "重新加载配置: %s", config->GetConfigName().c_str());
+			PrintText(0, "重新加载过滤: %s", lootFilter->GetConfigName().c_str());
 		}
 		config->Parse();
 		lootFilter->Parse();

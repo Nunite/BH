@@ -110,7 +110,7 @@ void ScreenInfo::OnGameJoin() {
 		bFailedToWrite = false;
 		string path = ReplaceAutomapTokens(szSavePath);
 		for (int i = 0; i < 5; i++) {
-			PrintText(Red, "文件 \"%s\" 被其它程序鎖定! 上一次遊戲統計不能保存!", ReplaceAutomapTokens(szSavePath));
+			PrintText(Red, "文件 \"%s\" 被其它程序锁定! 上一次游戏统计不能保存!", ReplaceAutomapTokens(szSavePath));
 		}
 	}
 
@@ -129,7 +129,7 @@ void ScreenInfo::OnGameJoin() {
 
 	BnetData* pData = (*p_D2LAUNCH_BnData);
 
-	char* szDiff[3] = { "普通", "惡夢", "地獄" };
+	char* szDiff[3] = { "普通", "恶梦", "地狱" };
 	currentPlayer = string(pUnit->pPlayerData->szName);
 	startLevel = (int)D2COMMON_GetUnitStat(pUnit, STAT_LEVEL, 0);
 	double startPctExp = ((double)startExperience - ExpByLevel[startLevel - 1]) / (ExpByLevel[startLevel] - ExpByLevel[startLevel - 1]) * 100.0;
@@ -188,14 +188,14 @@ void ScreenInfo::OnGameJoin() {
 	}
 	if (runname.length() > 0) {
 		//mp
-		PrintText(Orange, "%d 次總遊戲數。", nTotalGames);
-		PrintText(Orange, "%d 次 \"%s\" 遊戲數。", runcounter[runname], runname.c_str());
+		PrintText(Orange, "%d 次总游戏数。", nTotalGames);
+		PrintText(Orange, "%d 次 \"%s\" 游戏数。", runcounter[runname], runname.c_str());
 		//PrintText(Orange, "%d \"%s\" games played total.", runs[runname], runname.c_str());
 	}
 	else {
 		//sp
-		PrintText(Orange, "%d 次總遊戲數。", nTotalGames);
-		PrintText(Orange, "%d 次單人遊戲數。", runcounter[runname]);
+		PrintText(Orange, "%d 次总游戏数。", nTotalGames);
+		PrintText(Orange, "%d 次单人游戏数。", runcounter[runname]);
 		//PrintText(Orange, "%d single player games played on this character.", runs[runname], runname.c_str());
 	}
 }
@@ -487,7 +487,7 @@ void ScreenInfo::drawExperienceInfo() {
 		unit = "K";
 	}
 
-	//sprintf_s(sExp, "等級：%00d，經驗：%00.2f%% (%s%00.2f%%) [%s%.2f%s/s]", cLevel, pExp, expGainPct >= 0 ? "+" : "", expGainPct, expPerSecond >= 0 ? "+" : "", expPerSecond, unit);
+	//sprintf_s(sExp, "等级：%00d，经验：%00.2f%% (%s%00.2f%%) [%s%.2f%s/s]", cLevel, pExp, expGainPct >= 0 ? "+" : "", expGainPct, expPerSecond >= 0 ? "+" : "", expPerSecond, unit);
 	sprintf_s(sExp, "%00.2f%% (%s%00.2f%%) [%s%.2f%s/s]", pExp, expGainPct >= 0 ? "+" : "", expGainPct, expPerSecond >= 0 ? "+" : "", expPerSecond, unit);
 	Texthook::Draw((*p_D2CLIENT_ScreenSizeX / 2) - 200, *p_D2CLIENT_ScreenSizeY - 60, Center, 6, White, "%s", sExp);
 }
@@ -563,7 +563,7 @@ void ScreenInfo::OnAutomapDraw() {
 	GameStructInfo* pInfo = (*p_D2CLIENT_GameInfo);
 	BnetData* pData = (*p_D2LAUNCH_BnData);
 	UnitAny* pUnit = D2CLIENT_GetPlayerUnit();
-	char* szDiff[3] = {"普通", "惡夢", "地獄"};
+	char* szDiff[3] = {"普通", "恶梦", "地狱"};
 	if (!pInfo || !pData || !pUnit)
 		return;
 	int y = 6 + (BH::cGuardLoaded ? 16 : 0);
@@ -602,7 +602,7 @@ void ScreenInfo::OnAutomapDraw() {
 	// 	tpcount = to_string(dTPs);
 	// 	if (dTPs <= 5 && dTPs != dTPsCheck) {
 	// 		CHAR temp[255] = "";
-	// 		//sprintf_s(temp, sizeof(temp), "回城捲軸只剩下%d個了!", dTPs);
+	// 		//sprintf_s(temp, sizeof(temp), "回城卷轴只剩下%d个了!", dTPs);
 	// 		//PrintText(Red, temp);
 	// 		dTPsCheck = dTPs;
 	// 	}
@@ -614,7 +614,7 @@ void ScreenInfo::OnAutomapDraw() {
 	// 	idcount = to_string(dIDs);
 	// 	if (dIDs <= 5 && dIDs != dIDsCheck) {
 	// 		CHAR temp[255] = "";
-	// 		//sprintf_s(temp, sizeof(temp), "鑑定捲軸只剩下%d個了!", dIDs);
+	// 		//sprintf_s(temp, sizeof(temp), "鉴定卷轴只剩下%d个了!", dIDs);
 	// 		//PrintText(Red, temp);
 	// 		dIDsCheck = dIDs;
 	// 	}
@@ -670,7 +670,7 @@ void ScreenInfo::OnAutomapDraw() {
 			if (key.find("回城") != string::npos) {
 				Texthook::Draw(*p_D2CLIENT_ScreenSizeX - 10, y, Right, 0, Blue, "%s", key.c_str());
 			}
-			else if (key.find("鑑定") != string::npos) {
+			else if (key.find("鉴定") != string::npos) {
 				Texthook::Draw(*p_D2CLIENT_ScreenSizeX - 10, y, Right, 0, Red, "%s", key.c_str());
 			}
 			else {

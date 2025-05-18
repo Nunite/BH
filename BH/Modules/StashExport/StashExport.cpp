@@ -20,7 +20,7 @@ using namespace Drawing;
 void StashExport::OnLoad() {
 	LoadConfig();
 
-	settingsTab = new UITab("交易相关", BH::settingsUI);
+	settingsTab = new UITab("交易相關", BH::settingsUI);
 
 	unsigned int x = 8;
 	unsigned int y = 7;

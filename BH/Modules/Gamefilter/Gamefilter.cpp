@@ -269,7 +269,7 @@ void Gamefilter::OnOOGDraw() {
 	// draw the join game screen until we have it
 	if ((*p_D2MULTI_GameListControl) && filterBox) {
 		wstringstream wFilterStream;
-		wstring wFilterString = L"游戏: ";
+		wstring wFilterString = L"遊戲: ";
 		wstring wFilter = filterBox->wText;
 
 		wFilterStream << (int)(*p_D2MULTI_GameListControl)->dwSelectEnd;
@@ -280,7 +280,7 @@ void Gamefilter::OnOOGDraw() {
 		wFilterString += wFilterStream.str().c_str();
 
 		DWORD dwOldSize = D2WIN_SetTextSize(1);
-		D2WIN_DrawText(L"过滤", 549, 170, 4, -1);
+		D2WIN_DrawText(L"遊戲", 549, 170, 4, -1);
 		D2WIN_DrawText(wFilterString.c_str(), 424, 190, 4, -1);
 
 		if (*showDiff || *showGs) {
@@ -292,10 +292,10 @@ void Gamefilter::OnOOGDraw() {
 				unsigned int uiYPos = 235 + (i - dwListStart) * 19;
 				if (*showDiff) {
 					if ((filterVector.at(i)->dwStatus & 0x1000)) {
-						D2WIN_DrawText(L"恶梦", 530, uiYPos, Blue, -1);
+						D2WIN_DrawText(L"惡夢", 530, uiYPos, Blue, -1);
 					}
 					else if ((filterVector.at(i)->dwStatus & 0x2000)) {
-						D2WIN_DrawText(L"地狱", 530, uiYPos, Red, -1);
+						D2WIN_DrawText(L"地獄", 530, uiYPos, Red, -1);
 					}
 					else {
 						D2WIN_DrawText(L"普通", 530, uiYPos, White, -1);

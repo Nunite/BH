@@ -342,7 +342,7 @@ void StatsDisplay::OnDraw()
 			6,
 			Gold,
 			"玩家:\377c0 %s",
-			isMerc ? "\377c;雇佣兵" : unit->pPlayerData->szName);
+			isMerc ? "\377c;僱傭兵" : unit->pPlayerData->szName);
 
 		auto player_level = D2COMMON_GetUnitStat(unit, STAT_LEVEL, 0);
 		Texthook::Draw(pRect.right - 5,
@@ -350,7 +350,7 @@ void StatsDisplay::OnDraw()
 			Right,
 			6,
 			Gold,
-			L"等级:ÿc0 %d",
+			L"等級:ÿc0 %d",
 			static_cast<int>(player_level));
 
 		auto map_id = **Var_D2CLIENT_MapId();
@@ -367,7 +367,7 @@ void StatsDisplay::OnDraw()
 			Right,
 			6,
 			Gold,
-			L"场景经验: %.2f%% / 经验加成:ÿc: %d%%",
+			L"場景經驗: %.2f%% / 經驗加成:ÿc: %d%%",
 			xp_percentage,
 			static_cast<int>(D2COMMON_GetUnitStat(unit, STAT_ADDEXPERIENCE, 0)));
 
@@ -397,7 +397,7 @@ void StatsDisplay::OnDraw()
 			None,
 			6,
 			Blue,
-			L"ÿc4冰冻抗性(CR):ÿc3 %d ÿc0/ %d",
+			L"ÿc4冰凍抗性(CR):ÿc3 %d ÿc0/ %d",
 			static_cast<int>(D2COMMON_GetUnitStat(unit, STAT_COLDRESIST, 0)) + penalty,
 			cMax);
 		Texthook::Draw(column1,
@@ -405,7 +405,7 @@ void StatsDisplay::OnDraw()
 			None,
 			6,
 			Yellow,
-			L"ÿc4闪电抗性(LR):ÿc9 %d ÿc0/ %d",
+			L"ÿc4閃電抗性(LR):ÿc9 %d ÿc0/ %d",
 			static_cast<int>(D2COMMON_GetUnitStat(unit, STAT_LIGHTNINGRESIST, 0)) + penalty,
 			lMax);
 		Texthook::Draw(column1,
@@ -413,7 +413,7 @@ void StatsDisplay::OnDraw()
 			None,
 			6,
 			Gold,
-			L"毒系抗性(PR):ÿc2 %d ÿc0/ %d  ÿc4持续:ÿc: %d%%",
+			L"毒系抗性(PR):ÿc2 %d ÿc0/ %d  ÿc4持續:ÿc: %d%%",
 			static_cast<int>(D2COMMON_GetUnitStat(unit, STAT_POISONRESIST, 0)) + penalty,
 			pMax,
 			(100 - penalty - pLengthReduce)
@@ -424,7 +424,7 @@ void StatsDisplay::OnDraw()
 			None,
 			6,
 			Gold,
-			L"诅咒抵抗(CRA): %d%%",
+			L"詛咒抵抗(CRA): %d%%",
 			static_cast<int>(D2COMMON_GetUnitStat(unit, STAT_CURSERESISTANCE, 0)) + penalty);
 		*/
 		y += 8;
@@ -442,7 +442,7 @@ void StatsDisplay::OnDraw()
 			None,
 			6,
 			Red,
-			L"ÿc4伤害吸收(ABS): ÿc1%dÿc0/ÿc1%d%c ÿc3%dÿc0/ÿc3%d%c ÿc9%dÿc0/ÿc9%d%c ÿc8%dÿc0/ÿc8%d%c",
+			L"ÿc4傷害吸收(ABS): ÿc1%dÿc0/ÿc1%d%c ÿc3%dÿc0/ÿc3%d%c ÿc9%dÿc0/ÿc9%d%c ÿc8%dÿc0/ÿc8%d%c",
 			fAbsorb,
 			fAbsorbPct,
 			'%',
@@ -465,7 +465,7 @@ void StatsDisplay::OnDraw()
 			None,
 			6,
 			Tan,
-			L"ÿc4伤害减免(DR): ÿc7%dÿc0/ÿc7%d%c ÿc8%dÿc0/ÿc8%d%c",
+			L"ÿc4傷害減免(DR): ÿc7%dÿc0/ÿc7%d%c ÿc8%dÿc0/ÿc8%d%c",
 			dmgReduction,
 			dmgReductionPct,
 			'%',
@@ -477,7 +477,7 @@ void StatsDisplay::OnDraw()
 			None,
 			6,
 			Gold,
-			L"伤害反弹(ATD):ÿc0 %d ÿc9 %d",
+			L"傷害反彈(ATD):ÿc0 %d ÿc9 %d",
 			static_cast<int>(D2COMMON_GetUnitStat(unit, STAT_ATTACKERTAKESDAMAGE, 0)),
 			static_cast<int>(D2COMMON_GetUnitStat(unit, STAT_ATTACKERTAKESLTNGDMG, 0)));
 		y += 8;
@@ -498,7 +498,7 @@ void StatsDisplay::OnDraw()
 			None,
 			6,
 			Gold,
-			L"元素伤害(EM):ÿc1 %d%%ÿc3 %d%%ÿc9 %d%%ÿc2 %d%%ÿc8 %d%%",
+			L"元素傷害(EM):ÿc1 %d%%ÿc3 %d%%ÿc9 %d%%ÿc2 %d%%ÿc8 %d%%",
 			fMastery,
 			cMastery,
 			lMastery,
@@ -525,7 +525,7 @@ void StatsDisplay::OnDraw()
 			None,
 			6,
 			Gold,
-			L"基础命中(AR):ÿc5 敏捷:ÿc0 %dÿc5 装备:ÿc0% dÿc5 总量:ÿc0 %d",
+			L"基礎命中(AR):ÿc5 敏捷:ÿc0 %dÿc5 裝備:ÿc0% dÿc5 總量:ÿc0 %d",
 			dexAR,
 			gearAR,
 			dexAR + gearAR);
@@ -538,7 +538,7 @@ void StatsDisplay::OnDraw()
 			None,
 			6,
 			Gold,
-			L"基础防御(DEF):ÿc5 敏捷:ÿc0 %dÿc5 装备:ÿc0 %dÿc5 总量:ÿc0 %d",
+			L"基礎防禦(DEF):ÿc5 敏捷:ÿc0 %dÿc5 裝備:ÿc0 %dÿc5 總量:ÿc0 %d",
 			dexDef,
 			gearDef,
 			dexDef + gearDef);
@@ -548,7 +548,7 @@ void StatsDisplay::OnDraw()
 			None,
 			6,
 			Gold,
-			L"基础伤害(DAM):ÿc5 单手:ÿc0 %d-%dÿc5 双手:ÿc0 %d-%d",
+			L"基礎傷害(DAM):ÿc5 單手:ÿc0 %d-%dÿc5 雙手:ÿc0 %d-%d",
 			static_cast<int>(D2COMMON_GetUnitStat(unit, STAT_MINIMUMDAMAGE, 0)),
 			static_cast<int>(D2COMMON_GetUnitStat(unit, STAT_MAXIMUMDAMAGE, 0)),
 			static_cast<int>(D2COMMON_GetUnitStat(unit, STAT_SECONDARYMINIMUMDAMAGE, 0)),
@@ -561,7 +561,7 @@ void StatsDisplay::OnDraw()
 			None,
 			6,
 			Gold,
-			L"施法恢复(FCR):ÿc0 %d",
+			L"施法恢復(FCR):ÿc0 %d",
 			static_cast<int>(D2COMMON_GetUnitStat(unit, STAT_FASTERCAST, 0))
 		);
 		Texthook::Draw(column2,
@@ -569,7 +569,7 @@ void StatsDisplay::OnDraw()
 			None,
 			6,
 			Gold,
-			L"格挡恢复(FBR):ÿc0 %d",
+			L"格擋恢復(FBR):ÿc0 %d",
 			static_cast<int>(D2COMMON_GetUnitStat(unit, STAT_FASTERBLOCK, 0))
 		);
 		Texthook::Draw(column1,
@@ -577,7 +577,7 @@ void StatsDisplay::OnDraw()
 			None,
 			6,
 			Gold,
-			L"打击恢复(FHR):ÿc0 %d",
+			L"打擊恢復(FHR):ÿc0 %d",
 			static_cast<int>(D2COMMON_GetUnitStat(unit, STAT_FASTERHITRECOVERY, 0))
 		);
 		Texthook::Draw(column2,
@@ -612,7 +612,7 @@ void StatsDisplay::OnDraw()
 			None,
 			6,
 			Gold,
-			L"档位点BreakPoints (FCR关系到右键技能释放):");
+			L"檔位點BreakPoints (FCR關係到右鍵技能釋放):");
 
 
 		auto fcr_key = unit->dwTxtFileNo;
@@ -688,28 +688,28 @@ void StatsDisplay::OnDraw()
 			None,
 			6,
 			Gold,
-			L"压碎性打击(CB):ÿc0 %d",
+			L"壓碎性打擊(CB):ÿc0 %d",
 			static_cast<int>(D2COMMON_GetUnitStat(unit, STAT_CRUSHINGBLOW, 0)));
 		Texthook::Draw(column2,
 			y,
 			None,
 			6,
 			Gold,
-			L"撕裂伤口(OW): ÿc0%d",
+			L"撕裂傷口(OW): ÿc0%d",
 			static_cast<int>(D2COMMON_GetUnitStat(unit, STAT_OPENWOUNDS, 0)));
 		Texthook::Draw(column1,
 			(y += 16),
 			None,
 			6,
 			Gold,
-			L"双倍打击(DS):ÿc0 %d",
+			L"雙倍打擊(DS):ÿc0 %d",
 			static_cast<int>(D2COMMON_GetUnitStat(unit, STAT_DEADLYSTRIKE, 0)));
 		Texthook::Draw(column2,
 			y,
 			None,
 			6,
 			Gold,
-			L"致命打击(CS): ÿc0%d",
+			L"致命打擊(CS): ÿc0%d",
 			static_cast<int>(D2COMMON_GetUnitStat(unit, STAT_CRITICALSTRIKE, 0)));
 		Texthook::Draw(column1,
 			(y += 16),
@@ -723,14 +723,14 @@ void StatsDisplay::OnDraw()
 			None,
 			6,
 			Gold,
-			L"吸蓝(LM):ÿc3 %d",
+			L"吸藍(LM):ÿc3 %d",
 			static_cast<int>(D2COMMON_GetUnitStat(unit, STAT_MANALEECH, 0)));
 		Texthook::Draw(column1,
 			(y += 16),
 			None,
 			6,
 			Gold,
-			L"远程穿透(PP):ÿc0 %d",
+			L"遠程穿透(PP):ÿc0 %d",
 			static_cast<int>(D2COMMON_GetUnitStat(unit, STAT_PIERCINGATTACK, 0)) +
 			static_cast<int>(D2COMMON_GetUnitStat(unit, STAT_PIERCE, 0)));
 
@@ -754,7 +754,7 @@ void StatsDisplay::OnDraw()
 			None,
 			6,
 			Gold,
-			L"增加的伤害:ÿc0 %d(物理)",
+			L"增加的傷害:ÿc0 %d(物理)",
 			addedPhys);
 		Texthook::Draw(column2,
 			y,
@@ -777,7 +777,7 @@ void StatsDisplay::OnDraw()
 			None,
 			6,
 			Blue,
-			"%d-%d(冰冻)",
+			"%d-%d(冰凍)",
 			minCold,
 			maxCold);
 		Texthook::Draw(column1,
@@ -785,7 +785,7 @@ void StatsDisplay::OnDraw()
 			None,
 			6,
 			Yellow,
-			"%d-%d(闪电)",
+			"%d-%d(閃電)",
 			minLight,
 			maxLight);
 		Texthook::Draw(column2,
@@ -803,7 +803,7 @@ void StatsDisplay::OnDraw()
 			None,
 			6,
 			Gold,
-			L"魔法物品寻找(MF):ÿc3 %d",
+			L"魔法物品尋找(MF):ÿc3 %d",
 			static_cast<int>(D2COMMON_GetUnitStat(unit, STAT_MAGICFIND, 0))
 		);
 		Texthook::Draw(column2,
@@ -811,7 +811,7 @@ void StatsDisplay::OnDraw()
 			None,
 			6,
 			Gold,
-			L"金币寻找(GF):ÿc9 %d",
+			L"金幣尋找(GF):ÿc9 %d",
 			static_cast<int>(D2COMMON_GetUnitStat(unit, STAT_GOLDFIND, 0)));
 
 		if (!isMerc)
@@ -821,7 +821,7 @@ void StatsDisplay::OnDraw()
 				None,
 				6,
 				Gold,
-				L"储藏箱金币:ÿc9 %d",
+				L"儲藏箱金幣:ÿc9 %d",
 				static_cast<int>(D2COMMON_GetUnitStat(unit, STAT_GOLDBANK, 0)));
 		}
 

@@ -865,7 +865,7 @@ namespace ItemDisplay
 
 		// Clear and add 0 to the list
 		item->ItemFilterNames.clear();
-		item->ItemFilterNames.push_back("0 - 显示所有物品");
+		item->ItemFilterNames.push_back("0 - 顯示所有物品");
 
 		vector<pair<string, string>> filterDefinitions;
 		BH::lootFilter->ReadMapList("ItemDisplayFilterName", filterDefinitions);
@@ -880,7 +880,7 @@ namespace ItemDisplay
 
 		// If there is only 1 entry, it means no definitons were made, add standard
 		if (item->ItemFilterNames.size() == 1) {
-			item->ItemFilterNames.push_back("1 - 标准");
+			item->ItemFilterNames.push_back("1 - 標準");
 		}
 
 		item->ReplaceItemFilters(item->ItemFilterNames);
