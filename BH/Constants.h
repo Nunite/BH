@@ -1,7 +1,9 @@
 ﻿#pragma once
 
+#include "UIString_Base.h"
+#define SETTINGS_TEXT UI_SETTINGS_TITLE
+
 #define BH_VERSION "ZYLPD2 0.1"
-#define SETTINGS_TEXT "Settings"
 
 //#define CODE_PAGE 1252 // windows-1252	ANSI Latin 1; Western European (Windows)
 #define CODE_PAGE 936 // windows-1252	ANSI Latin 1; Western European (Windows)

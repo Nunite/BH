@@ -270,6 +270,9 @@
     <ClInclude Include="Modules\MultiStash\PlugYFiles.h">
       <Filter>Modules\MultiStash</Filter>
     </ClInclude>
+    <ClInclude Include="UIString_Base.h" />
+    <ClInclude Include="UIString_SC.h" />
+    <ClInclude Include="UIString_TC.h" />
   </ItemGroup>
   <ItemGroup>
     <Filter Include="Modules">

@@ -9,6 +9,7 @@
 #include "../MapNotify/MapNotify.h"
 #include "../../D2Ptrs.h"
 #include "../../D2Intercepts.h"
+#include "../../UIString_Base.h"
 
 // This module was inspired by the RedVex plugin "Item Mover", written by kaiks.
 // Thanks to kaiks for sharing his code.
@@ -69,14 +70,14 @@ void GameSettings::LoadConfig() {
 void GameSettings::LoadGeneralTab() {
 	Drawing::Texthook* colored_text;
 
-	Drawing::UITab* generalTab = new Drawing::UITab("通用", BH::settingsUI);
+	Drawing::UITab* generalTab = new Drawing::UITab(UI_GENERAL_TAB, BH::settingsUI);
 
 	unsigned int x_tab = 15;
 	unsigned int x = 8;
 	unsigned int y = 7;
 
 	// General
-	new Drawing::Texthook(generalTab, x, (y), "通用");
+	new Drawing::Texthook(generalTab, x, (y), UI_GENERAL_TAB);
 
 	// y += 15;
 	// colored_text = new Drawing::Texthook(generalTab, x, (y), "显示其它玩家鸡儿");
@@ -89,20 +90,20 @@ void GameSettings::LoadGeneralTab() {
 	// new Drawing::Keyhook(generalTab, GameSettings::KeyHookOffset, y + 2, &resyncKey, "");
 
 	y += 15;
-	colored_text = new Drawing::Texthook(generalTab, x, (y), "显示玩家/雇佣兵高级属性");
+	colored_text = new Drawing::Texthook(generalTab, x, (y), UI_GS_ADV_STATS);
 	colored_text->SetColor(Gold);
 	new Drawing::Keyhook(generalTab, GameSettings::KeyHookOffset, y + 2, &advStatMenuKey, "");
 
 	y += 15;
-	new Drawing::Checkhook(generalTab, x, y, &ScreenInfo::Toggles["Experience Meter"].state, "显示经验条");
+	new Drawing::Checkhook(generalTab, x, y, &ScreenInfo::Toggles["Experience Meter"].state, UI_GS_EXP_METER);
 	new Drawing::Keyhook(generalTab, GameSettings::KeyHookOffset, y + 2, &ScreenInfo::Toggles["Experience Meter"].toggle, "");
 
 	y += 15;
-	new Drawing::Checkhook(generalTab, x, y, &GameSettings::Toggles["Remove Shake"].state, "移除地震效果");
+	new Drawing::Checkhook(generalTab, x, y, &GameSettings::Toggles["Remove Shake"].state, UI_GS_REMOVE_SHAKE);
 	new Drawing::Keyhook(generalTab, GameSettings::KeyHookOffset, y + 2, &GameSettings::Toggles["Remove Shake"].toggle, "");
 
 	y += 15;
-	new Drawing::Checkhook(generalTab, x, y, &GameSettings::Toggles["Apply CPU Patch"].state, "CPU 补丁");
+	new Drawing::Checkhook(generalTab, x, y, &GameSettings::Toggles["Apply CPU Patch"].state, UI_GS_CPU_PATCH);
 	new Drawing::Keyhook(generalTab, GameSettings::KeyHookOffset, y + 2, &GameSettings::Toggles["Apply CPU Patch"].toggle, "");
 
 	// // Quick Cast
@@ -129,7 +130,7 @@ void GameSettings::LoadGeneralTab() {
 
 void GameSettings::LoadInteractionTab() {
 	Drawing::Texthook* colored_text;
-	Drawing::UITab* tab = new Drawing::UITab("快捷说明", BH::settingsUI);
+	Drawing::UITab* tab = new Drawing::UITab(UI_QUICKHELP_TAB, BH::settingsUI);
 
 	unsigned int x = 8;
 	unsigned int y = 7;
@@ -138,38 +139,38 @@ void GameSettings::LoadInteractionTab() {
 
 	// QoL
 	colored_text = new Drawing::Texthook(tab, x, y,
-		"鼠标移物品上时");
+		UI_QH_MOUSE_HOVER);
 
 	y += 15;
 	colored_text = new Drawing::Texthook(tab, x + indent, y,
-		"Shift+左键");
+		UI_QH_SHIFT_LEFT);
 	colored_text->SetColor(Gold);
 	colored_text = new Drawing::Texthook(tab, x + indent + offset, y,
-		"如果鉴定书在背包，就可以快速鉴定物品");
-	colored_text->SetColor(Gold);
-
-	y += 15;
-	colored_text = new Drawing::Texthook(tab, x + indent, y,
-		"Shift+右键");
-	colored_text->SetColor(Gold);
-	colored_text = new Drawing::Texthook(tab, x + indent + offset, y,
-		"在打开的背包、箱子、盒子之间移动");
+		UI_QH_SHIFT_LEFT_DESC);
 	colored_text->SetColor(Gold);
 
 	y += 15;
 	colored_text = new Drawing::Texthook(tab, x + indent, y,
-		"Ctrl+右键");
+		UI_QH_SHIFT_RIGHT);
 	colored_text->SetColor(Gold);
 	colored_text = new Drawing::Texthook(tab, x + indent + offset, y,
-		"把物品扔地上");
+		UI_QH_SHIFT_RIGHT_DESC);
 	colored_text->SetColor(Gold);
 
 	y += 15;
 	colored_text = new Drawing::Texthook(tab, x + indent, y,
-		"Ctrl+Shift+右键");
+		UI_QH_CTRL_RIGHT);
 	colored_text->SetColor(Gold);
 	colored_text = new Drawing::Texthook(tab, x + indent + offset, y,
-		"移动物品到关闭着的盒子");
+		UI_QH_CTRL_RIGHT_DESC);
+	colored_text->SetColor(Gold);
+
+	y += 15;
+	colored_text = new Drawing::Texthook(tab, x + indent, y,
+		UI_QH_CTRL_SHIFT_RIGHT);
+	colored_text->SetColor(Gold);
+	colored_text = new Drawing::Texthook(tab, x + indent + offset, y,
+		UI_QH_CTRL_SHIFT_RIGHT_DESC);
 	colored_text->SetColor(Gold);
 
 	// y += 15;
@@ -200,27 +201,58 @@ void GameSettings::LoadInteractionTab() {
 	// 	"放置 1 个非堆叠的物品");
 	// colored_text->SetColor(Gold);
 
-	// // Auras
 	// y += 20;
-	// new Drawing::Texthook(tab, x, (y), "荣誉光环 (仅限全服前3玩家)");
+	// colored_text = new Drawing::Texthook(tab, x, y,
+	// 	"在快捷栏、背包上按");
 
 	// y += 15;
-	// new Drawing::Checkhook(tab, x, y, &GameSettings::Toggles["99 Aura"].state, "显示 99级 荣誉光环");
-	// new Drawing::Keyhook(tab, GameSettings::KeyHookOffset, y + 2, &GameSettings::Toggles["99 Aura"].toggle, "");
-
-	// y += 15;
-	// new Drawing::Checkhook(tab, x, y, &GameSettings::Toggles["Dclone Aura"].state, "显示 DC击杀 荣誉光环");
-	// new Drawing::Keyhook(tab, GameSettings::KeyHookOffset, y + 2, &GameSettings::Toggles["Dclone Aura"].toggle, "");
-
-	// y += 15;
-	// new Drawing::Checkhook(tab, x, y, &GameSettings::Toggles["Rathma Aura"].state, "显示 拉斯玛击杀 荣誉光环");
-	// new Drawing::Keyhook(tab, GameSettings::KeyHookOffset, y + 2, &GameSettings::Toggles["Rathma Aura"].toggle, "");
+	// colored_text = new Drawing::Texthook(tab, x + indent, y,
+	// 	"Ctrl+右键");
+	// colored_text->SetColor(Gold);
+	// colored_text = new Drawing::Texthook(tab, x + indent + offset, y,
+	// 	"使用药水、卷轴等");
+	// colored_text->SetColor(Gold);
 
 	// y += 20;
-	// new Drawing::Texthook(tab, x, (y), "仅限开发者");
+	// colored_text = new Drawing::Texthook(tab, x, y,
+	// 	"整理背包");
+
 	// y += 15;
-	// new Drawing::Checkhook(tab, x, y, &GameSettings::Toggles["Developer Aura"].state, "显示 开发者 荣誉光环");
-	// new Drawing::Keyhook(tab, GameSettings::KeyHookOffset, y + 2, &GameSettings::Toggles["Developer Aura"].toggle, "");
+	// colored_text = new Drawing::Texthook(tab, x + indent, y,
+	// 	"ALT+r");
+	// colored_text->SetColor(Gold);
+	// colored_text = new Drawing::Texthook(tab, x + indent + offset, y,
+	// 	"所有包包一起整理");
+	// colored_text->SetColor(Gold);
+
+	// y += 15;
+	// colored_text = new Drawing::Texthook(tab, x + indent, y,
+	// 	"ALT+number");
+	// colored_text->SetColor(Gold);
+	// colored_text = new Drawing::Texthook(tab, x + indent + offset, y,
+	// 	"对应包包");
+	// colored_text->SetColor(Gold);
+
+	// y += 20;
+	// colored_text = new Drawing::Texthook(tab, x, y,
+	// 	"其他");
+
+	// y += 15;
+	// colored_text = new Drawing::Texthook(tab, x + indent, y,
+	// 	"ALT+s");
+	// colored_text->SetColor(Gold);
+	// colored_text = new Drawing::Texthook(tab, x + indent + offset, y,
+	// 	"保存小号插件仓库");
+	// colored_text->SetColor(Gold);
+
+	// y += 15;
+	// colored_text = new Drawing::Texthook(tab, x + indent, y,
+	// 	"ALT+l");
+	// colored_text->SetColor(Gold);
+	// colored_text = new Drawing::Texthook(tab, x + indent + offset, y,
+	// 	"加载小号插件仓库");
+	// colored_text->SetColor(Gold);
+
 }
 
 void GameSettings::OnLoad() {
