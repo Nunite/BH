@@ -206,13 +206,13 @@ void ChatColor::LoadConfig() {
 
 	BH::config->ReadAssoc("Whisper Color", whisperColors);
 
-	BH::config->ReadToggle("Merc Protect", "None", true, Toggles["Merc Protect"]);  //Ӷ������
+	//BH::config->ReadToggle("Merc Protect", "None", true, Toggles["Merc Protect"]);  //Ӷ������
 	BH::config->ReadToggle("Merc Boring", "None", true, Toggles["Merc Boring"]);  //Ӷ���²�
-	BH::config->ReadToggle("Rune Number", "None", true, Toggles["Rune Number"]);  //��������
-	BH::config->ReadToggle("Show Money", "None", false, Toggles["Show Money"]);  //̰��ģʽ,Ĭ�Ϲر�
-	BH::config->ReadToggle("Death Back", "None", false, Toggles["Death Back"]);  //���������س�,Ĭ�Ϲر�
+	BH::config->ReadToggle("Rune Number", "None", false, Toggles["Rune Number"]);  //符文编号，默认关闭
+	BH::config->ReadToggle("Show Money", "None", false, Toggles["Show Money"]);  //̰ģʽ,ĬϹر
+	BH::config->ReadToggle("Death Back", "None", false, Toggles["Death Back"]);  //س,ĬϹر
 
-	BH::config->ReadInt("Merc Protect Sec", MercProtectSec, 3);   //Ĭ��3��
+	BH::config->ReadInt("Merc Protect Sec", MercProtectSec, 3);   //Ĭ3
 }
 
 void ChatColor::OnChatPacketRecv(BYTE* packet, bool* block) {
@@ -689,7 +689,7 @@ void DrawMonitorInfo() {
 				secs = ChatColor::sMonitorStr[i].dwTimer - secs;  //����ʱ
 			}
 			//wsprintfW(wszTemp, L"%s: %.2d:%.2d:%.2d", ChatColor::sMonitorStr[i].wszDesc[0], secs / 3600, (secs / 60) % 60, secs % 60);
-			wsprintfW(wszTemp, L"%s: %.2d:%.2d", ChatColor::sMonitorStr[i].wszDesc[0], (secs / 60) % 60, secs % 60);
+			//wsprintfW(wszTemp, L"%s: %.2d:%.2d", ChatColor::sMonitorStr[i].wszDesc[0], (secs / 60) % 60, secs % 60);
 			DWORD width, fileNo;
 			D2WIN_GetTextWidthFileNo(wszTemp, &width, &fileNo);  //�����BH��ȡ������ķ���,��HM�е㲻һ��
 			D2WIN_DrawText(wszTemp, xpos - width, ypos, ChatColor::sMonitorStr[i].dwColor, 0);
@@ -969,11 +969,15 @@ void drawExperienceInfo() {
 }
 
 void drawRuneNum() {
-	//���Ը����Ļ�һ������
+	// 禁用符文编号显示功能
+	return;
+	
+	/*
+	//ԸĻһ
 	UnitAny* pUnit = D2CLIENT_GetPlayerUnit();
 	if (!pUnit) return;
 	
-	if (Item::viewingUnit) return;   //����ǲ鿴������Ҽ�����ʱ��Ͳ���ʾ�������� 
+	if (Item::viewingUnit) return;   //ǲ鿴ҼʱͲʾ 
 
 	if (!(D2CLIENT_GetUIState(UI_INVENTORY) || D2CLIENT_GetUIState(UI_STASH) || D2CLIENT_GetUIState(UI_CUBE) || D2CLIENT_GetUIState(UI_NPCSHOP)))
 		return;
@@ -985,7 +989,7 @@ void drawRuneNum() {
 		if (pItem->pItemData->ItemLocation == STORAGE_INVENTORY) {
 			left = INVENTORY_LEFT;
 			top = INVENTORY_TOP;
-			//��ɫ��������ʾ
+			//ɫʾ
 			//if (!D2CLIENT_GetUIState(UI_INVENTORY)&& !D2CLIENT_GetUIState(UI_STASH)) continue;
 		}
 		else if (pItem->pItemData->ItemLocation == STORAGE_STASH) {
@@ -1006,6 +1010,7 @@ void drawRuneNum() {
 			Texthook::Draw(left + 1 + CELL_SIZE * pItem->pObjectPath->dwPosX, top + 20 + CELL_SIZE * pItem->pObjectPath->dwPosY, None, 6, White, "%d", stoi(numCode));
 		}
 	}
+	*/
 }
 
 
@@ -1356,11 +1361,11 @@ wchar_t* __fastcall StrcatDefenseStringPatch(wchar_t* wszStr) {
 
 				}
 
-				if (mDef > mMaxDef) {//������������˵��������ED�������Զ�max+1
-					wsprintfW(wszTemp, L"%s(��С: %d, ���: %d, ����: %d+%d)\n", wszPrep, mMinDef, mMaxDef, mMaxDef, mDef - mMaxDef);
+				if (mDef > mMaxDef) {// 如果超过最大说明有附加ED或者自动max+1
+					wsprintfW(wszTemp, L"%s(最小: %d, 最大: %d, 当前: %d+%d)\n", wszPrep, mMinDef, mMaxDef, mMaxDef, mDef - mMaxDef);
 				}
 				else {
-					wsprintfW(wszTemp, L"%s(��С: %d, ���: %d, ����: %d)\n", wszPrep, mMinDef, mMaxDef, mDef);
+					wsprintfW(wszTemp, L"%s(最小: %d, 最大: %d, 当前: %d)\n", wszPrep, mMinDef, mMaxDef, mDef);
 				}
 				wcsrcat(wszStr, wszTemp);
 			}

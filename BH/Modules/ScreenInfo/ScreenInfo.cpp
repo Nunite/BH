@@ -597,28 +597,28 @@ void ScreenInfo::OnAutomapDraw() {
 	sprintf_s(szPing, sizeof(szPing), "%d", *p_D2CLIENT_Ping);
 	
 	string tpcount = "∞";
-	if (!CheckRTP()) {
-		DWORD dTPs = CalSrollOfTownportal();
-		tpcount = to_string(dTPs);
-		if (dTPs <= 5 && dTPs != dTPsCheck) {
-			CHAR temp[255] = "";
-			sprintf_s(temp, sizeof(temp), "回城卷轴只剩下%d个了!", dTPs);
-			PrintText(Red, temp);
-			dTPsCheck = dTPs;
-		}
-	}
+	// if (!CheckRTP()) {
+	// 	DWORD dTPs = CalSrollOfTownportal();
+	// 	tpcount = to_string(dTPs);
+	// 	if (dTPs <= 5 && dTPs != dTPsCheck) {
+	// 		CHAR temp[255] = "";
+	// 		//sprintf_s(temp, sizeof(temp), "回城卷轴只剩下%d个了!", dTPs);
+	// 		//PrintText(Red, temp);
+	// 		dTPsCheck = dTPs;
+	// 	}
+	// }
 
 	string idcount = "∞";
-	if (!CheckRID()) {
-		DWORD dIDs = CalSrollOfIdentify();
-		idcount = to_string(dIDs);
-		if (dIDs <= 5 && dIDs != dIDsCheck) {
-			CHAR temp[255] = "";
-			sprintf_s(temp, sizeof(temp), "鉴定卷轴只剩下%d个了!", dIDs);
-			PrintText(Red, temp);
-			dIDsCheck = dIDs;
-		}
-	}
+	// if (!CheckRID()) {
+	// 	DWORD dIDs = CalSrollOfIdentify();
+	// 	idcount = to_string(dIDs);
+	// 	if (dIDs <= 5 && dIDs != dIDsCheck) {
+	// 		CHAR temp[255] = "";
+	// 		//sprintf_s(temp, sizeof(temp), "鉴定卷轴只剩下%d个了!", dIDs);
+	// 		//PrintText(Red, temp);
+	// 		dIDsCheck = dIDs;
+	// 	}
+	// }
 
 	DWORD levelId = pUnit->pPath->pRoom1->pRoom2->pLevel->dwLevelNo;
 	LevelsTxt* levelTxt = &(*p_D2COMMON_sgptDataTable)->pLevelsTxt[levelId];

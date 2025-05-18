@@ -1,4 +1,4 @@
-﻿#include "ItemMover.h"
+#include "ItemMover.h"
 #include "../../BH.h"
 #include "../../D2Ptrs.h"
 #include "../../D2Stubs.h"
@@ -8,8 +8,6 @@
 #include "../ScreenInfo/ScreenInfo.h"
 using namespace Drawing;
 
-// 控制ItemMover模块所有功能的总开关
-#define ITEM_MOVER_ENABLED true
 
 //用于检查分辨率有没有发生变化
 int my_screenWidth = -1;
@@ -46,8 +44,6 @@ DWORD idBookId;
 DWORD unidItemId;
 
 bool ItemMover::Init() {
-	if (!ITEM_MOVER_ENABLED) return false;
-	
 	BnetData* pData = (*p_D2LAUNCH_BnData);
 	if (!pData) { return false; }
 	int xpac = pData->nCharFlags & PLAYER_TYPE_EXPANSION;
@@ -360,8 +356,6 @@ void ItemMover::PutItemOnGround() {
 
 void ItemMover::AutoToBelt()
 {
-	if (!ITEM_MOVER_ENABLED) return;
-	
 	UnitAny* unit = D2CLIENT_GetPlayerUnit();
 	if (!unit)
 		return;
@@ -407,8 +401,6 @@ void ItemMover::AutoToBelt()
 }
 
 void ItemMover::OnLeftClick(bool up, int x, int y, bool* block) {
-	if (!ITEM_MOVER_ENABLED) return;
-	
 	BnetData* pData = (*p_D2LAUNCH_BnData);
 	UnitAny* unit = D2CLIENT_GetPlayerUnit();
 	bool shiftState = ((GetKeyState(VK_LSHIFT) & 0x80) || (GetKeyState(VK_RSHIFT) & 0x80));
@@ -477,8 +469,6 @@ void ItemMover::OnLeftClick(bool up, int x, int y, bool* block) {
 }
 
 void ItemMover::OnRightClick(bool up, int x, int y, bool* block) {
-	if (!ITEM_MOVER_ENABLED) return;
-	
 	BnetData* pData = (*p_D2LAUNCH_BnData);
 	UnitAny* unit = D2CLIENT_GetPlayerUnit();
 	bool shiftState = ((GetKeyState(VK_LSHIFT) & 0x80) || (GetKeyState(VK_RSHIFT) & 0x80));
@@ -532,32 +522,26 @@ void ItemMover::OnRightClick(bool up, int x, int y, bool* block) {
 }
 
 void ItemMover::LoadConfig() {
-	if (!ITEM_MOVER_ENABLED) return;
-	
-	//BH::config->ReadKey("Use TP Tome", "VK_N", TpKey);
-	//BH::config->ReadKey("Use TP Tome Back", "VK_BACK", TpBackKey);
-	// BH::config->ReadKey("Use Exit Game", "VK_NUMPADSUBTRACT", ExitGameKey);
-	// BH::config->ReadKey("Use Healing Potion", "VK_1", HealKey);
-	// BH::config->ReadKey("Use Mana Potion", "VK_2", ManaKey);
-	// BH::config->ReadKey("Use Rejuv Potion", "VK_3", JuvKey);
-	// BH::config->ReadKey("Use Antidote Potion", "VK_4", YpsKey);
-	// BH::config->ReadKey("Use Potion To Belt", "VK_OEM_3", BeltKey); //自动填充腰带
+	BH::config->ReadKey("Use TP Tome", "VK_N", TpKey);
+	BH::config->ReadKey("Use TP Tome Back", "VK_BACK", TpBackKey);
+	BH::config->ReadKey("Use Exit Game", "VK_NUMPADSUBTRACT", ExitGameKey);
+	BH::config->ReadKey("Use Healing Potion", "VK_1", HealKey);
+	BH::config->ReadKey("Use Mana Potion", "VK_2", ManaKey);
+	BH::config->ReadKey("Use Rejuv Potion", "VK_3", JuvKey);
+	BH::config->ReadKey("Use Antidote Potion", "VK_4", YpsKey);
+	BH::config->ReadKey("Use Potion To Belt", "VK_OEM_3", BeltKey); //自动填充腰带
 
-	// BH::config->ReadInt("Low TP Warning", tp_warn_quantity);
+	BH::config->ReadInt("Low TP Warning", tp_warn_quantity);
 	// BH::config->ReadToggle("Quick Cast", "None", false, ScreenInfo::Toggles["Quick Cast"]);
 	// BH::config->ReadToggle("Skill Bar", "None", false, ScreenInfo::Toggles["Skill Bar"]);
 	// BH::config->ReadToggle("Skill Bar Disable", "None", false, ScreenInfo::Toggles["Skill Bar Disable"]);
-	//BH::config->ReadToggle("Buff Timers", "None", false, ScreenInfo::Toggles["Buff Timers"]);
+	// BH::config->ReadToggle("Buff Timers", "None", false, ScreenInfo::Toggles["Buff Timers"]);
 	//BH::config->ReadInt("StashLeftFix", BH::stash_left_fix,0);
 }
 
 void ItemMover::OnLoad() {
-	if (!ITEM_MOVER_ENABLED) return;
-	
 	LoadConfig();
 	AutoBackTown = false;
-	// 以下界面初始化代码已被禁用
-	/*
 	Drawing::Texthook* colored_text;
 
 	settingsTab = new Drawing::UITab("增强功能", BH::settingsUI);
@@ -584,17 +568,48 @@ void ItemMover::OnLoad() {
 	new Keyhook(settingsTab, keyhook_x, (y + 2), &ChatColor::Toggles["Show Money"].toggle, "");
 	new Checkhook(settingsTab, 4, (y += 15), &ChatColor::Toggles["Death Back"].state, "死亡立即回城");
 	new Keyhook(settingsTab, keyhook_x, (y + 2), &ChatColor::Toggles["Death Back"].toggle, "");
+	// y += 15;
+	// new Drawing::Checkhook(settingsTab, 4, y, &ScreenInfo::Toggles["Quick Cast"].state, "Quick Cast");
+	// new Drawing::Keyhook(settingsTab, keyhook_x, y + 2, &ScreenInfo::Toggles["Quick Cast"].toggle, "");
+	// y += 15;
+
+	// new Drawing::Checkhook(settingsTab, 4, y, &ScreenInfo::Toggles["Skill Bar"].state, "Skill Bar");
+	// new Drawing::Keyhook(settingsTab, keyhook_x, y + 2, &ScreenInfo::Toggles["Skill Bar"].toggle, "");
+	// y += 15;
+
+	// new Drawing::Checkhook(settingsTab, 4 + 15, y, &ScreenInfo::Toggles["Skill Bar Disable"].state, "Disable along Quick Cast");
+	// new Drawing::Keyhook(settingsTab, keyhook_x, y + 2, &ScreenInfo::Toggles["Skill Bar Disable"].toggle, "");
+	// y += 15;
+
+	// new Drawing::Checkhook(settingsTab, 4, y, &ScreenInfo::Toggles["Buff Timers"].state, "Always show Buff Timers");
+	// new Drawing::Keyhook(settingsTab, keyhook_x, y + 2, &ScreenInfo::Toggles["Buff Timers"].toggle, "");
+
+
+	/*y += 15;
+	y += 15;
+
+	new Drawing::Texthook(settingsTab, x, (y), "物品快速移动说明");
+	colored_text = new Drawing::Texthook(settingsTab, x, (y += 15),
+		"Shift+左键 如果鉴定书在背包，就可以快速鉴定物品");
+	colored_text->SetColor(Gold);
+	colored_text = new Drawing::Texthook(settingsTab, x, (y += 15),
+		"Shift+右键 在背包和打开的箱子（或打开的盒子）之间移动");
+	colored_text->SetColor(Gold);
+	colored_text = new Drawing::Texthook(settingsTab, x, (y += 15),
+		"Ctrl+右键 把物品扔地上");
+	colored_text->SetColor(Gold);
+	colored_text = new Drawing::Texthook(settingsTab, x, (y += 15),
+		"Ctrl+shift+右键 移动物品到关闭着的盒子");
+	colored_text->SetColor(Gold);*/
 
 	colored_text = new Drawing::Texthook(settingsTab, x, (y += 15),
 		"");
 	colored_text->SetColor(Gold);
-	*/
+
 }
 
 
 void ItemMover::OnKey(bool up, BYTE key, LPARAM lParam, bool* block) {
-	if (!ITEM_MOVER_ENABLED) return;
-	
 	UnitAny* unit = D2CLIENT_GetPlayerUnit();
 	
 	if (!unit)
@@ -640,7 +655,7 @@ void ItemMover::OnKey(bool up, BYTE key, LPARAM lParam, bool* block) {
 				*reinterpret_cast<int*>(PacketData + 1) = minItemId;
 				if (shiftState) {   //按shift
 					if (ChatColor::Toggles["Merc Boring"].state)
-						//PrintText(White, "佣兵：听我说谢谢你~");
+						PrintText(White, "佣兵：听我说谢谢你~");
 					*reinterpret_cast<int*>(PacketData + 5) = 1;  //是否给佣兵吃药,1是给，0是不给
 				}
 				D2NET_SendPacket(13, 0, PacketData);
@@ -707,8 +722,6 @@ void ItemMover::OnKey(bool up, BYTE key, LPARAM lParam, bool* block) {
 }
 
 void ItemMover::OnGamePacketRecv(BYTE* packet, bool* block) {
-	if (!ITEM_MOVER_ENABLED) return;
-	
 	switch (packet[0])
 	{
 	case 0x3F:
@@ -875,8 +888,6 @@ void ItemMover::OnGamePacketRecv(BYTE* packet, bool* block) {
 //}
 
 void ItemMover::OnGameExit() {
-	if (!ITEM_MOVER_ENABLED) return;
-	
 	ActivePacket.itemId = 0;
 	ActivePacket.itemTargetId = 0;
 	ActivePacket.x = 0;
@@ -887,8 +898,6 @@ void ItemMover::OnGameExit() {
 
 void ItemMover::OnLoop()
 {
-	if (!ITEM_MOVER_ENABLED) return;
-	
 	//分辩率有发生变化的话
 	if (my_screenWidth!=*p_D2CLIENT_ScreenSizeX|| my_screenHeight != *p_D2CLIENT_ScreenSizeY)
 	{

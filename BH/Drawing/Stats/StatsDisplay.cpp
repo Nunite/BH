@@ -418,6 +418,7 @@ void StatsDisplay::OnDraw()
 			pMax,
 			(100 - penalty - pLengthReduce)
 		);
+		/* 注释掉诅咒抵抗显示
 		Texthook::Draw(column1,
 			(y += 16),
 			None,
@@ -425,6 +426,7 @@ void StatsDisplay::OnDraw()
 			Gold,
 			L"诅咒抵抗(CRA): %d%%",
 			static_cast<int>(D2COMMON_GetUnitStat(unit, STAT_CURSERESISTANCE, 0)) + penalty);
+		*/
 		y += 8;
 
 		int fAbsorb = static_cast<int>(D2COMMON_GetUnitStat(unit, STAT_FIREABSORB, 0));

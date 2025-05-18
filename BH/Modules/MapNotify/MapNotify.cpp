@@ -11,6 +11,9 @@
 #include "../Item/Item.h"
 #include "../ScreenInfo/ScreenInfo.h"
 
+// 地图全局开关控制
+#define MAP_NOTIFY_ENABLED true  // 设置为 false 可全局禁用地图功能
+
 #pragma optimize( "", off)
 
 using namespace Drawing;
@@ -66,6 +69,7 @@ void MapNotify::LoadConfig() {
 }
 
 void MapNotify::ReadConfig() {
+	return;
 	BH::config->ReadInt("Reveal Mode", revealType);
 	BH::config->ReadInt("Show Monster Resistance", monsterResistanceThreshold);
 	BH::config->ReadInt("LK Chest Lines", lkLinesColor);
@@ -152,7 +156,7 @@ void MapNotify::ReadConfig() {
 		}
 	}
 
-	BH::config->ReadToggle("Reveal Map", "None", true, Toggles["Auto Reveal"]);
+	BH::config->ReadToggle("Reveal Map", "None", false, Toggles["Auto Reveal"]);  // 默认值改为false
 	BH::config->ReadToggle("Show Monsters", "None", true, Toggles["Show Monsters"]);
 	BH::config->ReadToggle("Show Missiles", "None", true, Toggles["Show Missiles"]);
 	BH::config->ReadToggle("Show Chests", "None", true, Toggles["Show Chests"]);
@@ -165,7 +169,7 @@ void MapNotify::ReadConfig() {
 	BH::config->ReadToggle("Monster Enchantments", "None", true, Toggles["Monster Enchantments"]);
 	BH::config->ReadToggle("Apply CPU Patch", "None", true, Toggles["Apply CPU Patch"]);
 	BH::config->ReadToggle("Apply FPS Patch", "None", true, Toggles["Apply FPS Patch"]);
-	BH::config->ReadToggle("Show Automap On Join", "None", false, Toggles["Show Automap On Join"]);
+	//BH::config->ReadToggle("Show Automap On Join", "None", false, Toggles["Show Automap On Join"]);
 	BH::config->ReadToggle("Skip NPC Quest Messages", "None", true, Toggles["Skip NPC Quest Messages"]);
 
 	BH::config->ReadInt("Minimap Max Ghost", automapDraw.maxGhost);
@@ -181,6 +185,7 @@ void MapNotify::ResetRevealed() {
 }
 
 void MapNotify::ResetPatches() {
+	return;
 	//Lighting Patch
 	if (Toggles["Force Light Radius"].state)
 		lightingPatch->Install();
@@ -235,6 +240,8 @@ void MapNotify::ResetPatches() {
 }
 
 void MapNotify::OnLoad() {
+	if (!MAP_NOTIFY_ENABLED) return;
+	return;
 	/*ResetRevealed();
 	ReadConfig();
 	ResetPatches();*/
@@ -284,8 +291,8 @@ void MapNotify::OnLoad() {
 	new Checkhook(settingsTab, 4, (Y += 15), &Toggles["Apply FPS Patch"].state, "FPS 补丁 (仅单机)");
 	new Keyhook(settingsTab, keyhook_x, (Y + 2), &Toggles["Apply FPS Patch"].toggle, "");
 
-	new Checkhook(settingsTab, 4, (Y += 15), &Toggles["Show Automap On Join"].state, "进游戏就打开地图");
-	new Keyhook(settingsTab, keyhook_x, (Y + 2), &Toggles["Show Automap On Join"].toggle, "");
+	//new Checkhook(settingsTab, 4, (Y += 15), &Toggles["Show Automap On Join"].state, "进游戏就打开地图");
+	//new Keyhook(settingsTab, keyhook_x, (Y + 2), &Toggles["Show Automap On Join"].toggle, "");
 
 	new Checkhook(settingsTab, 4, (Y += 15), &Toggles["Skip NPC Quest Messages"].state, "跳过NPC任务对话");
 	new Keyhook(settingsTab, keyhook_x, (Y + 2), &Toggles["Skip NPC Quest Messages"].toggle, "");
@@ -314,6 +321,8 @@ void MapNotify::OnLoad() {
 }
 
 void MapNotify::OnKey(bool up, BYTE key, LPARAM lParam, bool* block) {
+	if (!MAP_NOTIFY_ENABLED) return;
+	
 	bool ctrlState = ((GetKeyState(VK_LCONTROL) & 0x80) || (GetKeyState(VK_RCONTROL) & 0x80));
 	if (key == reloadConfigCtrl && ctrlState || key == reloadConfig) {
 		*block = true;
@@ -335,6 +344,8 @@ void MapNotify::OnKey(bool up, BYTE key, LPARAM lParam, bool* block) {
 }
 
 void MapNotify::OnUnload() {
+	if (!MAP_NOTIFY_ENABLED) return;
+	
 	lightingPatch->Remove();
 	weatherPatch->Remove();
 	infraPatch->Remove();
@@ -346,6 +357,7 @@ void MapNotify::OnUnload() {
 }
 
 void MapNotify::OnLoop() {
+	if (!MAP_NOTIFY_ENABLED) return;
 
 	//// Remove or install patchs based on state.
 	ResetPatches();
@@ -434,6 +446,8 @@ BYTE nChestLockedColour = 0x09;
 Act* lastAct = NULL;
 
 void MapNotify::OnDraw() {
+	if (!MAP_NOTIFY_ENABLED) return;
+	
 	//if (D2CLIENT_GetUIState(UI_CHAT_CONSOLE)) return;
 	UnitAny* player = D2CLIENT_GetPlayerUnit();
 
@@ -530,6 +544,8 @@ void MapNotify::OnDraw() {
 }
 
 void MapNotify::OnAutomapDraw() {
+	if (!MAP_NOTIFY_ENABLED) return;
+	
 	//if (D2CLIENT_GetUIState(UI_CHAT_CONSOLE)) return;
 	UnitAny* player = D2CLIENT_GetPlayerUnit();
 
@@ -851,6 +867,8 @@ void MapNotify::OnAutomapDraw() {
 }
 
 void MapNotify::OnGameJoin() {
+	if (!MAP_NOTIFY_ENABLED) return;
+	return;
 	//if (!D2CLIENT_GetUIState(UI_CHAT_CONSOLE)) {  //这句是我补的，不加这句，打字会有点卡
 		ResetRevealed();
 		automapLevels.clear();
@@ -874,6 +892,8 @@ void Squelch(DWORD Id, BYTE button) {
 }
 
 void MapNotify::OnGamePacketRecv(BYTE* packet, bool* block) {
+	if (!MAP_NOTIFY_ENABLED) return;
+	
 	switch (packet[0]) {
 
 	case 0x9c: {
