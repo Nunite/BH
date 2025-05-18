@@ -535,13 +535,15 @@ void ItemMover::LoadConfig() {
 	// BH::config->ReadToggle("Quick Cast", "None", false, ScreenInfo::Toggles["Quick Cast"]);
 	// BH::config->ReadToggle("Skill Bar", "None", false, ScreenInfo::Toggles["Skill Bar"]);
 	// BH::config->ReadToggle("Skill Bar Disable", "None", false, ScreenInfo::Toggles["Skill Bar Disable"]);
-	// BH::config->ReadToggle("Buff Timers", "None", false, ScreenInfo::Toggles["Buff Timers"]);
+	//BH::config->ReadToggle("Buff Timers", "None", false, ScreenInfo::Toggles["Buff Timers"]);
 	//BH::config->ReadInt("StashLeftFix", BH::stash_left_fix,0);
 }
 
 void ItemMover::OnLoad() {
 	LoadConfig();
 	AutoBackTown = false;
+	// 以下界面初始化代码已被禁用
+	/*
 	Drawing::Texthook* colored_text;
 
 	settingsTab = new Drawing::UITab("增强功能", BH::settingsUI);
@@ -568,44 +570,11 @@ void ItemMover::OnLoad() {
 	new Keyhook(settingsTab, keyhook_x, (y + 2), &ChatColor::Toggles["Show Money"].toggle, "");
 	new Checkhook(settingsTab, 4, (y += 15), &ChatColor::Toggles["Death Back"].state, "死亡立即回城");
 	new Keyhook(settingsTab, keyhook_x, (y + 2), &ChatColor::Toggles["Death Back"].toggle, "");
-	// y += 15;
-	// new Drawing::Checkhook(settingsTab, 4, y, &ScreenInfo::Toggles["Quick Cast"].state, "Quick Cast");
-	// new Drawing::Keyhook(settingsTab, keyhook_x, y + 2, &ScreenInfo::Toggles["Quick Cast"].toggle, "");
-	// y += 15;
-
-	// new Drawing::Checkhook(settingsTab, 4, y, &ScreenInfo::Toggles["Skill Bar"].state, "Skill Bar");
-	// new Drawing::Keyhook(settingsTab, keyhook_x, y + 2, &ScreenInfo::Toggles["Skill Bar"].toggle, "");
-	// y += 15;
-
-	// new Drawing::Checkhook(settingsTab, 4 + 15, y, &ScreenInfo::Toggles["Skill Bar Disable"].state, "Disable along Quick Cast");
-	// new Drawing::Keyhook(settingsTab, keyhook_x, y + 2, &ScreenInfo::Toggles["Skill Bar Disable"].toggle, "");
-	// y += 15;
-
-	// new Drawing::Checkhook(settingsTab, 4, y, &ScreenInfo::Toggles["Buff Timers"].state, "Always show Buff Timers");
-	// new Drawing::Keyhook(settingsTab, keyhook_x, y + 2, &ScreenInfo::Toggles["Buff Timers"].toggle, "");
-
-
-	/*y += 15;
-	y += 15;
-
-	new Drawing::Texthook(settingsTab, x, (y), "物品快速移动说明");
-	colored_text = new Drawing::Texthook(settingsTab, x, (y += 15),
-		"Shift+左键 如果鉴定书在背包，就可以快速鉴定物品");
-	colored_text->SetColor(Gold);
-	colored_text = new Drawing::Texthook(settingsTab, x, (y += 15),
-		"Shift+右键 在背包和打开的箱子（或打开的盒子）之间移动");
-	colored_text->SetColor(Gold);
-	colored_text = new Drawing::Texthook(settingsTab, x, (y += 15),
-		"Ctrl+右键 把物品扔地上");
-	colored_text->SetColor(Gold);
-	colored_text = new Drawing::Texthook(settingsTab, x, (y += 15),
-		"Ctrl+shift+右键 移动物品到关闭着的盒子");
-	colored_text->SetColor(Gold);*/
 
 	colored_text = new Drawing::Texthook(settingsTab, x, (y += 15),
 		"");
 	colored_text->SetColor(Gold);
-
+	*/
 }
 
 
