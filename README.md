@@ -1,3 +1,6 @@
+原:https://gitee.com/weili0677/BH
+源:https://github.com/Project-Diablo-2/BH
+
 # 个人修改BH（汉化）
 仅用于单人游戏或个人创建的PD2的私服或其它D2私服<br/>
 主要修改内容如下：<br/>
